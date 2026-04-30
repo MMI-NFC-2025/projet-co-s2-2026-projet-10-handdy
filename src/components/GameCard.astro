@@ -1,0 +1,11 @@
+---
+const { title, description, icon, class: className = '' } = Astro.props;
+---
+
+<div class={`flex min-h-[210px] flex-col items-center justify-center gap-4 rounded-[28px] bg-[#FF6200] px-5 py-6 text-center text-white shadow-[0_30px_90px_rgba(255,98,0,0.16)] ${className}`}>
+  <div class="flex h-14 w-14 items-center justify-center rounded-3xl bg-black/90">
+    {icon ? <img src={icon} alt="" class="h-7 w-7 object-contain" /> : <span class="block h-3.5 w-3.5 rounded-sm bg-white" />}
+  </div>
+  <h4 class="text-base font-semibold">{title}</h4>
+  <p class="text-sm text-white/80">{description}</p>
+</div>
