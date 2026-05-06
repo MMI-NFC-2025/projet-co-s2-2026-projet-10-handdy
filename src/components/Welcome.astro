@@ -5,14 +5,136 @@ import GameCard from './GameCard.astro';
 import heroPhone from '../assets/mode_arcade_landing_page.svg';
 import parcoursImage from '../assets/parcour_utilisateur_landing_page.svg';
 import wavesBig from '../assets/vagues_grandes.svg';
-import wavesSmall from '../assets/vagues_petites.svg';
 import logo from '../assets/logo_wendy.svg';
 ---
 
 <main class="min-h-screen bg-white text-slate-950">
-  <section class="relative overflow-hidden bg-[#FF6200] text-white">
-    <img src={wavesBig.src} alt="" class="pointer-events-none absolute right-0 top-0 hidden h-[30rem] w-auto md:block" />
-    <div class="mx-auto max-w-7xl px-6 py-8 md:px-10 lg:py-12">
+  <!-- Hero Section -->
+  <section class="relative bg-[#FF6200] text-white" style="width: 100%; height: 850px; overflow: hidden;">
+    <!-- Wave SVG -->
+    <img src={wavesBig.src} alt="" class="absolute pointer-events-none" style="right: 0; top: 0; width: 559px; height: 850px;" />
+
+    <!-- Header with Logo and Button -->
+    <div class="relative w-full h-[155px] bg-white flex items-center justify-between px-6 md:px-10 z-20">
+      <img src={logo.src} alt="Wendy Logo" class="h-[124px] w-[271px]" />
+      <Button href="#play" variant="secondary" class="bg-black text-white rounded-full h-[94px] w-[429px] text-[36px] font-semibold hover:bg-slate-900 flex items-center justify-center">Commencer à jouer !</Button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="relative w-full z-10" style="height: 695px;">
+      <div class="h-full flex items-center px-6 md:px-10">
+        <div class="space-y-4 md:space-y-6 max-w-xl">
+          <h1 class="text-5xl md:text-6xl leading-tight font-black text-white font-cal-sans" style="line-height: 1.2;">Apprendre la langue des<br />signes différemment !</h1>
+          <p class="text-base md:text-lg leading-relaxed text-white font-alexandria font-normal" style="line-height: 1.6;">Mini-jeux, défis multijoueurs et progression fun pour<br />maîtriser la langue des signes française</p>
+        </div>
+      </div>
+
+      <!-- Phone Images -->
+      <img src={heroPhone.src} alt="Mode arcade" class="absolute pointer-events-none z-30" style="right: 357px; top: 213px; width: 136px; height: 281px; transform: rotate(12.75deg); border: 4px solid: 20px; 0 8px 16px rgba(0,0,0,0.3);" />
+      <img src={parcoursImage.src} alt="Parcours" class="absolute pointer-events-none z-20" style="right: 201px; top: 277px; width: 154px; height: 317px; transform: rotate(-7.31deg); border: 3px solid  16px;  0 8px 16px rgba(0,0,0,0.3);" />
+    </div>
+  </section>
+
+  <!-- Mode Cards Section -->
+  <section class="relative px-6 py-12 md:py-16 lg:py-20 md:px-10" style="min-height: 800px;">
+    <div class="relative" style="height: 650px; max-width: 1440px; margin: 0 auto;">
+      <!-- Card 1 - Position X=170, Y=1079 relative to container -->
+      <div class="absolute" style="left: 170px; top: 0;">
+        <FeatureCard 
+          icon="📖"
+          title="Mode Entraînement" 
+          description="Un parcours pédagogique par paliers thématiques"
+          features={["Mini-jeux éducatifs (Memory, Cards, Quiz)", "Système de vies et streak", "Mode hors ligne disponible"]}
+        />
+      </div>
+
+      <!-- Card 2 - Position X=850, Y=1079 relative to container -->
+      <div class="absolute" style="left: 850px; top: 0;">
+        <FeatureCard 
+          icon="🎮"
+          title="Mode Arcade" 
+          description="Action et compétition ! Joue en solo ou en multijoueur."
+          features={["Mini-jeux dynamiques et compétitifs", "Mode Battle multijoueur en temps réel", "Classements et scores", "Éliminations progressives"]}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Mini Games Section -->
+  <section id="play" class="relative px-6 py-12 md:py-16 lg:py-20 md:px-10">
+    <div class="flex justify-center mb-12">
+      <!-- Button 5 minis-jeux variés: X=364, Y=1839, W=712, H=94 -->
+      <div class="flex items-center justify-center gap-6" style="width: 712px; height: 94px; background-color: #000000; border-radius: 50px;">
+        <div class="text-white font-cal-sans" style="font-size: 48px; line-height: 1;">5 minis-jeux variés</div>
+      </div>
+    </div>
+
+    <!-- Mini Games Grid -->
+    <div class="mx-auto max-w-8xl">
+      <div class="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+        <GameCard title="Cards" description="Apprends par flashcards visuelles." />
+        <GameCard title="Memory" description="Teste ta mémoire des signes." />
+        <GameCard title="Mode Héros" description="Des aventures guidées et défis quotidiens." />
+        <GameCard title="Traduction" description="Convertis des mots en gestes facilement." />
+        <GameCard title="Vitesse" description="Défie le chrono et améliore ta réactivité." />
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="relative overflow-hidden bg-white px-6 py-12 md:py-16 lg:py-20 md:px-10">
+    <div class="mx-auto max-w-7xl">
+      <h2 class="text-center text-4xl md:text-5xl font-black text-slate-950 mb-12 md:mb-16 font-cal-sans">Fonctionnalités uniques</h2>
+
+      <div class="relative bg-[#FF6200] rounded-[40px] px-6 md:px-12 py-12 md:py-16 text-white overflow-hidden">
+        <svg class="pointer-events-none absolute -left-20 top-0 w-[500px] h-[500px] opacity-30" viewBox="0 0 500 500" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="250" cy="250" r="250" />
+        </svg>
+        <svg class="pointer-events-none absolute -right-20 -bottom-20 w-[400px] h-[400px] opacity-30" viewBox="0 0 400 400" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="200" cy="200" r="200" />
+        </svg>
+
+        <div class="relative grid gap-8 md:gap-12 lg:grid-cols-2 items-center">
+          <div class="flex flex-col items-center justify-center text-center">
+            <div class="mb-6 inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full bg-white text-[#FF6200]">
+              <span class="text-2xl md:text-3xl">📱</span>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold mb-3">Mode Interactif</h3>
+            <p class="text-sm md:text-base leading-relaxed text-white/90">Comprendre les gestes avec la modalité en temps réel sur l'écran</p>
+          </div>
+
+          <div class="flex flex-col items-center justify-center text-center">
+            <div class="mb-6 inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full bg-white text-[#FF6200]">
+              <span class="text-2xl md:text-3xl">☁️</span>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold mb-3">Mode Hors Ligne</h3>
+            <p class="text-sm md:text-base leading-relaxed text-white/90">Télécharge les packs de lignes pour progresser partout facilement</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="mx-auto max-w-7xl px-6 py-12 md:py-16 lg:py-20 md:px-10">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+      <div class="flex-1">
+        <img src={logo.src} alt="Wendy Logo" class="h-12 md:h-14 w-auto mb-4" />
+        <h2 class="text-3xl md:text-4xl lg:text-5xl font-black text-slate-950 font-cal-sans">Prêt à maîtriser la LSF ?</h2>
+      </div>
+      <div class="flex-1 w-full">
+        <div class="bg-slate-950 rounded-[28px] px-6 md:px-8 py-6 md:py-8">
+          <p class="text-white text-sm md:text-base mb-4 font-medium">Rejoins la communauté Wendy et commence ton aventure des aujourd'hui!</p>
+          <form class="flex flex-col sm:flex-row gap-3">
+            <input type="email" placeholder="Ton email" class="flex-1 rounded-full border-none bg-white/95 px-5 py-3 text-slate-950 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6200]" />
+            <Button type="submit" class="bg-[#FF6200] text-white hover:bg-orange-600 rounded-full px-6 py-3 font-semibold text-sm md:text-base">Commencer gratuitement</Button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
       <header class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <img src={logo.src} alt="Handdy Logo" class="h-12 w-auto" />
