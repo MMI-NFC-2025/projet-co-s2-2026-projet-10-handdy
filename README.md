@@ -3,7 +3,7 @@
 
 Éléménts à renseigner pour la soutenance :
 
-- [ ] Nom du projet :
+- [ ] Nom du projet : Wendy
 - [ ] URL de la landing page :
 - [ ] URL de l'application finale :
 - [ ] URL de connexion au back office :
@@ -16,7 +16,6 @@
 
 | Étudiants    | Prénom NOM  |
 | :----------- | :---------- |
-| Étudiant 1   | à compléter |
-| Étudiant 2   | à compléter |
-| Étudiant 3   | à compléter |
-| (Étudiant 4) | à compléter |
+| Étudiant 1   | Izya THIRIET |
+| Étudiant 2   | Laura BAILLY |
+| Étudiant 3   | Bambou FRANCESCHINI |
