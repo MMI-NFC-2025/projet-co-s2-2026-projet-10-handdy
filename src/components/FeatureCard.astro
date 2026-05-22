@@ -1,0 +1,25 @@
+---
+const { icon, title, description, features = [], class: className = '' } = Astro.props;
+---
+
+<div class={`rounded-[32px] bg-[#FF6200] p-8 shadow-lg text-black w-[500px] h-[700px] flex flex-col justify-between font-alexandria ${className}`}>
+  <!-- Icon -->
+  <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-white/20">
+    <span class="text-4xl">{icon || '📚'}</span>
+  </div>
+
+  <!-- Title -->
+  <h3 class="text-[32px] font-bold mb-4 text-black">{title}</h3>
+
+  <!-- Main Description -->
+  <p class="text-[24px] leading-relaxed text-black mb-6">{description}</p>
+
+  <!-- Features List -->
+  {features && features.length > 0 && (
+    <div class="space-y-3 flex-grow">
+      {features.map((feature) => (
+        <p class="text-sm leading-relaxed text-black">{feature}</p>
+      ))}
+    </div>
+  )}
+</div>

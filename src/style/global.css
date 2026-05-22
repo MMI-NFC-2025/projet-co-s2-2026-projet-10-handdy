@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Cal+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --color-orange: #FF6200;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-cal-sans: 'Cal Sans', sans-serif;
+  --font-alexandria: 'Alexandria', sans-serif;
+}
+
+.font-cal-sans {
+  font-family: var(--font-cal-sans);
+}
+
+.font-alexandria {
+  font-family: var(--font-alexandria);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--color-white);
+  color: var(--color-black);
+  font-family: var(--font-sans);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(255, 98, 0, 0.18);
+}
