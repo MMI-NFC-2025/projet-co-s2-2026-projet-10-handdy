@@ -1,11 +1,67 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import ProgressSection from '../components/ProgressSection.astro';
+import GameModeCard from '../components/GameModeCard.astro';
+import Footer from '../components/Footer.astro';
+import PocketBase from 'pocketbase';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const pb = new PocketBase('http://127.0.0.1:8090');
+
+// TODO: Récupérer les données depuis PocketBase
+const userData = {
+  daysCount: 67,
+  totalLearned: 1250
+};
+
+const gameModes = [
+  {
+    title: 'Mode Arcade',
+    description: 'Joue et défis tes amis',
+    icon: '/icons/icon_arcade_accueil.svg'
+  },
+  {
+    title: 'Battle',
+    description: 'Multijoueur en ligne',
+    icon: '/icons/icon_VS_accueil.svg'
+  }
+];
 ---
 
 <Layout>
-	<Welcome />
+  <!-- Hero Section -->
+  <Hero
+    greetings="Bonjour"
+    subtitle="Prêt à apprendre aujourd'hui ?"
+    daysCount={userData.daysCount}
+    totalLearned={userData.totalLearned}
+  />
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8 md:space-y-12">
+    <!-- Progress Section -->
+    <section>
+      <ProgressSection
+        image="/images/chemin_utilisateur_accueil.webp"
+        buttonText="Voir l'avancée"
+      />
+    </section>
+
+    <!-- Game Modes Section -->
+    <section>
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-6">Modes de jeu</h2>
+      <div class="grid grid-cols-2 gap-4 md:gap-6">
+        {gameModes.map((mode) => (
+          <GameModeCard
+            title={mode.title}
+            description={mode.description}
+            icon={mode.icon}
+          />
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <Footer />
 </Layout>

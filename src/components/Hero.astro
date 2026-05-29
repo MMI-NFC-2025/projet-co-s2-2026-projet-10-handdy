@@ -1,0 +1,79 @@
+---
+/**
+ * Hero Component
+ * Section hero avec header, titre et statistiques
+ */
+
+interface Props {
+  greetings?: string;
+  subtitle?: string;
+  daysCount?: number;
+  totalLearned?: number;
+}
+
+const {
+  greetings = 'Bonjour',
+  subtitle = 'Prêt à apprendre aujourd\'hui ?',
+  daysCount = 67,
+  totalLearned = 1250
+} = Astro.props;
+---
+
+<div class="bg-orange-500 text-white">
+  <!-- Header Navigation -->
+  <div class="max-w-6xl mx-auto px-4 md:px-6 py-4 md:py-6 flex items-center justify-between">
+    <a href="/" class="flex-shrink-0">
+      <img src="/icons/logo_wendy.svg" alt="Wendy Logo" class="h-8 md:h-10" />
+    </a>
+    
+    <!-- Desktop Navigation -->
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#" class="text-white hover:text-orange-100 font-medium transition">Accueil</a>
+      <a href="#" class="text-white hover:text-orange-100 font-medium transition">Dic</a>
+      <a href="#" class="text-white hover:text-orange-100 font-medium transition">Arcade</a>
+      <a href="#" class="text-white hover:text-orange-100 font-medium transition">Progres</a>
+      <a href="#" class="text-white hover:text-orange-100 font-medium transition">Profil</a>
+    </div>
+
+    <!-- Mobile Menu Icon -->
+    <button class="md:hidden text-white">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Hero Content -->
+  <div class="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-20">
+    <!-- Title & Subtitle -->
+    <div class="mb-12 md:mb-16">
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 md:mb-4">
+        {greetings}
+      </h1>
+      <p class="text-lg md:text-xl text-white/90">
+        {subtitle}
+      </p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 gap-4 md:gap-6">
+      <!-- Serie Card -->
+      <div class="bg-orange-400 rounded-2xl md:rounded-3xl p-6 md:p-8 text-center shadow-lg hover:shadow-xl transition text-white">
+        <div class="flex items-center justify-center gap-2 mb-4 md:mb-6">
+          <span class="text-lg md:text-xl font-semibold">Série</span>
+          <img src="/icons/badge_serie_accueil.svg" alt="Série" class="w-6 h-6 md:w-8 md:h-8" />
+        </div>
+        <p class="text-4xl md:text-6xl font-bold mb-2">{daysCount}</p>
+      </div>
+
+      <!-- XP Card -->
+      <div class="bg-orange-400 rounded-2xl md:rounded-3xl p-6 md:p-8 text-center shadow-lg hover:shadow-xl transition text-white">
+        <div class="flex items-center justify-center gap-2 mb-4 md:mb-6">
+          <span class="text-lg md:text-xl font-semibold">XP</span>
+          <img src="/icons/badge_xp_accueil.svg" alt="XP" class="w-6 h-6 md:w-8 md:h-8" />
+        </div>
+        <p class="text-4xl md:text-6xl font-bold mb-2">{totalLearned}</p>
+      </div>
+    </div>
+  </div>
+</div>

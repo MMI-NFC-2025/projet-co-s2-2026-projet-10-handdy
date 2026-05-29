@@ -1,0 +1,34 @@
+---
+/**
+ * ProgressSection Component
+ * Section d'accueil avec image et bouton "Voir l'avancée"
+ */
+
+interface Props {
+  image?: string;
+  title?: string;
+  buttonText?: string;
+}
+
+const {
+  image = '/images/chemin_utilisateur_accueil.webp',
+  title = 'Ton parcours',
+  buttonText = 'Voir l\'avancée'
+} = Astro.props;
+---
+
+<div class="relative rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition">
+  <!-- Background Image -->
+  <img 
+    src={image} 
+    alt={title}
+    class="w-full h-64 md:h-80 object-cover"
+  />
+  
+  <!-- Overlay with button -->
+  <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+    <button class="bg-white text-orange-500 font-bold px-8 py-3 rounded-full hover:bg-orange-50 transition shadow-lg">
+      {buttonText}
+    </button>
+  </div>
+</div>
