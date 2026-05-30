@@ -1,0 +1,46 @@
+---
+/**
+ * ContinueButton Component
+ * Bouton avec action pour continuer vers la prochaine section
+ */
+
+interface Props {
+  text?: string;
+  href?: string;
+  image?: string;
+}
+
+const {
+  text = "Voir l'avancé",
+  href = "#",
+  image = '/images/chemin_utilisateur_accueil.webp'
+} = Astro.props;
+---
+
+<div class="space-y-4">
+  <div class="bg-gradient-to-r from-green-400 to-green-500 rounded-3xl p-6 md:p-8 shadow-md overflow-hidden">
+    <div class="flex flex-col md:flex-row items-center gap-6">
+      <!-- Image Section -->
+      <div class="w-full md:w-2/5">
+        <img
+          src={image}
+          alt="Continue"
+          class="w-full h-40 md:h-56 object-cover rounded-2xl"
+        />
+      </div>
+      
+      <!-- Content Section -->
+      <div class="w-full md:w-3/5 flex flex-col justify-center">
+        <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">
+          {text}
+        </h3>
+        <a 
+          href={href}
+          class="inline-block bg-white hover:bg-slate-100 text-green-600 font-semibold py-3 px-8 rounded-full transition w-fit"
+        >
+          Continuer
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

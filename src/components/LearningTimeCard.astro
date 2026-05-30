@@ -1,0 +1,50 @@
+---
+/**
+ * LearningTimeCard Component
+ * Affiche le temps total d'apprentissage
+ */
+
+interface Props {
+  hours: number;
+  minutes: number;
+  dailyAverageMinutes: number;
+  image?: string;
+}
+
+const {
+  hours,
+  minutes,
+  dailyAverageMinutes,
+  image = '/images/temps_apprentissage.webp'
+} = Astro.props;
+---
+
+<div class="space-y-4">
+  <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Temps d'apprentissage</h2>
+  
+  <div class="bg-white rounded-2xl p-6 md:p-8 shadow-md overflow-hidden">
+    <div class="flex flex-col md:flex-row items-center gap-6">
+      <!-- Icon Section -->
+      <div class="w-16 h-16 md:w-24 md:h-24 flex-shrink-0">
+        <img 
+          src={image} 
+          alt="Temps d'apprentissage" 
+          class="w-full h-full object-contain"
+        />
+      </div>
+      
+      <!-- Content Section -->
+      <div class="flex-1">
+        <p class="text-sm md:text-base text-slate-600 mb-2">Total ce mois-ci</p>
+        <div class="flex items-baseline gap-2">
+          <p class="text-4xl md:text-5xl font-bold text-slate-900">
+            {hours}h {minutes}min
+          </p>
+        </div>
+        <p class="text-xs md:text-sm text-slate-500 mt-2">
+          Soit environ {dailyAverageMinutes} minutes par jour
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

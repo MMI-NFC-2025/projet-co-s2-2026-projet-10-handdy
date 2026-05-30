@@ -1,0 +1,229 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import LevelCard from '../components/LevelCard.astro';
+import StatsSection from '../components/StatsSection.astro';
+import WeeklyStats from '../components/WeeklyStats.astro';
+import BadgeGrid from '../components/BadgeGrid.astro';
+import LearningTimeCard from '../components/LearningTimeCard.astro';
+import ContinueButton from '../components/ContinueButton.astro';
+import PocketBase from 'pocketbase';
+import bonhommeImage from '../assets/images/bonhomme_chemin.webp';
+import tempsImage from '../assets/images/temps_apprentissage.webp';
+import cheminImage from '../assets/images/chemin_utilisateur_accueil.webp';
+
+// Initialize PocketBase
+const pb = new PocketBase('http://127.0.0.1:8090');
+
+// TODO: In production, you would authenticate the user and get their ID
+// For now, using hardcoded user ID (assuming first user exists)
+const userId = 'user_id_placeholder';
+
+// Data structures
+interface UserData {
+  level: number;
+  currentXP: number;
+  maxXP: number;
+  seriesCurrent: number;
+  lessonsCompleted: number;
+  totalLearningMinutes: number;
+  weeklyStats: Array<{day: string; shortDay: string; xp: number}>;
+}
+
+interface Badge {
+  id: string;
+  name: string;
+  icon?: string;
+  unlocked: boolean;
+}
+
+// Default data (will be replaced when collections are populated)
+const defaultUserData: UserData = {
+  level: 2,
+  currentXP: 1250,
+  maxXP: 1500,
+  seriesCurrent: 67,
+  lessonsCompleted: 121,
+  totalLearningMinutes: 320, // 5h 20min
+  weeklyStats: [
+    { day: 'Lundi', shortDay: 'Lun', xp: 120 },
+    { day: 'Mardi', shortDay: 'Mar', xp: 95 },
+    { day: 'Mercredi', shortDay: 'Mer', xp: 140 },
+    { day: 'Jeudi', shortDay: 'Jeu', xp: 110 },
+    { day: 'Vendredi', shortDay: 'Ven', xp: 85 },
+    { day: 'Samedi', shortDay: 'Sam', xp: 0 },
+    { day: 'Dimanche', shortDay: 'Dim', xp: 0 }
+  ]
+};
+
+const defaultBadges: Badge[] = [
+  { id: '1', name: 'série de 14 jours', icon: '/icons/badge_serie_accueil.svg', unlocked: true },
+  { id: '2', name: '50 leçon', icon: '/icons/badge_xp_accueil.svg', unlocked: true },
+  { id: '3', name: 'Novice LSF', icon: '/icons/logo_wendy.svg', unlocked: true },
+  { id: '4', name: 'série de 50 jours', unlocked: false },
+  { id: '5', name: '100 leçon', unlocked: false },
+  { id: '6', name: 'Maître LSF', unlocked: false }
+];
+
+let userData = { ...defaultUserData };
+let badges = [...defaultBadges];
+
+try {
+  // Fetch user badges
+  console.log('🔄 Fetching user badges from PocketBase...');
+  const userBadgesData = await pb.collection('user_badges').getFullList({
+    filter: `user = "${userId}"`
+  });
+  console.log('✅ User badges loaded:', userBadgesData.length, 'badges');
+
+  // Fetch all badges
+  console.log('🔄 Fetching badges from PocketBase...');
+  const badgesData = await pb.collection('badges').getFullList();
+  console.log('✅ Badges loaded:', badgesData.length, 'badges');
+
+  // Fetch user games (to calculate stats)
+  console.log('🔄 Fetching user games from PocketBase...');
+  const userGamesData = await pb.collection('user_games').getFullList({
+    filter: `user = "${userId}"`
+  });
+  console.log('✅ User games loaded:', userGamesData.length, 'games');
+
+  // Process badges
+  if (badgesData && badgesData.length > 0) {
+    const unlockedBadgeIds = new Set(userBadgesData?.map(ub => ub.badge) || []);
+    
+    badges = badgesData.map(badge => ({
+      id: badge.id,
+      name: badge.name || badge.title || 'Badge sans nom',
+      icon: badge.icon || undefined,
+      unlocked: unlockedBadgeIds.has(badge.id)
+    }));
+  }
+
+  // Calculate stats from user games
+  if (userGamesData && userGamesData.length > 0) {
+    // Calculate total learning time
+    const totalMinutes = userGamesData.reduce((acc, game) => {
+      return acc + (game.duration_minutes || 0);
+    }, 0);
+    userData.totalLearningMinutes = totalMinutes;
+
+    // Calculate series and lessons
+    const seriesCount = userGamesData.filter(g => g.is_series === true).length;
+    userData.seriesCurrent = seriesCount;
+    userData.lessonsCompleted = userGamesData.length;
+
+    // Calculate XP for week (assuming game.xp_earned exists)
+    const now = new Date();
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const weekStats = userData.weeklyStats.map(day => ({ ...day, xp: 0 }));
+
+    userGamesData.forEach(game => {
+      const gameDate = new Date(game.created);
+      if (gameDate >= weekStart) {
+        const dayOfWeek = gameDate.getDay();
+        weekStats[dayOfWeek].xp += (game.xp_earned || 0);
+      }
+    });
+
+    userData.weeklyStats = weekStats;
+  }
+
+  console.log('✅ Page data prepared successfully!');
+} catch (error) {
+  console.warn('⚠️ PocketBase not available or collections empty. Using default data.');
+  console.warn('Error:', error);
+  console.log('📝 Collections status:');
+  console.log('  - user_badges: Ready to receive data');
+  console.log('  - badges: Ready to receive data');
+  console.log('  - user_games: Ready to receive data');
+}
+
+// Calculate hours and minutes
+const hours = Math.floor(userData.totalLearningMinutes / 60);
+const minutes = userData.totalLearningMinutes % 60;
+const dailyAverageMinutes = Math.round(userData.totalLearningMinutes / 7);
+
+// Calculate total XP for the week
+const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
+---
+
+<Layout>
+  <Header />
+  
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8 md:space-y-12">
+    <!-- Page Title -->
+    <section class="bg-gradient-to-r from-orange-400 to-orange-500 rounded-3xl p-6 md:p-8 text-white shadow-md">
+      <h1 class="text-3xl md:text-4xl font-bold">Tes progrès</h1>
+    </section>
+
+    <!-- Level Card -->
+    <section>
+      <LevelCard 
+        level={userData.level}
+        currentXP={userData.currentXP}
+        maxXP={userData.maxXP}
+        icon={bonhommeImage.src}
+      />
+    </section>
+
+    <!-- Stats Section -->
+    <section>
+      <StatsSection 
+        seriesCurrent={userData.seriesCurrent}
+        lessonsCompleted={userData.lessonsCompleted}
+      />
+    </section>
+
+    <!-- Weekly Stats -->
+    <section>
+      <WeeklyStats 
+        weekStats={userData.weeklyStats}
+        totalXPWeek={totalXPWeek}
+      />
+    </section>
+
+    <!-- Badges -->
+    <section>
+      <BadgeGrid badges={badges} />
+    </section>
+
+    <!-- Learning Time -->
+    <section>
+      <LearningTimeCard 
+        hours={hours}
+        minutes={minutes}
+        dailyAverageMinutes={dailyAverageMinutes}
+        image={tempsImage.src}
+      />
+    </section>
+
+    <!-- Continue Button -->
+    <section>
+      <ContinueButton 
+        text="Voir l'avancé"
+        image={cheminImage.src}
+      />
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  main {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

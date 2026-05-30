@@ -1,0 +1,55 @@
+---
+/**
+ * StatsSection Component
+ * Affiche les statistiques principales (série actuelle et leçons terminées)
+ */
+
+interface Props {
+  seriesCurrent: number;
+  lessonsCompleted: number;
+}
+
+const {
+  seriesCurrent,
+  lessonsCompleted
+} = Astro.props;
+---
+
+<div class="space-y-4">
+  <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Statistiques</h2>
+  
+  <div class="grid grid-cols-2 gap-4 md:gap-6">
+    <!-- Série Actuelle -->
+    <div class="bg-white rounded-2xl p-4 md:p-6 shadow-md">
+      <div class="flex justify-center mb-3">
+        <img 
+          src="/icons/icon_flamme_serie.png" 
+          alt="Série actuelle" 
+          class="w-12 h-12 md:w-16 md:h-16 object-contain"
+        />
+      </div>
+      <p class="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-2">
+        {seriesCurrent}
+      </p>
+      <p class="text-sm md:text-base text-slate-600 text-center">série actuelle</p>
+      <p class="text-xs md:text-sm text-orange-500 font-semibold text-center mt-2">
+        prochain palier 100
+      </p>
+    </div>
+
+    <!-- Leçons Terminées -->
+    <div class="bg-white rounded-2xl p-4 md:p-6 shadow-md">
+      <div class="flex justify-center mb-3">
+        <img 
+          src="/icons/icon_lecon.svg" 
+          alt="Leçons terminées" 
+          class="w-12 h-12 md:w-16 md:h-16 object-contain"
+        />
+      </div>
+      <p class="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-2">
+        {lessonsCompleted}
+      </p>
+      <p class="text-sm md:text-base text-slate-600 text-center">Leçons terminées</p>
+    </div>
+  </div>
+</div>

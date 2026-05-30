@@ -1,0 +1,53 @@
+---
+/**
+ * LevelCard Component
+ * Affiche le niveau actuel avec barre de progression
+ */
+
+interface Props {
+  level: number;
+  currentXP: number;
+  maxXP: number;
+  icon?: string;
+}
+
+const {
+  level,
+  currentXP,
+  maxXP,
+  icon = '/icons/bonhomme_chemin.svg'
+} = Astro.props;
+
+const progressPercentage = (currentXP / maxXP) * 100;
+---
+
+<div class="bg-white rounded-3xl p-6 md:p-8 shadow-md">
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-4">
+      {icon && (
+        <img 
+          src={icon} 
+          alt="Niveau {level}" 
+          class="w-16 h-16 md:w-20 md:h-20 object-contain"
+        />
+      )}
+      <div>
+        <h3 class="text-lg md:text-xl font-semibold text-slate-900">Niveau {level}</h3>
+        <p class="text-sm text-slate-600">{currentXP} / {maxXP} RC</p>
+      </div>
+    </div>
+    
+    <!-- Level Badge -->
+    <div class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-orange-500 rounded-full">
+      <span class="text-white font-bold text-2xl md:text-3xl">{level}</span>
+    </div>
+  </div>
+  
+  <!-- Progress Bar -->
+  <div class="w-full bg-slate-200 rounded-full h-3 md:h-4 overflow-hidden">
+    <div
+      class="bg-orange-500 h-full transition-all duration-500 ease-out"
+      style={`width: ${Math.min(progressPercentage, 100)}%`}
+    />
+  </div>
+</div>
