@@ -1,0 +1,209 @@
+import PocketBase from 'pocketbase_0.38.2_windows_amd64';
+
+const pbUrl = 'http://127.0.0.1:8090';
+const pb = new PocketBase(pbUrl);
+
+export function getFileUrl(record, filename) {
+  if (!record || !filename) return null;
+  return `${pbUrl}/api/files/${record.collectionId}/${record.id}/${encodeURIComponent(filename)}`;
+}
+
+export async function badgesAll() {
+  return await pb.collection('badges').getFullList({ sort: 'nom' });
+}
+
+export async function badgeById(id) {
+  return await pb.collection('badges').getOne(id);
+}
+
+export async function addBadge(data) {
+  return await pb.collection('badges').create(data);
+}
+
+export async function updateBadge(id, data) {
+  return await pb.collection('badges').update(id, data);
+}
+
+export async function gameTypesAll() {
+  return await pb.collection('game_types').getFullList({ sort: 'nom' });
+}
+
+export async function gameTypeById(id) {
+  return await pb.collection('game_types').getOne(id);
+}
+
+export async function addGameType(data) {
+  // data: { nom, description }
+  return await pb.collection('game_types').create(data);
+}
+
+export async function updateGameType(id, data) {
+  return await pb.collection('game_types').update(id, data);
+}
+
+
+export async function signsAll({ search = '', thematicId = '' } = {}) {
+  const filters = [];
+  if (search) filters.push(`nom~"${search}"`);
+  if (thematicId) filters.push(`thematic="${thematicId}"`);
+  const filter = filters.join(' && ');
+  return await pb.collection('signs').getFullList({
+    filter: filter || undefined,
+    sort: 'nom',
+    expand: 'thematic',
+  });
+}
+
+export async function signById(id) {
+  return await pb.collection('signs').getOne(id, { expand: 'thematic' });
+}
+
+export async function addSign(data) {
+  return await pb.collection('signs').create(data);
+}
+
+export async function updateSign(id, data) {
+  return await pb.collection('signs').update(id, data);
+}
+
+export async function thematicsAll() {
+  return await pb.collection('thematics').getFullList({ sort: 'nom' });
+}
+
+export async function thematicById(id) {
+  return await pb.collection('thematics').getOne(id);
+}
+
+export async function signsDessinAll({ search = '' } = {}) {
+  const filter = search ? `nom~"${search}"` : undefined;
+  return await pb.collection('signs_dessin').getFullList({ filter, sort: 'nom' });
+}
+
+export async function signsDessinById(id) {
+  return await pb.collection('signs_dessin').getOne(id);
+}
+
+export async function addSignDessin(data) {
+  return await pb.collection('signs_dessin').create(data);
+}
+
+export async function updateSignDessin(id, data) {
+  return await pb.collection('signs_dessin').update(id, data);
+}
+
+export async function lessonsAll() {
+  return await pb.collection('mode_lecon').getFullList({ sort: 'titre', expand: 'relation' });
+}
+
+export async function lessonById(id) {
+  return await pb.collection('mode_lecon').getOne(id, { expand: 'relation' });
+}
+
+export async function addLesson(data) {
+  // data: { titre, relation: [signId, ...] }
+  return await pb.collection('mode_lecon').create(data);
+}
+
+export async function updateLesson(id, data) {
+  return await pb.collection('mode_lecon').update(id, data);
+}
+
+export async function gamesCardsAll() {
+  return await pb.collection('jeux_cards').getFullList({ expand: 'relation' });
+}
+
+export async function gameCardsById(id) {
+  return await pb.collection('jeux_cards').getOne(id, { expand: 'relation' });
+}
+
+export async function addGameCards(data) {
+  return await pb.collection('jeux_cards').create(data);
+}
+
+export async function updateGameCards(id, data) {
+  return await pb.collection('jeux_cards').update(id, data);
+}
+
+export async function gamesMemoryAll() {
+  return await pb.collection('jeux_memory').getFullList({ sort: 'nom_niveau', expand: 'relation' });
+}
+
+export async function gameMemoryById(id) {
+  return await pb.collection('jeux_memory').getOne(id, { expand: 'relation' });
+}
+
+export async function addGameMemory(data) {
+  return await pb.collection('jeux_memory').create(data);
+}
+
+export async function updateGameMemory(id, data) {
+  return await pb.collection('jeux_memory').update(id, data);
+}
+
+export async function gamesVraiFauxAll() {
+  return await pb.collection('jeux_vrai_faux').getFullList({ expand: 'relation' });
+}
+
+export async function gameVraiFauxById(id) {
+  return await pb.collection('jeux_vrai_faux').getOne(id, { expand: 'relation' });
+}
+
+export async function addGameVraiFaux(data) {
+  return await pb.collection('jeux_vrai_faux').create(data);
+}
+
+export async function updateGameVraiFaux(id, data) {
+  return await pb.collection('jeux_vrai_faux').update(id, data);
+}
+
+export async function scoresAll() {
+  return await pb.collection('scores').getFullList({ sort: '-created', expand: 'user,game_type' });
+}
+
+export async function scoresByUser(userId) {
+  return await pb.collection('scores').getFullList({
+    filter: `user="${userId}"`,
+    sort: '-created',
+    expand: 'game_type',
+  });
+}
+
+export async function addScore(data) {
+  return await pb.collection('scores').create(data);
+}
+
+export async function supportMessagesAll() {
+  return await pb.collection('support_messages').getFullList({ sort: '-created', expand: 'utilisateur' });
+}
+
+export async function supportMessagesByUser(userId) {
+  return await pb.collection('support_messages').getFullList({
+    filter: `utilisateur="${userId}"`,
+    sort: '-created',
+  });
+}
+
+export async function addSupportMessage(data) {
+  return await pb.collection('support_messages').create(data);
+}
+
+export async function updateSupportMessage(id, data) {
+  return await pb.collection('support_messages').update(id, data);
+}
+
+export async function userById(id) {
+  return await pb.collection('users').getOne(id);
+}
+
+export async function usersAll() {
+  return await pb.collection('users').getFullList({ sort: 'created' });
+}
+
+export async function login(email, password) {
+  const auth = await pb.collection('users').authWithPassword(email, password);
+  return auth;
+}
+
+export function logout() {
+  pb.authStore.clear();
+}
