@@ -18,29 +18,22 @@ const {
 ---
 
 <div class="space-y-4">
-  <div class="bg-gradient-to-r from-green-400 to-green-500 rounded-3xl p-6 md:p-8 shadow-md overflow-hidden">
-    <div class="flex flex-col md:flex-row items-center gap-6">
-      <!-- Image Section -->
-      <div class="w-full md:w-2/5">
-        <img
-          src={image}
-          alt="Continue"
-          class="w-full h-40 md:h-56 object-cover rounded-2xl"
-        />
-      </div>
+  <a href={href} class="block">
+    <div 
+      class="bg-gradient-to-r from-green-400 to-green-500 rounded-3xl p-6 md:p-8 shadow-md overflow-hidden relative h-64 md:h-80 flex items-center justify-center"
+      style={`background-image: url(${image}); background-size: cover; background-position: center;`}
+    >
+      <!-- Overlay for better text contrast -->
+      <div class="absolute inset-0 bg-black/20 rounded-3xl"></div>
       
-      <!-- Content Section -->
-      <div class="w-full md:w-3/5 flex flex-col justify-center">
-        <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">
-          {text}
-        </h3>
-        <a 
-          href={href}
-          class="inline-block bg-white hover:bg-slate-100 text-green-600 font-semibold py-3 px-8 rounded-full transition w-fit"
-        >
-          Continuer
-        </a>
+      <!-- Content centered on image -->
+      <div class="relative z-10 text-center">
+        <div class="inline-block bg-transparent border-2 border-white rounded-full px-8 md:px-12 py-4 md:py-6">
+          <h3 class="text-3xl md:text-4xl font-bold text-white">
+            {text}
+          </h3>
+        </div>
       </div>
     </div>
-  </div>
+  </a>
 </div>

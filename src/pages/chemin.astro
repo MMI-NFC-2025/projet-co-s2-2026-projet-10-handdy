@@ -18,14 +18,9 @@ import leconIcon from '../assets/icons/icon_lecon.svg';
 import mascotteIcon from '../assets/icons/mascotte.svg';
 import wendyLogo from '../assets/icons/logo_wendy.svg';
 
-// Initialize PocketBase
 const pb = new PocketBase('http://127.0.0.1:8090');
-
-// TODO: In production, you would authenticate the user and get their ID
-// For now, using hardcoded user ID (assuming first user exists)
 const userId = 'user_id_placeholder';
 
-// Data structures
 interface UserData {
   level: number;
   currentXP: number;
@@ -43,14 +38,13 @@ interface Badge {
   unlocked: boolean;
 }
 
-// Default data (will be replaced when collections are populated)
 const defaultUserData: UserData = {
   level: 2,
   currentXP: 1250,
   maxXP: 1500,
   seriesCurrent: 67,
   lessonsCompleted: 121,
-  totalLearningMinutes: 320, // 5h 20min
+  totalLearningMinutes: 320, 
   weeklyStats: [
     { day: 'Lundi', shortDay: 'Lun', xp: 120 },
     { day: 'Mardi', shortDay: 'Mar', xp: 95 },
@@ -75,26 +69,22 @@ let userData = { ...defaultUserData };
 let badges = [...defaultBadges];
 
 try {
-  // Fetch user badges
   console.log('🔄 Fetching user badges from PocketBase...');
   const userBadgesData = await pb.collection('user_badges').getFullList({
     filter: `user = "${userId}"`
   });
   console.log('✅ User badges loaded:', userBadgesData.length, 'badges');
 
-  // Fetch all badges
   console.log('🔄 Fetching badges from PocketBase...');
   const badgesData = await pb.collection('badges').getFullList();
   console.log('✅ Badges loaded:', badgesData.length, 'badges');
 
-  // Fetch user games (to calculate stats)
   console.log('🔄 Fetching user games from PocketBase...');
   const userGamesData = await pb.collection('user_games').getFullList({
     filter: `user = "${userId}"`
   });
   console.log('✅ User games loaded:', userGamesData.length, 'games');
 
-  // Process badges
   if (badgesData && badgesData.length > 0) {
     const unlockedBadgeIds = new Set(userBadgesData?.map(ub => ub.badge) || []);
     
@@ -106,20 +96,16 @@ try {
     }));
   }
 
-  // Calculate stats from user games
   if (userGamesData && userGamesData.length > 0) {
-    // Calculate total learning time
     const totalMinutes = userGamesData.reduce((acc, game) => {
       return acc + (game.duration_minutes || 0);
     }, 0);
     userData.totalLearningMinutes = totalMinutes;
 
-    // Calculate series and lessons
     const seriesCount = userGamesData.filter(g => g.is_series === true).length;
     userData.seriesCurrent = seriesCount;
     userData.lessonsCompleted = userGamesData.length;
 
-    // Calculate XP for week (assuming game.xp_earned exists)
     const now = new Date();
     const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
     const weekStats = userData.weeklyStats.map(day => ({ ...day, xp: 0 }));
@@ -145,12 +131,10 @@ try {
   console.log('  - user_games: Ready to receive data');
 }
 
-// Calculate hours and minutes
 const hours = Math.floor(userData.totalLearningMinutes / 60);
 const minutes = userData.totalLearningMinutes % 60;
 const dailyAverageMinutes = Math.round(userData.totalLearningMinutes / 7);
 
-// Calculate total XP for the week
 const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
 ---
 
@@ -158,12 +142,10 @@ const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
   <Header />
   
   <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8 md:space-y-12">
-    <!-- Page Title -->
     <section class="bg-gradient-to-r from-orange-400 to-orange-500 rounded-3xl p-6 md:p-8 text-white shadow-md">
       <h1 class="text-3xl md:text-4xl font-bold">Tes progrès</h1>
     </section>
 
-    <!-- Level Card -->
     <section>
       <LevelCard 
         level={userData.level}
@@ -173,7 +155,6 @@ const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
       />
     </section>
 
-    <!-- Stats Section -->
     <section>
       <StatsSection 
         seriesCurrent={userData.seriesCurrent}
@@ -183,7 +164,6 @@ const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
       />
     </section>
 
-    <!-- Weekly Stats -->
     <section>
       <WeeklyStats 
         weekStats={userData.weeklyStats}
@@ -193,12 +173,10 @@ const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
       />
     </section>
 
-    <!-- Badges -->
     <section>
       <BadgeGrid badges={badges} />
     </section>
 
-    <!-- Learning Time -->
     <section>
       <LearningTimeCard 
         hours={hours}
@@ -208,7 +186,6 @@ const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
       />
     </section>
 
-    <!-- Continue Button -->
     <section>
       <ContinueButton 
         text="Voir l'avancé"
