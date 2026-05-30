@@ -1,0 +1,106 @@
+---
+
+---
+
+<div id="mobileMenuContainer" class="fixed inset-0 z-50 md:hidden" style="display: none;">
+  <!-- Overlay -->
+  <div 
+    id="menuOverlay" 
+    class="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+  ></div>
+  
+  <!-- Menu coulissant -->
+  <nav id="mobileMenu" class="fixed left-0 top-0 h-screen w-full bg-orange-500 overflow-y-auto transform transition-transform duration-300 -translate-x-full">
+    <div class="flex items-center justify-between bg-orange-500 px-4 py-4 border-b border-orange-600">
+      <!-- Logo -->
+      <img src="/icons/logo_wendy.svg" alt="Wendy Logo" class="h-8" />
+      
+      <!-- Close button -->
+      <button id="closeMenuBtn" class="text-white hover:text-orange-100 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Menu links -->
+    <div class="flex flex-col">
+      <a href="/" class="px-4 py-4 text-white font-medium border-b border-orange-600 hover:bg-orange-600 transition">
+        Accueil
+      </a>
+      <a href="#" class="px-4 py-4 text-white font-medium border-b border-orange-600 hover:bg-orange-600 transition">
+        Dico
+      </a>
+      <a href="/arcade" class="px-4 py-4 text-white font-medium border-b border-orange-600 hover:bg-orange-600 transition">
+        Arcade
+      </a>
+      <a href="/chemin" class="px-4 py-4 text-white font-medium border-b border-orange-600 hover:bg-orange-600 transition">
+        Progrès
+      </a>
+      <a href="#" class="px-4 py-4 text-white font-medium border-b border-orange-600 hover:bg-orange-600 transition">
+        Profil
+      </a>
+    </div>
+  </nav>
+</div>
+
+<!-- Hamburger button - visible en mobile uniquement, positionnée en haut à droite du header -->
+<button 
+  id="menuToggle" 
+  class="md:hidden text-slate-900 hover:text-slate-700 transition"
+  aria-label="Ouvrir le menu"
+>
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+  </svg>
+</button>
+
+<script>
+  function initMenu() {
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileMenuContainer = document.getElementById('mobileMenuContainer');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    const menuLinks = document.querySelectorAll('#mobileMenu a');
+
+    if (!menuToggle || !mobileMenuContainer || !mobileMenu) {
+      console.error('Menu elements not found');
+      return;
+    }
+
+    // Ouvrir le menu
+    menuToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      mobileMenuContainer.style.display = 'block';
+      setTimeout(() => {
+        mobileMenu.classList.remove('-translate-x-full');
+        mobileMenu.classList.add('translate-x-0');
+      }, 10);
+    });
+
+    // Fermer le menu
+    const closeMenu = () => {
+      mobileMenu.classList.add('-translate-x-full');
+      mobileMenu.classList.remove('translate-x-0');
+      setTimeout(() => {
+        mobileMenuContainer.style.display = 'none';
+      }, 300);
+    };
+
+    closeMenuBtn?.addEventListener('click', closeMenu);
+    menuOverlay?.addEventListener('click', closeMenu);
+
+    // Fermer au clic sur un lien
+    menuLinks.forEach((link) => {
+      link.addEventListener('click', closeMenu);
+    });
+  }
+
+  // Attendre que le DOM soit prêt
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMenu);
+  } else {
+    initMenu();
+  }
+</script>

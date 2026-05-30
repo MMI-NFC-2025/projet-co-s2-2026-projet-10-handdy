@@ -1,0 +1,178 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+import ArcadeGameCard from '../components/ArcadeGameCard.astro';
+import PlayerRankCard from '../components/PlayerRankCard.astro';
+import PocketBase from 'pocketbase';
+
+// Import assets
+import cardIcon from '../assets/icons/arcade.svg';
+import leconIcon from '../assets/icons/icon_lecon.svg';
+import arcadeIcon from '../assets/icons/icon_arcade_accueil.svg';
+
+const pb = new PocketBase('http://127.0.0.1:8090');
+
+interface Score {
+  id: string;
+  user?: string;
+  username?: string;
+  xp_earned: number;
+  created: string;
+  game_type?: string;
+}
+
+interface LeaderboardEntry {
+  username: string;
+  totalXP: number;
+  avatar?: string;
+  rank: number;
+}
+
+// Données par défaut
+const defaultGames = [
+  {
+    id: 'cards',
+    title: 'Cards',
+    description: 'Associe les bonnes cartes rapidement',
+    icon: cardIcon.src,
+    soloLink: '/games/cards/solo',
+    multiLink: '/games/cards/multi'
+  },
+  {
+    id: 'memory',
+    title: 'Memory',
+    description: 'Retrouve les paires mots-signes',
+    icon: cardIcon.src,
+    soloLink: '/games/memory/solo',
+    multiLink: '/games/memory/multi'
+  },
+  {
+    id: 'lecon',
+    title: 'Mode leçon',
+    description: 'Apprendre des leçons pour avancer dans l\'xp',
+    icon: leconIcon.src,
+    soloLink: '/games/lecon/solo',
+    multiLink: '/games/lecon/multi'
+  },
+  {
+    id: 'associer',
+    title: 'Associer',
+    description: 'Associer les vidéos au signes',
+    icon: cardIcon.src,
+    soloLink: '/games/associer/solo',
+    multiLink: '/games/associer/multi'
+  }
+];
+
+// Classement par défaut
+const defaultLeaderboard: LeaderboardEntry[] = [
+  { rank: 1, username: 'Sophie_lsf', totalXP: 15420, avatar: undefined },
+  { rank: 2, username: 'MaxSigneur', totalXP: 14850, avatar: undefined },
+  { rank: 3, username: 'Léatmax', totalXP: 13750, avatar: undefined },
+  { rank: 4, username: 'Toi', totalXP: 12350, avatar: undefined }
+];
+
+let leaderboard = defaultLeaderboard;
+
+// Récupérer les données de PocketBase
+try {
+  console.log('🔄 Fetching scores from PocketBase...');
+  
+  // Récupérer les scores de la semaine
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  
+  const scoresData = await pb.collection('scores').getFullList({
+    filter: `created >= '${weekAgo.toISOString()}'`,
+    sort: '-xp_earned'
+  });
+  
+  console.log('✅ Scores loaded:', scoresData.length);
+
+  // Construire le classement par utilisateur
+  const scoreMap = new Map<string, number>();
+  
+  scoresData.forEach((score: any) => {
+    const username = score.user_name || score.username || 'Joueur ' + Math.random();
+    const currentXP = scoreMap.get(username) || 0;
+    scoreMap.set(username, currentXP + (score.xp_earned || 0));
+  });
+
+  // Convertir en array et trier
+  const sortedScores = Array.from(scoreMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map((entry, index) => ({
+      rank: index + 1,
+      username: entry[0],
+      totalXP: entry[1],
+      avatar: undefined
+    }));
+
+  if (sortedScores.length > 0) {
+    leaderboard = sortedScores;
+  }
+
+  console.log('✅ Leaderboard prepared:', leaderboard.length, 'players');
+} catch (error) {
+  console.warn('⚠️ PocketBase not available or empty. Using default leaderboard.');
+  console.warn('Error:', error);
+}
+---
+
+<Layout>
+  <!-- Mode Arcade Hero Section -->
+  <section class="bg-orange-500 text-white py-12 md:py-16 rounded-b-3xl relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 md:px-6">
+      <div class="flex items-center justify-between">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold font-cal-sans">Mode arcade</h1>
+        <img 
+          src={arcadeIcon.src} 
+          alt="Machine arcade" 
+          class="w-20 h-20 md:w-32 md:h-32 object-contain absolute right-4 md:right-8 top-1/2 -translate-y-1/2"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16 space-y-12 md:space-y-16">
+    <!-- Classement de la semaine -->
+    <section>
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl md:text-4xl font-bold font-cal-sans text-slate-900">Classement de la semaine</h2>
+        <a href="#" class="text-orange-500 hover:text-orange-600 font-semibold transition">Voir tout</a>
+      </div>
+
+      <div class="bg-white rounded-3xl p-6 md:p-8 shadow-md space-y-4">
+        {leaderboard.map((player) => (
+          <PlayerRankCard
+            rank={player.rank}
+            name={player.username}
+            avatar={player.avatar}
+            xp={player.totalXP}
+          />
+        ))}
+      </div>
+    </section>
+
+    <!-- Mini-jeux disponibles -->
+    <section>
+      <h2 class="text-3xl md:text-4xl font-bold font-cal-sans text-slate-900 mb-8">Mini-jeux disponibles</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {defaultGames.map((game) => (
+          <ArcadeGameCard
+            title={game.title}
+            description={game.description}
+            icon={game.icon}
+            soloLink={game.soloLink}
+            multiLink={game.multiLink}
+          />
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
