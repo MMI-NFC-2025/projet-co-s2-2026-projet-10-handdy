@@ -7,11 +7,15 @@
 interface Props {
   seriesCurrent: number;
   lessonsCompleted: number;
+  flammeIcon?: string;
+  leconIcon?: string;
 }
 
 const {
   seriesCurrent,
-  lessonsCompleted
+  lessonsCompleted,
+  flammeIcon,
+  leconIcon
 } = Astro.props;
 ---
 
@@ -22,11 +26,13 @@ const {
     <!-- Série Actuelle -->
     <div class="bg-white rounded-2xl p-4 md:p-6 shadow-md">
       <div class="flex justify-center mb-3">
-        <img 
-          src="/icons/icon_flamme_serie.png" 
-          alt="Série actuelle" 
-          class="w-12 h-12 md:w-16 md:h-16 object-contain"
-        />
+        {flammeIcon && (
+          <img 
+            src={flammeIcon} 
+            alt="Série actuelle" 
+            class="w-12 h-12 md:w-16 md:h-16 object-contain"
+          />
+        )}
       </div>
       <p class="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-2">
         {seriesCurrent}
@@ -40,11 +46,13 @@ const {
     <!-- Leçons Terminées -->
     <div class="bg-white rounded-2xl p-4 md:p-6 shadow-md">
       <div class="flex justify-center mb-3">
-        <img 
-          src="/icons/icon_lecon.svg" 
-          alt="Leçons terminées" 
-          class="w-12 h-12 md:w-16 md:h-16 object-contain"
-        />
+        {leconIcon && (
+          <img 
+            src={leconIcon} 
+            alt="Leçons terminées" 
+            class="w-12 h-12 md:w-16 md:h-16 object-contain"
+          />
+        )}
       </div>
       <p class="text-3xl md:text-4xl font-bold text-slate-900 text-center mb-2">
         {lessonsCompleted}

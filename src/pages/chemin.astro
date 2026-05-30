@@ -12,6 +12,10 @@ import PocketBase from 'pocketbase';
 import bonhommeImage from '../assets/images/bonhomme_chemin.webp';
 import tempsImage from '../assets/images/temps_apprentissage.webp';
 import cheminImage from '../assets/images/chemin_utilisateur_accueil.webp';
+import flammeIcon from '../assets/icons/image 18.svg';
+import leconIcon from '../assets/icons/icon_lecon.svg';
+import mascotteIcon from '../assets/icons/mascotte.svg';
+import wendyLogo from '../assets/icons/logo_wendy.svg';
 
 // Initialize PocketBase
 const pb = new PocketBase('http://127.0.0.1:8090');
@@ -173,6 +177,8 @@ const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
       <StatsSection 
         seriesCurrent={userData.seriesCurrent}
         lessonsCompleted={userData.lessonsCompleted}
+        flammeIcon={flammeIcon.src}
+        leconIcon={leconIcon.src}
       />
     </section>
 
@@ -181,6 +187,8 @@ const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
       <WeeklyStats 
         weekStats={userData.weeklyStats}
         totalXPWeek={totalXPWeek}
+        mascotteIcon={mascotteIcon.src}
+        wendyLogo={wendyLogo.src}
       />
     </section>
 
