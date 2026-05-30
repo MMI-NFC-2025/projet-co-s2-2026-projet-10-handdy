@@ -12,6 +12,7 @@ import PocketBase from 'pocketbase';
 import bonhommeImage from '../assets/images/bonhomme_chemin.webp';
 import tempsImage from '../assets/images/temps_apprentissage.webp';
 import cheminImage from '../assets/images/chemin_utilisateur_accueil.webp';
+import cadenaImage from '../assets/images/cadena.webp';
 import flammeIcon from '../assets/icons/image 18.svg';
 import leconIcon from '../assets/icons/icon_lecon.svg';
 import mascotteIcon from '../assets/icons/mascotte.svg';
@@ -62,12 +63,12 @@ const defaultUserData: UserData = {
 };
 
 const defaultBadges: Badge[] = [
-  { id: '1', name: 'série de 14 jours', icon: '/icons/badge_serie_accueil.svg', unlocked: true },
-  { id: '2', name: '50 leçon', icon: '/icons/badge_xp_accueil.svg', unlocked: true },
-  { id: '3', name: 'Novice LSF', icon: '/icons/logo_wendy.svg', unlocked: true },
-  { id: '4', name: 'série de 50 jours', unlocked: false },
-  { id: '5', name: '100 leçon', unlocked: false },
-  { id: '6', name: 'Maître LSF', unlocked: false }
+  { id: '1', name: 'série de 14 jours', icon: flammeIcon.src, unlocked: true },
+  { id: '2', name: '50 leçon', icon: leconIcon.src, unlocked: true },
+  { id: '3', name: 'Novice LSF', icon: mascotteIcon.src, unlocked: true },
+  { id: '4', name: 'série de 50 jours', icon: cadenaImage.src, unlocked: false },
+  { id: '5', name: '100 leçon', icon: cadenaImage.src, unlocked: false },
+  { id: '6', name: 'Maître LSF', icon: cadenaImage.src, unlocked: false }
 ];
 
 let userData = { ...defaultUserData };
