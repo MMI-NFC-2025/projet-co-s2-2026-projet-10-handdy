@@ -1,0 +1,27 @@
+---
+/**
+ * QuestionProgress Component
+ * Affiche la barre de progression et le compteur de questions
+ */
+
+interface Props {
+  current: number;
+  total: number;
+}
+
+const { current, total } = Astro.props;
+const progressPercentage = (current / total) * 100;
+---
+
+<div class="mb-6">
+  <div class="flex items-center justify-between mb-3">
+    <span class="text-sm font-semibold text-slate-700">Question {current}/{total}</span>
+  </div>
+  <!-- Progress Bar -->
+  <div class="w-full bg-slate-300 rounded-full h-2 overflow-hidden">
+    <div
+      class="bg-orange-500 h-full transition-all duration-500 ease-out"
+      style={`width: ${progressPercentage}%`}
+    />
+  </div>
+</div>
