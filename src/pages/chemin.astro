@@ -27,6 +27,7 @@ interface UserData {
   seriesCurrent: number;
   lessonsCompleted: number;
   totalLearningMinutes: number;
+  avatar?: string;
   weeklyStats: Array<{day: string; shortDay: string; xp: number}>;
 }
 
@@ -78,6 +79,13 @@ let userData = { ...defaultUserData };
 let badges = [...defaultBadges];
 
 try {
+  console.log('🔄 Fetching user data from PocketBase...');
+  const userRecord = await pb.collection('utilisateurs').getOne(userId);
+  if (userRecord && userRecord.photo_profil) {
+    userData.avatar = pb.files.getURL(userRecord, userRecord.photo_profil);
+    console.log('✅ User avatar loaded:', userData.avatar);
+  }
+
   console.log('🔄 Fetching user badges from PocketBase...');
   const userBadgesData = await pb.collection('user_badges').getFullList({
     filter: `user = "${userId}"`
@@ -157,17 +165,20 @@ const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
 
 <Layout>
   
+  <!-- Hero Section - Full Width -->
+  <section class="w-full bg-orange-500 text-white shadow-md">
+    <div class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <h1 class="text-4xl md:text-5xl font-bold font-cal-sans">Tes progrès</h1>
+    </div>
+  </section>
+  
   <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8 md:space-y-12">
-    <section class="bg-gradient-to-r from-orange-400 to-orange-500 rounded-3xl p-6 md:p-8 text-white shadow-md">
-      <h1 class="text-3xl md:text-4xl font-bold">Tes progrès</h1>
-    </section>
-
     <section>
       <LevelCard 
         level={userData.level}
         currentXP={userData.currentXP}
         maxXP={userData.maxXP}
-        icon={bonhommeImage.src}
+        avatar={userData.avatar}
       />
     </section>
 
