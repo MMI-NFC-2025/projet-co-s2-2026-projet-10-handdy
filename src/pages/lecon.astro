@@ -1,0 +1,118 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro'; // Import de ton composant Footer !
+
+// L'URL de ton PocketBase local
+const pocketbaseHost = "http://127.0.0.1:8090";
+
+let signe = {
+  nom: "...",
+  description: "",
+  videoUrl: ""
+};
+
+try {
+  // On récupère un enregistrement depuis ta collection "signs"
+  const response = await fetch(`${pocketbaseHost}/api/collections/signs/records?limit=1`);
+  const data = await response.json();
+  
+  if (data.items && data.items.length > 0) {
+    const record = data.items[0];
+    signe.nom = record.nom;
+    signe.description = record.description;
+    
+    // Génération de l'URL absolue pour la vidéo
+    signe.videoUrl = `${pocketbaseHost}/api/files/${record.collectionId}/${record.id}/${record.video}`;
+  }
+} catch (error) {
+  console.error("Impossible de joindre PocketBase :", error);
+}
+---
+
+<Layout title="Mode Leçon - Wenddy">
+  <main class="min-h-screen bg-[#E5E7EB] flex flex-col justify-between font-sans overflow-x-hidden">
+    
+    <!-- En-tête : Croix et Barre de progression -->
+    <!-- Sur PC, on centre et on limite la largeur (max-w-5xl) pour que ça ne s'étire pas trop -->
+    <header class="bg-white rounded-b-3xl py-6 px-4 shadow-sm relative z-10">
+      <div class="max-w-5xl mx-auto relative flex flex-col items-center">
+        <!-- Bouton Quitter -->
+        <a href="/" class="absolute left-0 top-0 text-black hover:text-[#FF6B00] transition-colors">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </a>
+        
+        <!-- Texte Question -->
+        <p class="text-sm md:text-base font-bold mb-3 text-gray-700">Question 3/7</p>
+        
+        <!-- Barre de progression -->
+        <!-- Tu pourras la remplacer par <ProgressBar /> plus tard si tu le souhaites -->
+        <div class="w-full max-w-md h-4 bg-gray-200 rounded-full relative">
+          <div class="h-full bg-[#FF6B00] rounded-full w-2/5 relative">
+            <!-- Raton laveur -->
+            <div class="absolute -right-4 -top-3 w-10 h-10 bg-white rounded-full border-2 border-black flex items-center justify-center shadow-sm">
+              🦊
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenu principal : Flex Column sur mobile, Flex Row sur PC (md:) -->
+    <section class="flex-grow flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 px-4 py-12 max-w-5xl mx-auto w-full">
+      
+      <!-- BLOC GAUCHE : La Vidéo -->
+      <div class="w-full max-w-sm md:w-1/2 bg-white rounded-2xl p-2 shadow-sm border border-gray-200 aspect-[4/5] md:aspect-square lg:aspect-[4/5] overflow-hidden flex items-center justify-center">
+        {signe.videoUrl ? (
+          <video 
+            src={signe.videoUrl} 
+            class="w-full h-full object-cover rounded-xl"
+            autoplay 
+            loop 
+            muted 
+            playsinline
+          ></video>
+        ) : (
+          <p class="text-gray-400 font-medium">Vidéo introuvable</p>
+        )}
+      </div>
+
+      <!-- BLOC DROIT : Informations et Boutons -->
+      <div class="w-full max-w-sm md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
+        <!-- Emoji main -->
+        <div class="mb-6">
+          <img src="/src/assets/waving-hand.png" alt="Coucou" class="w-20 h-20 md:w-24 md:h-24 drop-shadow-md" />
+        </div>
+        
+        <!-- Titre dynamique -->
+        <h1 class="text-3xl md:text-5xl font-black text-black mb-4 md:mb-6 leading-tight">
+          Comment signer <br class="hidden md:block" />
+          <span class="text-[#FF6B00] capitalize">{signe.nom}</span> ?
+        </h1>
+
+        <!-- Description -->
+        {signe.description && (
+          <p class="text-gray-600 text-base md:text-lg mb-8 max-w-sm">
+            {signe.description}
+          </p>
+        )}
+
+        <!-- Boutons de navigation de la leçon -->
+        <div class="flex w-full gap-4 mt-auto md:mt-8">
+          <button class="flex-1 py-3 px-4 bg-white border-2 border-gray-200 text-black font-bold rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
+            Précédent
+          </button>
+          <button class="flex-1 py-3 px-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-colors shadow-sm">
+            Suivant
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Footer : J'utilise ton composant Footer.astro ! -->
+    <Footer />
+    
+  </main>
+</Layout>

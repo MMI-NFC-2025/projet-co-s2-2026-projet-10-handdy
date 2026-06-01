@@ -1,0 +1,37 @@
+---
+interface Props {
+  showMenu?: boolean;
+}
+
+const { showMenu = true } = Astro.props;
+---
+
+<header class="w-full bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 md:px-8 md:py-4">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="flex items-center">
+      <img src="/logo_wendy.svg" alt="Wenddy" class="h-10 md:h-12 w-auto" />
+    </a>
+
+    <!-- Menu Button (mobile) -->
+    {showMenu && (
+      <button class="md:hidden text-white p-2" aria-label="Menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    )}
+
+    <!-- Desktop Menu -->
+    {showMenu && (
+      <nav class="hidden md:flex gap-8 text-white text-sm">
+        <a href="/" class="hover:opacity-80 transition">Accueil</a>
+        <a href="/dico" class="hover:opacity-80 transition">Dico</a>
+        <a href="/arcade" class="hover:opacity-80 transition">Arcade</a>
+        <a href="/progress" class="hover:opacity-80 transition">Progrès</a>
+        <a href="/profile" class="hover:opacity-80 transition">Profil</a>
+      </nav>
+    )}
+  </div>
+</header>
+

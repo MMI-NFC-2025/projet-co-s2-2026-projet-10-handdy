@@ -1,0 +1,25 @@
+---
+/**
+ * AnswerButton — bouton de réponse pour le jeu Associer
+ * Props :
+ *   label     : texte affiché
+ *   value     : identifiant du sign (id PocketBase)
+ *   isCorrect : si c'est la bonne réponse (utilisé en JS côté client)
+ */
+interface Props {
+  label: string;
+  value: string;
+  isCorrect?: boolean;
+}
+
+const { label, value, isCorrect = false } = Astro.props;
+---
+
+<button
+  type="button"
+  class="answer-btn w-full py-4 px-6 rounded-2xl border-2 border-slate-200 bg-white text-slate-900 font-semibold text-base text-center font-alexandria transition-all duration-200 hover:border-[#FF6200] hover:bg-orange-50 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#FF6200]/40"
+  data-value={value}
+  data-correct={isCorrect ? "true" : "false"}
+>
+  {label}
+</button>

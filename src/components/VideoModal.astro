@@ -1,0 +1,88 @@
+---
+---
+
+<div id="videoModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+    <!-- Header with title and close button -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <h2 id="videoTitle" class="text-xl md:text-2xl font-bold text-gray-900"></h2>
+      <button 
+        id="closeVideoModal"
+        class="text-gray-500 hover:text-gray-700 transition duration-200"
+        type="button"
+        title="Fermer"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Video Player -->
+    <div class="flex-grow flex items-center justify-center bg-black p-4">
+      <video 
+        id="modalVideo" 
+        class="max-w-full max-h-full rounded" 
+        controls 
+        autoplay
+      >
+        <source id="videoSource" src="" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo HTML5.
+      </video>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{}}>
+  // Wait for DOM to be fully loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupVideoModal);
+  } else {
+    setupVideoModal();
+  }
+
+  function setupVideoModal() {
+    const modal = document.getElementById('videoModal');
+    const titleEl = document.getElementById('videoTitle');
+    const videoSource = document.getElementById('videoSource');
+    const video = document.getElementById('modalVideo');
+    const closeBtn = document.getElementById('closeVideoModal');
+
+    if (!modal || !titleEl || !videoSource || !video || !closeBtn) {
+      console.error('VideoModal elements not found');
+      return;
+    }
+
+    // Global function to open video modal
+    window.openVideoModal = function(videoUrl, title) {
+      titleEl.textContent = title;
+      videoSource.src = videoUrl;
+      video.load();
+      modal.classList.remove('hidden');
+      video.focus();
+      video.play();
+    };
+
+    // Close button
+    closeBtn.addEventListener('click', () => {
+      modal.classList.add('hidden');
+      video.pause();
+    });
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        video.pause();
+      }
+    });
+
+    // Click outside to close
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+        video.pause();
+      }
+    });
+  }
+</script>

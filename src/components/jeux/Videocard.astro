@@ -1,0 +1,129 @@
+---
+/**
+ * VideoCard — carte vidéo cliquable pour afficher un signe LSF
+ * Props :
+ *   videoUrl      : URL de la vidéo (depuis PocketBase)
+ *   thumbnailUrl  : URL de la miniature (optionnel)
+ *   label         : texte alternatif (optionnel)
+ *   cardId        : identifiant unique de la carte (ex: "0", "1")
+ */
+interface Props {
+  videoUrl: string;
+  thumbnailUrl?: string;
+  label?: string;
+  cardId: string;
+}
+
+const { videoUrl, thumbnailUrl, label = "Signe LSF", cardId } = Astro.props;
+---
+
+<div
+  class="video-card relative w-full aspect-square rounded-3xl overflow-hidden bg-slate-100 shadow-sm cursor-pointer group"
+  data-card-id={cardId}
+>
+  <!-- Thumbnail -->
+  {
+    thumbnailUrl ? (
+      <img
+        class="video-thumb w-full h-full object-cover"
+        src={thumbnailUrl}
+        alt={label}
+      />
+    ) : (
+      <div class="video-thumb w-full h-full bg-black" aria-hidden="true" />
+    )
+  }
+
+  <!-- Élément vidéo (caché par défaut) -->
+  <video
+    class="video-player absolute inset-0 w-full h-full object-cover hidden"
+    src={videoUrl}
+    playsinline
+    preload="metadata"
+  ></video>
+
+  <!-- Overlay play -->
+  <button
+    class="play-btn absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition-colors"
+    type="button"
+    aria-label={`Lancer la vidéo : ${label}`}
+  >
+    <span class="w-14 h-14 flex items-center justify-center rounded-full bg-white/90 shadow-md group-hover:scale-110 transition-transform duration-200">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-6 h-6 ml-1"
+        style="color: #FF6200"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M8 5v14l11-7z" />
+      </svg>
+    </span>
+  </button>
+
+  <!-- Overlay pause -->
+  <button
+    class="pause-btn absolute inset-0 flex items-center justify-center bg-black/25 hidden"
+    type="button"
+    aria-label="Mettre en pause"
+  >
+    <span class="w-14 h-14 flex items-center justify-center rounded-full bg-white/90 shadow-md">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-6 h-6"
+        style="color: #FF6200"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+      </svg>
+    </span>
+  </button>
+</div>
+
+<script>
+  // Gestion lecture/pause pour chaque VideoCard
+  document.querySelectorAll<HTMLElement>(".video-card").forEach((card) => {
+    const video = card.querySelector<HTMLVideoElement>(".video-player")!;
+    const thumb = card.querySelector<HTMLElement>(".video-thumb")!;
+    const playBtn = card.querySelector<HTMLButtonElement>(".play-btn")!;
+    const pauseBtn = card.querySelector<HTMLButtonElement>(".pause-btn")!;
+
+    function stopAll() {
+      document.querySelectorAll<HTMLElement>(".video-card").forEach((c) => {
+        if (c === card) return;
+        const v = c.querySelector<HTMLVideoElement>(".video-player")!;
+        const t = c.querySelector<HTMLElement>(".video-thumb")!;
+        v.pause();
+        v.classList.add("hidden");
+        t.classList.remove("hidden");
+        c.querySelector(".play-btn")!.classList.remove("hidden");
+        c.querySelector(".pause-btn")!.classList.add("hidden");
+      });
+    }
+
+    playBtn.addEventListener("click", () => {
+      stopAll();
+      video.classList.remove("hidden");
+      thumb.classList.add("hidden");
+      playBtn.classList.add("hidden");
+      pauseBtn.classList.remove("hidden");
+      video.play();
+    });
+
+    pauseBtn.addEventListener("click", () => {
+      video.pause();
+      pauseBtn.classList.add("hidden");
+      playBtn.classList.remove("hidden");
+    });
+
+    video.addEventListener("ended", () => {
+      video.classList.add("hidden");
+      thumb.classList.remove("hidden");
+      pauseBtn.classList.add("hidden");
+      playBtn.classList.remove("hidden");
+    });
+  });
+</script>

@@ -1,0 +1,532 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ProgressBar from "../../components/jeux/ProgressBar.astro";
+const PB_URL = "http://127.0.0.1:8090";
+---
+
+<Layout>
+  <!-- Fonte Alexandria chargée dans global.css, appliquée ici -->
+  <div class="min-h-screen bg-white flex flex-col font-alexandria">
+
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <header class="w-full px-4 pt-5 pb-3 max-w-md mx-auto w-full">
+      <div class="flex items-center gap-3">
+
+        <!-- Bouton quitter -->
+        <a
+          href="/"
+          class="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+          aria-label="Quitter le jeu"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5 text-slate-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </a>
+
+        <!-- Barre de progression dynamique -->
+        <div class="flex-1 flex items-center gap-2">
+          <span
+            id="progress-label"
+            class="text-sm font-semibold text-slate-500 whitespace-nowrap"
+          >
+            Question 1/7
+          </span>
+          <div class="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
+            <div
+              id="progress-bar"
+              class="h-full rounded-full transition-all duration-500 ease-out"
+              style="width: 14%; background-color: #FF6200;"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Mascotte (logo_wendy.svg disponible dans les assets) -->
+        <div class="flex-shrink-0 w-10 h-10">
+          <img
+            src="/src/assets/logo_wendy.svg"
+            alt="Mascotte Handdy"
+            class="w-full h-full object-contain"
+            onerror="this.style.display='none'; document.getElementById('mascot-fallback').style.display='block';"
+          />
+          <div
+            id="mascot-fallback"
+            class="w-10 h-10 bg-black rounded-lg hidden"
+            aria-hidden="true"
+          ></div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- ═══════════════ CONTENU PRINCIPAL ═══════════════ -->
+    <main class="flex-1 max-w-md mx-auto w-full px-4 pt-2 pb-8 flex flex-col gap-5">
+
+      <!-- Titre de la question -->
+      <h1
+        id="question-title"
+        class="text-xl font-bold text-slate-900 text-center font-cal-sans leading-snug"
+      >
+        Quel est le bon signe ?
+      </h1>
+
+      <!-- ── État : chargement ── -->
+      <div
+        id="state-loading"
+        class="flex flex-col items-center justify-center py-20 gap-4"
+      >
+        <div
+          class="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
+          style="border-color: #FF6200; border-top-color: transparent;"
+        ></div>
+        <p class="text-slate-400 text-sm font-semibold">Chargement du jeu…</p>
+      </div>
+
+      <!-- ── État : erreur ── -->
+      <div
+        id="state-error"
+        class="hidden flex-col items-center justify-center py-20 gap-4 text-center"
+      >
+        <p class="text-red-500 font-bold">Impossible de charger les questions.</p>
+        <button
+          onclick="window.location.reload()"
+          class="px-6 py-3 rounded-full text-white font-semibold text-sm transition hover:opacity-90"
+          style="background-color: #FF6200;"
+        >
+          Réessayer
+        </button>
+      </div>
+
+      <!-- ── Jeu principal ── -->
+      <div id="state-game" class="hidden flex-col gap-5">
+
+        <!-- 2 vidéos côte à côte -->
+        <div class="grid grid-cols-2 gap-3">
+
+          <!-- Vidéo 1 -->
+          <div
+            id="video-card-0"
+            class="video-card relative w-full aspect-square rounded-3xl overflow-hidden bg-slate-100 shadow-sm cursor-pointer group"
+          >
+            <div id="thumb-0" class="w-full h-full bg-black"></div>
+            <img id="thumbimg-0" class="absolute inset-0 w-full h-full object-cover hidden" src="" alt="Signe 1" />
+            <video
+              id="video-0"
+              class="absolute inset-0 w-full h-full object-cover hidden"
+              playsinline
+              preload="metadata"
+            ></video>
+            <button
+              id="play-0"
+              class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition-colors"
+              type="button"
+              aria-label="Lancer la vidéo 1"
+            >
+              <span class="w-14 h-14 flex items-center justify-center rounded-full bg-white/90 shadow-md group-hover:scale-110 transition-transform duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 ml-1" style="color:#FF6200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </span>
+            </button>
+            <button
+              id="pause-0"
+              class="absolute inset-0 flex items-center justify-center bg-black/25 hidden"
+              type="button"
+              aria-label="Pause vidéo 1"
+            >
+              <span class="w-14 h-14 flex items-center justify-center rounded-full bg-white/90 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" style="color:#FF6200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          <!-- Vidéo 2 -->
+          <div
+            id="video-card-1"
+            class="video-card relative w-full aspect-square rounded-3xl overflow-hidden bg-slate-100 shadow-sm cursor-pointer group"
+          >
+            <div id="thumb-1" class="w-full h-full bg-black"></div>
+            <img id="thumbimg-1" class="absolute inset-0 w-full h-full object-cover hidden" src="" alt="Signe 2" />
+            <video
+              id="video-1"
+              class="absolute inset-0 w-full h-full object-cover hidden"
+              playsinline
+              preload="metadata"
+            ></video>
+            <button
+              id="play-1"
+              class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition-colors"
+              type="button"
+              aria-label="Lancer la vidéo 2"
+            >
+              <span class="w-14 h-14 flex items-center justify-center rounded-full bg-white/90 shadow-md group-hover:scale-110 transition-transform duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 ml-1" style="color:#FF6200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </span>
+            </button>
+            <button
+              id="pause-1"
+              class="absolute inset-0 flex items-center justify-center bg-black/25 hidden"
+              type="button"
+              aria-label="Pause vidéo 2"
+            >
+              <span class="w-14 h-14 flex items-center justify-center rounded-full bg-white/90 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" style="color:#FF6200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Consigne -->
+        <p class="text-center text-slate-400 text-sm font-semibold -mt-1">
+          Regarde les vidéos, puis choisis le bon mot 👇
+        </p>
+
+        <!-- Boutons de réponse (injectés dynamiquement) -->
+        <div id="answers-container" class="flex flex-col gap-3"></div>
+
+        <!-- Feedback bonne/mauvaise réponse -->
+        <div
+          id="feedback"
+          class="hidden text-center py-3 px-5 rounded-2xl font-bold text-base transition-all"
+        ></div>
+
+        <!-- Bouton suivant -->
+        <button
+          id="next-btn"
+          class="hidden w-full py-4 rounded-full text-white font-bold text-base transition-all active:scale-95 shadow-lg"
+          style="background-color: #FF6200; box-shadow: 0 8px 30px rgba(255,98,0,0.25);"
+          type="button"
+        >
+          Question suivante →
+        </button>
+
+      </div>
+
+      <!-- ── Écran de fin ── -->
+      <div
+        id="state-end"
+        class="hidden flex-col items-center justify-center py-10 gap-6 text-center"
+      >
+        <img
+          src="/src/assets/logo_wendy.svg"
+          alt="Mascotte Handdy"
+          class="w-24 h-24 object-contain"
+          onerror="this.style.display='none'"
+        />
+        <h2 class="text-2xl font-bold text-slate-900 font-cal-sans">Bien joué !</h2>
+        <p id="end-score" class="text-slate-500 font-semibold text-base font-alexandria"></p>
+        <button
+          onclick="window.location.reload()"
+          class="px-8 py-4 rounded-full text-white font-bold text-base transition-all hover:opacity-90 active:scale-95 shadow-lg"
+          style="background-color: #FF6200; box-shadow: 0 8px 30px rgba(255,98,0,0.25);"
+        >
+          Rejouer
+        </button>
+        <a
+          href="/"
+          class="text-sm text-slate-400 underline font-semibold hover:text-slate-600 transition-colors"
+        >
+          Retour à l'accueil
+        </a>
+      </div>
+
+    </main>
+  </div>
+</Layout>
+
+<!-- ═══════════════ LOGIQUE DU JEU ═══════════════ -->
+<script>
+  // ─── Config ───────────────────────────────────────
+  const PB_URL = "http://127.0.0.1:8090";
+  const MAX_QUESTIONS = 7;
+
+  // ─── Helpers ──────────────────────────────────────
+  function fileUrl(collection: string, recordId: string, filename: string) {
+    return `${PB_URL}/api/files/${collection}/${recordId}/${filename}`;
+  }
+
+  function shuffle<T>(arr: T[]): T[] {
+    return [...arr].sort(() => Math.random() - 0.5);
+  }
+
+  // ─── Types ────────────────────────────────────────
+  interface Sign {
+    id: string;
+    nom: string;
+    video: string;
+    miniature: string;
+    collectionId: string;
+  }
+
+  interface Question {
+    signs: [Sign, Sign];       // [signe à deviner, distractor]
+    correctSign: Sign;
+    options: { label: string; value: string; correct: boolean }[];
+  }
+
+  // ─── État ─────────────────────────────────────────
+  let questions: Question[] = [];
+  let currentIndex = 0;
+  let score = 0;
+  let answered = false;
+
+  // ─── DOM ──────────────────────────────────────────
+  const stateLoading = document.getElementById("state-loading")!;
+  const stateError = document.getElementById("state-error")!;
+  const stateGame = document.getElementById("state-game")!;
+  const stateEnd = document.getElementById("state-end")!;
+  const progressBar = document.getElementById("progress-bar")!;
+  const progressLabel = document.getElementById("progress-label")!;
+  const questionTitle = document.getElementById("question-title")!;
+  const answersContainer = document.getElementById("answers-container")!;
+  const feedbackEl = document.getElementById("feedback")!;
+  const nextBtn = document.getElementById("next-btn")!;
+  const endScore = document.getElementById("end-score")!;
+
+  // ─── Chargement depuis PocketBase ─────────────────
+  async function loadQuestions(): Promise<Question[] | null> {
+    try {
+      // On récupère jeux_cards avec les signs liés (expand=relation)
+      const res = await fetch(
+        `${PB_URL}/api/collections/jeux_cards/records?expand=relation&perPage=50`
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      // PocketBase v0.38+ retourne "items", versions antérieures "records"
+      const cards = data.items ?? data.records ?? [];
+      const built: Question[] = [];
+
+      for (const card of cards) {
+        // expand.relation peut être un objet seul ou un tableau selon la config
+        const rawRelation = card.expand?.relation;
+        const signs: Sign[] = Array.isArray(rawRelation)
+          ? rawRelation
+          : rawRelation
+            ? [rawRelation]
+            : [];
+
+        if (signs.length < 2) continue;
+
+        // On prend 2 signs au hasard depuis la carte (4 dispo, on en prend 2)
+        // Le premier sera affiché + correct, le second sera le distractor
+        const [correctSign, distractorSign] = shuffle(signs).slice(0, 2) as [Sign, Sign];
+
+        built.push({
+          signs: [correctSign, distractorSign],
+          correctSign,
+          options: shuffle([
+            { label: correctSign.nom, value: correctSign.id, correct: true },
+            { label: distractorSign.nom, value: distractorSign.id, correct: false },
+          ]),
+        });
+      }
+
+      return shuffle(built).slice(0, MAX_QUESTIONS);
+    } catch (err) {
+      console.error("[jeux/cards] Erreur chargement :", err);
+      return null;
+    }
+  }
+
+  // ─── Afficher une question ─────────────────────────
+  function renderQuestion(q: Question) {
+    answered = false;
+    feedbackEl.classList.add("hidden");
+    nextBtn.classList.add("hidden");
+
+    const total = questions.length;
+    const current = currentIndex + 1;
+    progressLabel.textContent = `Question ${current}/${total}`;
+    progressBar.style.width = `${Math.round((current / total) * 100)}%`;
+    questionTitle.textContent = "Quel est le bon mot pour ce signe ?";
+
+    // Mettre à jour les 2 vidéos
+    q.signs.forEach((sign, i) => {
+      const video = document.getElementById(`video-${i}`) as HTMLVideoElement;
+      const thumbImg = document.getElementById(`thumbimg-${i}`) as HTMLImageElement;
+      const thumbFallback = document.getElementById(`thumb-${i}`)!;
+      const playBtn = document.getElementById(`play-${i}`)!;
+      const pauseBtn = document.getElementById(`pause-${i}`)!;
+
+      // Reset lecteur
+      video.pause();
+      video.src = "";
+      video.classList.add("hidden");
+      playBtn.classList.remove("hidden");
+      pauseBtn.classList.add("hidden");
+
+      // Charger la vidéo
+      if (sign.video) {
+        video.src = fileUrl(sign.collectionId ?? "signs", sign.id, sign.video);
+        video.load();
+      }
+
+      // Charger la miniature
+      if (sign.miniature) {
+        thumbImg.src = fileUrl(sign.collectionId ?? "signs", sign.id, sign.miniature);
+        thumbImg.alt = sign.nom;
+        thumbImg.classList.remove("hidden");
+        thumbFallback.classList.add("hidden");
+      } else {
+        thumbImg.classList.add("hidden");
+        thumbFallback.classList.remove("hidden");
+      }
+    });
+
+    // Recréer les boutons de réponse
+    answersContainer.innerHTML = "";
+    q.options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.dataset.value = opt.value;
+      btn.dataset.correct = opt.correct ? "true" : "false";
+      btn.className =
+        "answer-btn w-full py-4 px-6 rounded-2xl border-2 border-slate-200 bg-white text-slate-900 font-semibold text-base text-center transition-all duration-200 hover:border-[#FF6200] hover:bg-orange-50 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#FF6200]/40";
+      btn.style.fontFamily = "var(--font-alexandria)";
+      btn.textContent = opt.label;
+      btn.addEventListener("click", handleAnswer);
+      answersContainer.appendChild(btn);
+    });
+  }
+
+  // ─── Gérer une réponse ────────────────────────────
+  function handleAnswer(e: Event) {
+    if (answered) return;
+    answered = true;
+
+    const btn = e.currentTarget as HTMLButtonElement;
+    const isCorrect = btn.dataset.correct === "true";
+
+    // Stopper les vidéos
+    [0, 1].forEach((i) => {
+      const v = document.getElementById(`video-${i}`) as HTMLVideoElement;
+      v.pause();
+      document.getElementById(`pause-${i}`)?.classList.add("hidden");
+      document.getElementById(`play-${i}`)?.classList.remove("hidden");
+    });
+
+    // Colorer les boutons
+    answersContainer.querySelectorAll<HTMLButtonElement>(".answer-btn").forEach((b) => {
+      b.removeEventListener("click", handleAnswer);
+      b.classList.remove(
+        "border-slate-200", "bg-white", "hover:border-[#FF6200]", "hover:bg-orange-50"
+      );
+      if (b.dataset.correct === "true") {
+        b.classList.add("border-green-400", "bg-green-50", "text-green-700", "pointer-events-none");
+      } else {
+        b.classList.add("border-red-300", "bg-red-50", "text-red-500", "opacity-60", "pointer-events-none");
+      }
+    });
+
+    // Feedback
+    if (isCorrect) {
+      score++;
+      feedbackEl.textContent = "✅ Bonne réponse !";
+      feedbackEl.className =
+        "text-center py-3 px-5 rounded-2xl font-bold text-base bg-green-50 text-green-700 border border-green-200";
+    } else {
+      const correctLabel = questions[currentIndex].options.find((o) => o.correct)?.label ?? "";
+      feedbackEl.textContent = `❌ C'était : ${correctLabel}`;
+      feedbackEl.className =
+        "text-center py-3 px-5 rounded-2xl font-bold text-base bg-red-50 text-red-600 border border-red-200";
+    }
+    feedbackEl.classList.remove("hidden");
+
+    nextBtn.textContent =
+      currentIndex < questions.length - 1 ? "Question suivante →" : "Voir mes résultats 🎉";
+    nextBtn.classList.remove("hidden");
+  }
+
+  // ─── Bouton suivant ───────────────────────────────
+  nextBtn.addEventListener("click", () => {
+    currentIndex++;
+    if (currentIndex < questions.length) {
+      renderQuestion(questions[currentIndex]);
+    } else {
+      showEnd();
+    }
+  });
+
+  // ─── Écran de fin ─────────────────────────────────
+  function showEnd() {
+    stateGame.classList.add("hidden");
+    stateGame.classList.remove("flex");
+    stateEnd.classList.remove("hidden");
+    stateEnd.classList.add("flex");
+    progressBar.style.width = "100%";
+    progressLabel.textContent = "Terminé !";
+    endScore.textContent = `Score : ${score} / ${questions.length} bonne${score > 1 ? "s" : ""} réponse${score > 1 ? "s" : ""} 🎉`;
+  }
+
+  // ─── Contrôles vidéo ──────────────────────────────
+  function setupVideoControls() {
+    [0, 1].forEach((i) => {
+      const playBtn = document.getElementById(`play-${i}`)!;
+      const pauseBtn = document.getElementById(`pause-${i}`)!;
+      const video = document.getElementById(`video-${i}`) as HTMLVideoElement;
+
+      playBtn.addEventListener("click", () => {
+        // Stopper l'autre
+        const other = i === 0 ? 1 : 0;
+        const otherVideo = document.getElementById(`video-${other}`) as HTMLVideoElement;
+        otherVideo.pause();
+        document.getElementById(`pause-${other}`)?.classList.add("hidden");
+        document.getElementById(`play-${other}`)?.classList.remove("hidden");
+
+        playBtn.classList.add("hidden");
+        pauseBtn.classList.remove("hidden");
+        video.play();
+      });
+
+      pauseBtn.addEventListener("click", () => {
+        video.pause();
+        pauseBtn.classList.add("hidden");
+        playBtn.classList.remove("hidden");
+      });
+
+      video.addEventListener("ended", () => {
+        pauseBtn.classList.add("hidden");
+        playBtn.classList.remove("hidden");
+      });
+    });
+  }
+
+  // ─── Init ─────────────────────────────────────────
+  async function init() {
+    setupVideoControls();
+    const loaded = await loadQuestions();
+
+    stateLoading.classList.add("hidden");
+
+    if (!loaded || loaded.length === 0) {
+      stateError.classList.remove("hidden");
+      stateError.classList.add("flex");
+      return;
+    }
+
+    questions = loaded;
+    stateGame.classList.remove("hidden");
+    stateGame.classList.add("flex");
+    renderQuestion(questions[0]);
+  }
+
+  init();
+</script>

@@ -1,0 +1,227 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import SearchBar from '../components/SearchBar.astro';
+import CategoryCard from '../components/CategoryCard.astro';
+import SignCard from '../components/SignCard.astro';
+import VideoModal from '../components/VideoModal.astro';
+import Footer from '../components/Footer.astro';
+import { Image } from 'astro:assets';
+import iconePolitesse from '../assets/icone_politesse.svg';
+import iconeEmotions from '../assets/icone_emotions.svg';
+import iconeAlimentation from '../assets/icone_pomme.svg';
+import iconeFamille from '../assets/icone_famille.svg';
+import iconeVerbes from '../assets/icone_casque.svg';
+import iconeQuotidien from '../assets/icone_arbre.svg';
+
+// Récupérer les données de PocketBase
+const POCKETBASE_URL = 'http://127.0.0.1:8090/api';
+
+interface Sign {
+  id: string;
+  nom: string;
+  description?: string;
+  video?: string;
+  miniature?: string;
+  thematics?: string | string[];
+  collectionId?: string;
+}
+
+interface Category {
+  id: string;
+  nom: string;
+  icon: any;
+  keywords: string[];
+}
+
+// Catégories avec les icônes et mots-clés pour le mappage
+const categories: Category[] = [
+  { id: 'politesse', nom: 'Politesse', icon: iconePolitesse, keywords: ['politesse', 'bonjour', 'merci', 'aurevoir', 'bonsoir', "s'il vous plaît"] },
+  { id: 'emotions', nom: 'Emotions', icon: iconeEmotions, keywords: ['emotion', 'heureux', 'triste', 'colère', 'peur', 'joie'] },
+  { id: 'alimentation', nom: 'Alimentation', icon: iconeAlimentation, keywords: ['manger', 'boire', 'nourriture', 'repas', 'faim', 'soif'] },
+  { id: 'famille', nom: 'Famille', icon: iconeFamille, keywords: ['maman', 'papa', 'frère', 'soeur', 'enfant', 'parent', 'famille', 'homme', 'femme'] },
+  { id: 'verbes', nom: 'Verbes', icon: iconeVerbes, keywords: ['faire', 'aller', 'venir', 'avoir', 'être', 'pouvoir', 'vouloir', 'dormir', 'travailler', 'apprendre'] },
+  { id: 'quotidien', nom: 'Quotidien', icon: iconeQuotidien, keywords: ['jour', "aujourd'hui", 'hier', 'demain', 'temps', 'heure', 'semaine', 'lentement', 'rapidement'] },
+];
+
+// Fonction pour catégoriser un signe
+function categorizeSign(sign: Sign): string {
+  const signName = (sign.nom || '').toLowerCase();
+  
+  for (const category of categories) {
+    for (const keyword of category.keywords) {
+      if (signName.includes(keyword.toLowerCase())) {
+        return category.id;
+      }
+    }
+  }
+  
+  return 'quotidien'; // catégorie par défaut
+}
+
+// Fonction pour obtenir l'URL de l'image
+function getImageUrl(sign: Sign, baseUrl: string = POCKETBASE_URL): string {
+  if (sign.miniature && sign.collectionId) {
+    return `${baseUrl}/files/${sign.collectionId}/${sign.id}/${sign.miniature}`;
+  }
+  return '';
+}
+
+// Fonction pour obtenir l'URL de la vidéo
+function getVideoUrl(sign: Sign, baseUrl: string = POCKETBASE_URL): string {
+  if (sign.video && sign.collectionId) {
+    return `${baseUrl}/files/${sign.collectionId}/${sign.id}/${sign.video}`;
+  }
+  return '';
+}
+
+let signs: Sign[] = [];
+let signCategories: Map<string, string> = new Map();
+let error: string | null = null;
+
+try {
+  // Récupérer tous les signes
+  const signsResponse = await fetch(`${POCKETBASE_URL}/collections/signs/records?perPage=500`);
+  
+  if (!signsResponse.ok) {
+    throw new Error(`Erreur ${signsResponse.status}: ${signsResponse.statusText}`);
+  }
+  
+  const signsData = await signsResponse.json();
+  signs = signsData.items || [];
+  
+  // Pré-calculer les catégories pour chaque signe
+  signs.forEach((sign) => {
+    const category = categorizeSign(sign);
+    signCategories.set(sign.id, category);
+  });
+} catch (err) {
+  error = err instanceof Error ? err.message : 'Erreur inconnue lors de la récupération des données';
+  console.error('Erreur PocketBase:', error);
+}
+---
+  <div class="min-h-screen bg-white flex flex-col">
+    <Header />
+    <SearchBar placeholder="Recherchez un signe" />
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
+      {error && (
+        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6">
+          <p><strong>Attention:</strong> {error}</p>
+        </div>
+      )}
+
+      <!-- Categories Section -->
+      <section class="mb-12 md:mb-16">
+        <h2 class="text-2xl md:text-3xl font-bold font-cal-sans text-gray-900 mb-6 md:mb-8">
+          Catégories
+        </h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+          {categories.map((category) => (
+            <CategoryCard
+              title={category.nom}
+              icon={category.icon.src}
+            />
+          ))}
+        </div>
+      </section>
+
+      <!-- Signs Section -->
+      <section>
+        <h2 class="text-2xl md:text-3xl font-bold font-cal-sans text-gray-900 mb-6 md:mb-8">
+          Signes
+        </h2>
+
+        {signs.length > 0 ? (
+          <>
+            <div id="signs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {signs.map((sign) => (
+                <div data-sign={sign.id} data-category={signCategories.get(sign.id) || 'quotidien'}>
+                  <SignCard
+                    title={sign.nom}
+                    image={getImageUrl(sign)}
+                    description={sign.description || 'Langue des signes française'}
+                    videoUrl={getVideoUrl(sign)}
+                  />
+                </div>
+              ))}
+            </div>
+            <div 
+              id="no-results"
+              class="hidden text-center text-gray-500 py-12"
+            >
+              <p class="text-lg">Aucun signe ne correspond à votre recherche.</p>
+            </div>
+          </>
+        ) : (
+          <p class="text-center text-gray-500 py-12">
+            {error ? 'Impossible de charger les signes' : 'Aucun signe disponible'}
+          </p>
+        )}
+      </section>
+    </main>
+
+    <Footer />
+    <VideoModal />
+  </div>
+
+  <style>
+    :global(body) {
+      background-color: #f9fafb;
+    }
+  </style>
+
+<script>
+  // Setup event listeners for all video play buttons
+  function setupAllVideoListeners() {
+    document.querySelectorAll('.sign-card').forEach(card => {
+      const videoUrl = card.getAttribute('data-video-url');
+      const signTitle = card.getAttribute('data-sign-title');
+      
+      if (!videoUrl || !signTitle) return;
+      
+      // Main play button
+      const playBtn = card.querySelector('.video-play-btn');
+      if (playBtn) {
+        playBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const win = window as any; // Cast window to 'any' to avoid TS errors
+          if (win.openVideoModal) {
+            win.openVideoModal(videoUrl, signTitle);
+          }
+        });
+      }
+      
+      // Overlay button on image
+      const overlayBtn = card.querySelector('.video-overlay-btn');
+      if (overlayBtn) {
+        overlayBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const win = window as any; // Cast window to 'any'
+          if (win.openVideoModal) {
+            win.openVideoModal(videoUrl, signTitle);
+          }
+        });
+      }
+      
+      // Audio button
+      const audioBtn = card.querySelector('.audio-play-btn');
+      if (audioBtn) {
+        audioBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const audio = new Audio(videoUrl);
+          audio.play();
+        });
+      }
+    });
+  }
+  
+  // Run on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupAllVideoListeners);
+  } else {
+    setupAllVideoListeners();
+  }
+</script>
