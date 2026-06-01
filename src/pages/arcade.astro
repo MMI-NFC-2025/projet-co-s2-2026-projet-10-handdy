@@ -9,6 +9,10 @@ import PocketBase from 'pocketbase';
 import cardIcon from '../assets/icons/arcade.svg';
 import leconIcon from '../assets/icons/icon_lecon.svg';
 import arcadeIcon from '../assets/icons/icon_arcade_accueil.svg';
+import cardsImage from '../assets/images/lsf_pourquoi1.webp';
+import memoryLogo from '../assets/icons/logo_wendy.svg';
+import leconImage from '../assets/images/merci_sign.jpg';
+import associerImage from '../assets/images/vous_sign.jpg';
 
 const pb = new PocketBase('http://127.0.0.1:8090');
 
@@ -34,7 +38,7 @@ const defaultGames = [
     id: 'cards',
     title: 'Cards',
     description: 'Associe les bonnes cartes rapidement',
-    icon: cardIcon.src,
+    icon: cardsImage.src,
     soloLink: '/games/cards/solo',
     multiLink: '/games/cards/multi'
   },
@@ -42,7 +46,7 @@ const defaultGames = [
     id: 'memory',
     title: 'Memory',
     description: 'Retrouve les paires mots-signes',
-    icon: cardIcon.src,
+    icon: memoryLogo.src,
     soloLink: '/games/memory/solo',
     multiLink: '/games/memory/multi'
   },
@@ -50,7 +54,7 @@ const defaultGames = [
     id: 'lecon',
     title: 'Mode leçon',
     description: 'Apprendre des leçons pour avancer dans l\'xp',
-    icon: leconIcon.src,
+    icon: leconImage.src,
     soloLink: '/games/lecon/solo',
     multiLink: '/games/lecon/multi'
   },
@@ -58,7 +62,7 @@ const defaultGames = [
     id: 'associer',
     title: 'Associer',
     description: 'Associer les vidéos au signes',
-    icon: cardIcon.src,
+    icon: associerImage.src,
     soloLink: '/games/associer/solo',
     multiLink: '/games/associer/multi'
   }

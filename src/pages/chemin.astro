@@ -18,7 +18,7 @@ import mascotteIcon from '../assets/icons/mascotte.svg';
 import wendyLogo from '../assets/icons/logo_wendy.svg';
 
 const pb = new PocketBase('http://127.0.0.1:8090');
-const userId = 'user_id_placeholder';
+const userId = 'htmlmku9etcfiv13';
 
 interface UserData {
   level: number;
@@ -64,6 +64,16 @@ const defaultBadges: Badge[] = [
   { id: '6', name: 'Maître LSF', icon: cadenaImage.src, unlocked: false }
 ];
 
+// Mapping des icônes par défaut pour les badges
+const badgeIconMap: Record<string, string> = {
+  'série de 14 jours': flammeIcon.src,
+  '50 leçon': leconIcon.src,
+  'Novice LSF': mascotteIcon.src,
+  'série de 50 jours': cadenaImage.src,
+  '100 leçon': cadenaImage.src,
+  'Maître LSF': cadenaImage.src
+};
+
 let userData = { ...defaultUserData };
 let badges = [...defaultBadges];
 
@@ -87,12 +97,20 @@ try {
   if (badgesData && badgesData.length > 0) {
     const unlockedBadgeIds = new Set(userBadgesData?.map(ub => ub.badge) || []);
     
+    console.log('🏆 Badges from PocketBase:');
+    badgesData.forEach(badge => {
+      console.log(`  - ID: ${badge.id}, Name: ${badge.name}, Icon: ${badge.icon}`);
+    });
+    console.log('🔓 Unlocked badge IDs:', Array.from(unlockedBadgeIds));
+    
     badges = badgesData.map(badge => ({
       id: badge.id,
       name: badge.name || badge.title || 'Badge sans nom',
-      icon: badge.icon || undefined,
+      icon: badge.icon || badgeIconMap[badge.name || badge.title] || undefined,
       unlocked: unlockedBadgeIds.has(badge.id)
     }));
+    
+    console.log('🎯 Final badges array:', badges);
   }
 
   if (userGamesData && userGamesData.length > 0) {
