@@ -1,4 +1,5 @@
 ---
+import lockIcon from '../assets/icones/cadenas.svg?url';
 import mascotIcon from '../assets/icones/mascotte.svg?url';
 import profileIcon from '../assets/icones/profil.svg?url';
 import starIcon from '../assets/icones/etoile.svg?url';
@@ -7,12 +8,15 @@ import settingsIcon from '../assets/icones/paramètre.svg?url';
 import bellIcon from '../assets/icones/cloche.svg?url';
 import mailIcon from '../assets/icones/mail.svg?url';
 import Layout from '../layouts/Layout.astro';
+// 🌟 1. On importe ton composant Button
+import Button from '../components/Button.astro';
 ---
 
 <Layout>
   <svelte:fragment slot="title">Profil • Wenddy</svelte:fragment>
   <div class="bg-slate-100 min-h-screen text-slate-900 font-sans">
     <main class="max-w-md mx-auto px-4 pb-10 sm:max-w-3xl lg:max-w-4xl sm:px-6">
+      
       <section class="bg-[#FF6200] text-white rounded-b-[40px] pt-8 pb-8 px-5 shadow-orange shadow-sm sm:px-8">
         <div class="flex items-center justify-between gap-4">
           <div class="flex items-center gap-4">
@@ -21,7 +25,7 @@ import Layout from '../layouts/Layout.astro';
             </div>
             <div>
               <p class="text-sm opacity-80">Profil</p>
-              <h1 id="profileName" class="text-xl font-semibold tracking-tight sm:text-2xl">Utilisateur</h1>
+              <h1 id="profileName" class="text-xl font-semibold tracking-tight sm:text-2xl"></h1>
             </div>
           </div>
           <div class="h-14 w-14 flex items-center justify-center sm:h-16 sm:w-16">
@@ -50,7 +54,6 @@ import Layout from '../layouts/Layout.astro';
           <span><strong id="followersValue" class="text-white">0</strong> abonnés</span>
           <span><strong id="followingValue" class="text-white">0</strong> abonnements</span>
         </div>
-
       </section>
 
       <div class="mt-6 px-4 sm:px-0">
@@ -123,14 +126,30 @@ import Layout from '../layouts/Layout.astro';
         <div id="badgeGrid" class="grid grid-cols-1 gap-4 sm:grid-cols-3"></div>
       </section>
 
+      <div class="mt-8 px-4 sm:px-0">
+        <Button id="logoutBtn" type="button" class="w-full bg-red-600 text-red-50 hover:bg-red-100 shadow-none">
+          Se déconnecter
+        </Button>
+      </div>
+
     </main>
   </div>
 
-  <script type="module">
+  <script>
+    
+    import { isAuthenticated, logout, getUserProfileStats } from '../../backend/backend.mjs';
+
+    function getPersistedAuth() { try { const raw = localStorage.getItem('pb_auth'); return raw ?
+    JSON.parse(raw) : null; } catch { return null; } }
+
+    function getCurrentUser() { const auth = getPersistedAuth(); return auth?.record || auth?.model || null; }
+
     const profileNameEl = document.querySelector('#profileName');
     const xpValueEl = document.querySelector('#xpValue');
     const seriesValueEl = document.querySelector('#seriesValue');
     const badgeGrid = document.querySelector('#badgeGrid');
+    const currentUser = getCurrentUser(); if (currentUser && profileNameEl) { profileNameEl.textContent = currentUser.pseudo || currentUser.username || currentUser.email || 'Utilisateur'; }
+    
     const logoutBtn = document.querySelector('#logoutBtn');
 
     const badgeDefinitions = [
@@ -157,17 +176,7 @@ import Layout from '../layouts/Layout.astro';
       },
     ];
 
-    function getPersistedAuth() {
-      try {
-        const stored = localStorage.getItem('pb_auth');
-        if (!stored) return null;
-        return JSON.parse(stored);
-      } catch {
-        return null;
-      }
-    }
-
-    function renderBadges({ seriesCount, lessonCount, serieUnlocked, lessonUnlocked, noviceUnlocked }) {
+    function renderBadges({ seriesCount, lessonCount, serieUnlocked, lessonUnlocked, noviceUnlocked }: any) {
       if (!badgeGrid) return;
 
       badgeGrid.innerHTML = badgeDefinitions
@@ -204,42 +213,52 @@ import Layout from '../layouts/Layout.astro';
     }
 
     async function loadProfileData() {
-      const authData = getPersistedAuth();
-      const user = authData?.record || authData?.model;
-
-      if (!user?.id) {
-        localStorage.removeItem('pb_auth');
-        window.location.href = '/login';
+      // Vérifie si l'utilisateur est bien connecté via ton backend
+      if (!isAuthenticated()) {
+        if (xpValueEl) xpValueEl.textContent = '—';
+        if (seriesValueEl) seriesValueEl.textContent = '—';
+        if (badgeGrid) {
+          badgeGrid.innerHTML = '<div class="rounded-[32px] border border-slate-200 bg-white p-4 text-sm text-slate-500">Connecte-toi pour voir tes badges et tes stats.</div>';
+        }
         return;
       }
 
-      if (profileNameEl) {
-        profileNameEl.textContent = user.pseudo || user.username || user.email || 'Utilisateur';
+      // Récupère l'utilisateur
+      const user = getCurrentUser();
+      
+      // Injecte le nom
+      if (profileNameEl && user) {
+        profileNameEl.textContent = user.pseudo || user.username || 'Utilisateur';
       }
 
-      const response = await fetch(`/api/profil?userId=${encodeURIComponent(user.id)}`);
-      if (!response.ok) {
-        throw new Error('Impossible de charger les données de profil.');
+      if (user) {
+        try {
+          const stats = await getUserProfileStats(user.id);
+          
+      
+          if (xpValueEl) xpValueEl.textContent = String(stats.xpTotal);
+          if (seriesValueEl) seriesValueEl.textContent = String(stats.seriesCount);
+          renderBadges(stats);
+        } catch (error) {
+          console.error("Erreur lors du chargement des statistiques", error);
+        }
       }
-
-      const data = await response.json();
-      if (xpValueEl) xpValueEl.textContent = String(data.xpTotal ?? '0');
-      if (seriesValueEl) seriesValueEl.textContent = String(data.seriesCount ?? '0');
-
-      renderBadges(data);
     }
 
-    loadProfileData().catch((error) => {
-      console.error('Impossible de charger les badges ou les sessions PocketBase', error);
-      localStorage.removeItem('pb_auth');
-      window.location.href = '/login';
-    });
 
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
+
+        logout();
+        
+       
+        localStorage.removeItem('pocketbase_auth'); 
         localStorage.removeItem('pb_auth');
-        window.location.href = '/login';
+      
+        window.location.href = '/login'; 
       });
     }
+
+    loadProfileData();
   </script>
 </Layout>

@@ -161,8 +161,6 @@ import Button from '../components/Button.astro';
         }
 
         // 🌟 DOUBLE SAUVEGARDE MAGIQUE POUR TON PROFIL :
-        // On enregistre les données de session sous la clé 'pb_auth' attendue par ton profil,
-        // avec la structure mixte (record ET user) pour couvrir tous les cas de figure.
         if (authData) {
           localStorage.setItem('pb_auth', JSON.stringify({
             token: authData.token,
@@ -171,7 +169,6 @@ import Button from '../components/Button.astro';
           }));
         }
 
-        // Redirection vers le profil
         setTimeout(() => {
           window.location.href = '/profil';
         }, 600);
@@ -183,7 +180,6 @@ import Button from '../components/Button.astro';
       }
     });
 
-    // Redirection automatique au chargement si une session valide existe déjà
     if (isAuthenticated() || localStorage.getItem('pb_auth')) {
       window.location.href = '/profil';
     } else {

@@ -3,8 +3,6 @@ import PocketBase from 'pocketbase';
 const pbUrl = 'https://wenddy.bambou-franceschini.fr';
 const pb = new PocketBase(pbUrl);
 
-pb.authStore.modelCollection = 'utilisateurs'; 
-
 export function getFileUrl(record, filename) {
   if (!record || !filename) return null;
   return `${pbUrl}/api/files/${record.collectionId}/${record.id}/${encodeURIComponent(filename)}`;
@@ -14,10 +12,6 @@ export async function badgesAll() {
   return await pb.collection('badges').getFullList({ sort: 'nom' });
 }
 
-
-export function getCurrentUser() {
-  return pb.authStore.model;
-}
 export function isAuthenticated() {
   return pb.authStore.isValid;
 }
@@ -189,12 +183,12 @@ export async function addScore(data) {
 }
 
 export async function supportMessagesAll() {
-  return await pb.collection('support_messages').getFullList({ sort: '-created', expand: 'utilisateur' });
+  return await pb.collection('support_messages').getFullList({ sort: '-created', expand: 'utilisateurs' });
 }
 
 export async function supportMessagesByUser(userId) {
   return await pb.collection('support_messages').getFullList({
-    filter: `utilisateur="${userId}"`,
+    filter: `utilisateurs="${userId}"`,
     sort: '-created',
   });
 }
@@ -216,7 +210,6 @@ export async function usersAll() {
 }
 
 export async function addUser(data) {
-  // data: { email, password, passwordConfirm, pseudo, username, ... }
   return await pb.collection('utilisateurs').create(data);
 }
 
@@ -284,17 +277,16 @@ export async function getUserProfileStats(userId) {
 }
 
 export async function login(email, password) {
-  const auth = await pb.collection('utilisateurs').authWithPassword(email, password);
-  return auth;
+  return await pb.collection('users').authWithPassword(email.trim(), password);
 }
 
 export async function registerUser({ email, password, passwordConfirm, pseudo, username }) {
+  const user = await pb.collection('users').create({ email, password, passwordConfirm, pseudo, username });
   return await addUser({
     email,
     password,
     passwordConfirm,
-    pseudo,
-    username,
+    id: user.id,
   });
 }
 
