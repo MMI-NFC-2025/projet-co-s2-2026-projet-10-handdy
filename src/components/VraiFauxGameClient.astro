@@ -1,5 +1,14 @@
 ---
-const { questions } = Astro.props;
+// Il est recommandé de typer les props qu'on reçoit !
+interface Question {
+  id: string;
+  video?: string;
+  word?: string;
+  correct_answer: boolean;
+  question_text?: string;
+}
+
+const { questions } = Astro.props as { questions: Question[] };
 ---
 
 <div id="vrai-faux-game" class="app-container" data-questions={JSON.stringify(questions)}>
@@ -25,7 +34,6 @@ const { questions } = Astro.props;
 
         <div class="media-container">
             <video id="sign-video" autoplay loop muted playsinline>
-                <source src="" type="video/mp4" />
                 Votre navigateur ne supporte pas la vidéo.
             </video>
         </div>
@@ -45,7 +53,7 @@ const { questions } = Astro.props;
     :global(body) {
         margin: 0;
         padding: 0;
-        background-color: #ffffff; /* Fond blanc autour du conteneur mobile sur desktop */
+        background-color: #ffffff;
     }
 
     .app-container {
@@ -53,7 +61,7 @@ const { questions } = Astro.props;
         max-width: 450px;
         margin: 0 auto;
         background-color: #EAECEF;
-        min-height: 100dvh; /* Utilisation de dvh pour les navigateurs mobiles */
+        min-height: 100dvh;
         padding: 20px;
         display: flex;
         flex-direction: column;
@@ -109,16 +117,14 @@ const { questions } = Astro.props;
         width: 40px;
         transition: left 0.3s ease;
         left: 0%;
-        /* Cache le texte "Masc" de la balise alt si l'image est introuvable */
         color: transparent; 
     }
 
-    /* Conteneur principal qui va prendre l'espace restant pour pousser les boutons en bas */
     .content-wrapper {
         flex-grow: 1;
         display: flex;
         flex-direction: column;
-        justify-content: center; /* Centre la vidéo et la question verticalement */
+        justify-content: center;
     }
 
     .question-text {
@@ -135,7 +141,7 @@ const { questions } = Astro.props;
         overflow: hidden;
         margin-bottom: 20px;
         width: 100%;
-        aspect-ratio: 4 / 3; /* Format standard, modifie si tes vidéos sont en 16/9 */
+        aspect-ratio: 4 / 3;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -144,7 +150,7 @@ const { questions } = Astro.props;
     #sign-video {
         width: 100%;
         height: 100%;
-        object-fit: contain; /* S'assure que la vidéo n'est pas coupée */
+        object-fit: contain;
     }
 
     .word-proposal {
@@ -166,7 +172,7 @@ const { questions } = Astro.props;
         display: flex;
         justify-content: space-between;
         gap: 15px;
-        margin-top: auto; /* Pousse les boutons tout en bas du conteneur parent */
+        margin-top: auto;
         padding-bottom: 10px;
     }
 
@@ -191,19 +197,15 @@ const { questions } = Astro.props;
 </style>
 
 <script>
-    // Logique interactive côté client
     document.addEventListener('DOMContentLoaded', () => {
         const gameContainer = document.getElementById('vrai-faux-game');
         
-        // On vérifie que le container et les données existent avant de parser
         if (!gameContainer || !gameContainer.dataset.questions) return;
 
-        // Récupération des données passées par Astro
         const questions = JSON.parse(gameContainer.dataset.questions);
         let currentIndex = 0;
         let score = 0;
 
-        // Elements du DOM (On ajoute "as HTMLElement" pour rassurer TypeScript)
         const videoEl = document.getElementById('sign-video') as HTMLVideoElement;
         const wordEl = document.getElementById('proposed-word') as HTMLElement;
         const counterEl = document.getElementById('question-counter') as HTMLElement;
@@ -224,13 +226,19 @@ const { questions } = Astro.props;
 
             const currentQ = questions[currentIndex];
 
-            // Mise à jour du texte et de la vidéo
-            wordEl.textContent = currentQ.word;
-            questionTextEl.textContent = currentQ.question_text;
+            // Mise à jour du texte
+            wordEl.textContent = currentQ.word || '';
+            questionTextEl.textContent = currentQ.question_text || '';
             
+            // Mise à jour de la vidéo
             if (currentQ.video) {
                 videoEl.src = currentQ.video;
+                videoEl.load(); // Indispensable pour forcer le rechargement de la source
                 videoEl.play().catch(e => console.log("Autoplay bloqué", e));
+            } else {
+                // Si la question n'a pas de vidéo, on vide la source
+                videoEl.removeAttribute('src');
+                videoEl.load();
             }
 
             // Mise à jour de la barre de progression
@@ -240,7 +248,6 @@ const { questions } = Astro.props;
             progressMascot.style.left = `${progressPercentage}%`;
         }
 
-        // On précise que isTrue est un booléen (true ou false)
         function handleAnswer(isTrue: boolean) {
             const currentQ = questions[currentIndex];
             if (currentQ.correct_answer === isTrue) {
@@ -254,11 +261,10 @@ const { questions } = Astro.props;
             updateUI();
         }
 
-        // Écouteurs d'événements (On s'assure que les boutons existent avant d'ajouter l'écouteur)
         if (btnVrai) btnVrai.addEventListener('click', () => handleAnswer(true));
         if (btnFaux) btnFaux.addEventListener('click', () => handleAnswer(false));
         if (closeBtn) closeBtn.addEventListener('click', () => {
-            window.location.href = '/'; // Retour à l'accueil
+            window.location.href = '/'; 
         });
 
         // Initialiser le premier affichage

@@ -62,22 +62,12 @@ try {
     console.log('📋 First record:', questionsData[0]);
     
     questions = questionsData.map((q: any) => {
-      console.log('Processing record:', { 
-        id: q.id, 
-        questions: q.questions, 
-        select: q.select, 
-        bool: q.bool,
-        relation: q.relation,
-        expand: q.expand
-      });
-      
       // Construire l'URL de la vidéo depuis la relation
       let videoUrl = undefined;
       if (q.expand && q.expand.relation && q.expand.relation.video) {
         const videoFile = q.expand.relation.video;
         const relationId = q.relation;
         videoUrl = `http://127.0.0.1:8090/api/files/signs/${relationId}/${videoFile}`;
-        console.log('✅ Video URL:', videoUrl);
       }
       
       return {
@@ -89,8 +79,6 @@ try {
       };
     });
     
-    console.log('✅ Questions loaded:', questions.length);
-    console.log('Parsed questions:', questions);
   } else {
     console.warn('⚠️ No questions found in PocketBase, using test data');
     questions = testQuestions;
@@ -98,22 +86,16 @@ try {
 
 } catch (error: any) {
   console.error('❌ Could not connect to PocketBase');
-  console.error('Status:', error.status);
-  console.error('Message:', error.message);
-  console.error('Full error:', error);
   console.warn('📝 Using test data instead...');
   questions = testQuestions;
 }
-
-console.log('🎯 Final questions count:', questions.length);
 ---
-
-<VraiFauxGameClient {questions} />
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jeu Vrai ou Faux</title>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
