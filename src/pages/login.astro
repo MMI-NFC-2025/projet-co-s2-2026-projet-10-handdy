@@ -1,0 +1,165 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+---
+
+<Layout>
+  <main class="min-h-screen bg-slate-50 px-6 py-16 sm:px-10 lg:px-16">
+    <div class="mx-auto w-full max-w-xl rounded-[32px] bg-white p-8 shadow-xl shadow-slate-200">
+      <div class="mb-8 flex flex-col gap-2 text-center">
+        <p class="text-sm uppercase tracking-[0.35em] text-[#FF6200]">Bienvenue</p>
+        <h1 class="text-3xl font-black text-slate-950 sm:text-4xl">Connexion / Inscription</h1>
+        <p class="mx-auto max-w-md text-sm leading-6 text-slate-600">Crée ton compte ou connecte-toi pour commencer à utiliser Wenddy.</p>
+      </div>
+
+      <div class="mb-6 flex items-center justify-center gap-3 rounded-full bg-slate-100 p-1">
+        <button id="loginModeBtn" type="button" class="flex-1 rounded-full bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition">Se connecter</button>
+        <button id="signupModeBtn" type="button" class="flex-1 rounded-full px-4 py-3 text-sm font-semibold text-slate-700 transition">Créer un compte</button>
+      </div>
+
+      <form id="authForm" class="space-y-5">
+        <div id="nameField" class="hidden">
+          <label class="block text-sm font-semibold text-slate-700">Pseudo</label>
+          <input id="usernameInput" type="text" placeholder="Ton pseudo" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#FF6200] focus:ring-2 focus:ring-[#FF6200]/20" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700">Email</label>
+          <input id="emailInput" type="email" placeholder="Ton email" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#FF6200] focus:ring-2 focus:ring-[#FF6200]/20" required />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700">Mot de passe</label>
+          <input id="passwordInput" type="password" placeholder="Ton mot de passe" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#FF6200] focus:ring-2 focus:ring-[#FF6200]/20" required />
+        </div>
+
+        <div id="confirmPasswordField" class="hidden">
+          <label class="block text-sm font-semibold text-slate-700">Confirmer le mot de passe</label>
+          <input id="confirmPasswordInput" type="password" placeholder="Confirme ton mot de passe" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#FF6200] focus:ring-2 focus:ring-[#FF6200]/20" />
+        </div>
+
+        <div id="formMessage" class="min-h-[1.5rem] text-sm text-red-600"></div>
+
+        <Button type="submit" class="w-full rounded-full bg-[#FF6200] text-white px-6 py-3 text-sm font-semibold">Se connecter</Button>
+      </form>
+
+      <div class="mt-4 text-center text-sm text-slate-600">
+        <button id="switchModeLink" type="button" class="font-semibold text-[#FF6200] underline-offset-4 hover:underline">Créer un compte</button>
+      </div>
+
+      <div class="mt-8 flex justify-center">
+        <Button href="/" variant="secondary" class="rounded-full px-8 py-3">Retour à l'accueil</Button>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import PocketBase from 'https://cdn.jsdelivr.net/npm/pocketbase@0.27.0/dist/pocketbase.es.js';
+    const pb = new PocketBase('http://127.0.0.1:8090');
+
+    const loginModeBtn = document.querySelector('#loginModeBtn');
+    const signupModeBtn = document.querySelector('#signupModeBtn');
+    const switchModeLink = document.querySelector('#switchModeLink');
+    const authForm = document.querySelector('#authForm');
+    const nameField = document.querySelector('#nameField');
+    const confirmPasswordField = document.querySelector('#confirmPasswordField');
+    const submitButton = authForm.querySelector('button[type="submit"]');
+    const formMessage = document.querySelector('#formMessage');
+    const usernameInput = document.querySelector('#usernameInput');
+    const emailInput = document.querySelector('#emailInput');
+    const passwordInput = document.querySelector('#passwordInput');
+    const confirmPasswordInput = document.querySelector('#confirmPasswordInput');
+
+    let currentMode = 'login';
+
+    function setMode(mode) {
+      currentMode = mode;
+      const isLogin = mode === 'login';
+      nameField.classList.toggle('hidden', isLogin);
+      confirmPasswordField.classList.toggle('hidden', isLogin);
+      loginModeBtn.classList.toggle('bg-white', isLogin);
+      loginModeBtn.classList.toggle('text-slate-900', isLogin);
+      signupModeBtn.classList.toggle('bg-white', !isLogin);
+      signupModeBtn.classList.toggle('text-slate-900', !isLogin);
+      submitButton.textContent = isLogin ? 'Se connecter' : 'Créer un compte';
+      switchModeLink.textContent = isLogin ? 'Créer un compte' : 'Se connecter';
+      formMessage.textContent = '';
+    }
+
+    function showMessage(message, type = 'error') {
+      formMessage.textContent = message;
+      formMessage.classList.toggle('text-red-600', type === 'error');
+      formMessage.classList.toggle('text-green-600', type === 'success');
+    }
+
+    loginModeBtn.addEventListener('click', () => setMode('login'));
+    signupModeBtn.addEventListener('click', () => setMode('signup'));
+    switchModeLink.addEventListener('click', () => setMode(currentMode === 'login' ? 'signup' : 'login'));
+
+    async function authenticate(payload) {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(text.replace(/<[^>]+>/g, '').trim() || 'Erreur serveur inattendue.');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la connexion.');
+      }
+      return data;
+    }
+
+    authForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        showMessage('Veuillez remplir l’email et le mot de passe.');
+        return;
+      }
+
+      const payload = {
+        mode: currentMode,
+        email,
+        password,
+      };
+
+      if (currentMode === 'signup') {
+        const username = usernameInput.value.trim() || email.split('@')[0];
+        const passwordConfirm = confirmPasswordInput.value;
+
+        if (!passwordConfirm) {
+          showMessage('Veuillez confirmer votre mot de passe.');
+          return;
+        }
+        if (password !== passwordConfirm) {
+          showMessage('Les mots de passe ne correspondent pas.');
+          return;
+        }
+
+        payload.username = username;
+        payload.passwordConfirm = passwordConfirm;
+      }
+
+      try {
+        const auth = await authenticate(payload);
+        pb.authStore.save(auth.token, auth.record);
+        showMessage(currentMode === 'login' ? 'Connexion réussie ! Redirection...' : 'Compte créé avec succès ! Redirection...', 'success');
+        setTimeout(() => window.location.href = '/', 600);
+      } catch (error) {
+        showMessage(error.message || 'Email ou mot de passe invalide.');
+      }
+    });
+
+    setMode('login');
+  </script>
+</Layout>

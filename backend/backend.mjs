@@ -1,6 +1,6 @@
-import PocketBase from 'pocketbase_0.38.2_windows_amd64';
+import PocketBase from 'pocketbase';
 
-const pbUrl = 'http://127.0.0.1:8090';
+const pbUrl = 'https://wenddy.bambou-franceschini.fr/_/';
 const pb = new PocketBase(pbUrl);
 
 export function getFileUrl(record, filename) {
@@ -202,6 +202,16 @@ export async function usersAll() {
 export async function login(email, password) {
   const auth = await pb.collection('users').authWithPassword(email, password);
   return auth;
+}
+
+export async function registerUser({ email, password, passwordConfirm, username, pseudo }) {
+  return await pb.collection('users').create({
+    email,
+    password,
+    passwordConfirm,
+    username,
+    pseudo,
+  });
 }
 
 export function logout() {
