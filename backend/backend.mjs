@@ -1,7 +1,9 @@
 import PocketBase from 'pocketbase';
 
-const pbUrl = 'https://wenddy.bambou-franceschini.fr/_/';
+const pbUrl = 'https://wenddy.bambou-franceschini.fr';
 const pb = new PocketBase(pbUrl);
+
+pb.authStore.modelCollection = 'utilisateurs'; 
 
 export function getFileUrl(record, filename) {
   if (!record || !filename) return null;
@@ -10,6 +12,20 @@ export function getFileUrl(record, filename) {
 
 export async function badgesAll() {
   return await pb.collection('badges').getFullList({ sort: 'nom' });
+}
+
+
+export function getCurrentUser() {
+  return pb.authStore.model;
+}
+export function isAuthenticated() {
+  return pb.authStore.isValid;
+}
+export function getAuthToken() {
+  return pb.authStore.token;
+}
+export function setAuth(token, model) {
+  pb.authStore.save(token, model);
 }
 
 export async function badgeById(id) {
@@ -192,25 +208,93 @@ export async function updateSupportMessage(id, data) {
 }
 
 export async function userById(id) {
-  return await pb.collection('users').getOne(id);
+  return await pb.collection('utilisateurs').getOne(id);
 }
 
 export async function usersAll() {
-  return await pb.collection('users').getFullList({ sort: 'created' });
+  return await pb.collection('utilisateurs').getFullList({ sort: 'created' });
+}
+
+export async function addUser(data) {
+  // data: { email, password, passwordConfirm, pseudo, username, ... }
+  return await pb.collection('utilisateurs').create(data);
+}
+
+export async function userGamesByUser(userId) {
+  return await pb.collection('user_games').getFullList({ filter: `user="${userId}"`, sort: 'date_session' });
+}
+
+function normalizeDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+}
+
+function getDailyKeys(records) {
+  const set = new Set();
+  for (const record of records) {
+    const date = normalizeDate(record.date_session || record.created);
+    if (date) {
+      set.add(`${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`);
+    }
+  }
+  return [...set]
+    .map((value) => {
+      const [year, month, day] = value.split('-').map(Number);
+      return new Date(Date.UTC(year, month - 1, day));
+    })
+    .sort((a, b) => a.getTime() - b.getTime());
+}
+
+function computeMaxConsecutiveDays(dates) {
+  if (!dates.length) return 0;
+  let maxStreak = 1;
+  let currentStreak = 1;
+
+  for (let i = 1; i < dates.length; i += 1) {
+    const previous = dates[i - 1].getTime();
+    const current = dates[i].getTime();
+    if (current === previous + 86400000) {
+      currentStreak += 1;
+    } else if (current !== previous) {
+      currentStreak = 1;
+    }
+    maxStreak = Math.max(maxStreak, currentStreak);
+  }
+
+  return maxStreak;
+}
+
+export async function getUserProfileStats(userId) {
+  const sessions = await userGamesByUser(userId);
+  const lessonCount = sessions.length;
+  const xpTotal = sessions.reduce((sum, session) => sum + (Number(session.xp_gagne) || 0), 0);
+  const uniqueDates = getDailyKeys(sessions);
+  const seriesCount = computeMaxConsecutiveDays(uniqueDates);
+
+  return {
+    sessions,
+    lessonCount,
+    xpTotal,
+    seriesCount,
+    serieUnlocked: seriesCount >= 14,
+    lessonUnlocked: lessonCount >= 50,
+    noviceUnlocked: seriesCount >= 14 && lessonCount >= 50,
+  };
 }
 
 export async function login(email, password) {
-  const auth = await pb.collection('users').authWithPassword(email, password);
+  const auth = await pb.collection('utilisateurs').authWithPassword(email, password);
   return auth;
 }
 
-export async function registerUser({ email, password, passwordConfirm, username, pseudo }) {
-  return await pb.collection('users').create({
+export async function registerUser({ email, password, passwordConfirm, pseudo, username }) {
+  return await addUser({
     email,
     password,
     passwordConfirm,
-    username,
     pseudo,
+    username,
   });
 }
 

@@ -1,20 +1,33 @@
 ---
 const { badgeId, title, unlocked = false, lockedIcon, unlockedIcon, description = '' } = Astro.props;
 ---
+
 <div
   data-badge={badgeId}
   data-badge-title={title}
   data-locked-icon={lockedIcon}
   data-unlocked-icon={unlockedIcon}
-  class={
-    `aspect-square w-full rounded-[32px] p-4 text-center shadow-sm transition ${
-      unlocked ? 'bg-orange-50' : 'bg-white'
-    }`
-  }
+  class={`aspect-square w-full rounded-[32px] p-4 text-center shadow-sm transition ${
+    unlocked ? 'bg-orange-50' : 'bg-white'
+  }`}
 >
-  <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-3xl bg-slate-100 mx-auto overflow-hidden transition-all">
-    <img data-badge-img src={unlocked ? unlockedIcon : lockedIcon} alt={title} class="h-8 w-8 object-contain" />
+  <div
+    class={`mb-3 flex h-14 w-14 items-center justify-center rounded-3xl mx-auto overflow-hidden transition-all ${
+      unlocked ? 'bg-amber-100' : 'bg-slate-100 grayscale opacity-60'
+    }`}
+  >
+    <img
+      data-badge-img
+      src={unlocked ? unlockedIcon : lockedIcon}
+      alt={title}
+      class="h-8 w-8 object-contain"
+    />
   </div>
-  <p class="text-sm font-semibold text-slate-900">{title}</p>
-  {description ? <p class="mt-2 text-xs text-slate-500">{description}</p> : null}
+  <p class={`text-sm font-semibold ${unlocked ? 'text-slate-900' : 'text-slate-400'}`}>
+    {title}
+  </p>
+  {description && (
+    <p class="mt-2 text-xs text-slate-500">{description}</p>
+  )}
 </div>
+
