@@ -1,28 +1,20 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Footer from '../components/Footer.astro'; // Import de ton composant Footer !
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 
-// L'URL de ton PocketBase local
 const pocketbaseHost = "http://127.0.0.1:8090";
-
-let signe = {
-  nom: "...",
-  description: "",
-  videoUrl: ""
-};
+let signes = [];
 
 try {
-  // On récupère un enregistrement depuis ta collection "signs"
-  const response = await fetch(`${pocketbaseHost}/api/collections/signs/records?limit=1`);
+  const response = await fetch(`${pocketbaseHost}/api/collections/signs/records?limit=5`);
   const data = await response.json();
   
   if (data.items && data.items.length > 0) {
-    const record = data.items[0];
-    signe.nom = record.nom;
-    signe.description = record.description;
-    
-    // Génération de l'URL absolue pour la vidéo
-    signe.videoUrl = `${pocketbaseHost}/api/files/${record.collectionId}/${record.id}/${record.video}`;
+    signes = data.items.map((record: any) => ({
+      nom: (record.nom || "Inconnu").replace(/_/g, ' '), 
+      videoUrl: `${pocketbaseHost}/api/files/${record.collectionId}/${record.id}/${record.video}`
+    }));
   }
 } catch (error) {
   console.error("Impossible de joindre PocketBase :", error);
@@ -30,89 +22,130 @@ try {
 ---
 
 <Layout title="Mode Leçon - Wenddy">
-  <main class="min-h-screen bg-[#E5E7EB] flex flex-col justify-between font-sans overflow-x-hidden">
+  <div class="min-h-screen bg-[#F3F4F6] flex flex-col font-sans overflow-x-hidden">
     
-    <!-- En-tête : Croix et Barre de progression -->
-    <!-- Sur PC, on centre et on limite la largeur (max-w-5xl) pour que ça ne s'étire pas trop -->
-    <header class="bg-white rounded-b-3xl py-6 px-4 shadow-sm relative z-10">
-      <div class="max-w-5xl mx-auto relative flex flex-col items-center">
-        <!-- Bouton Quitter -->
-        <a href="/" class="absolute left-0 top-0 text-black hover:text-[#FF6B00] transition-colors">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </a>
-        
-        <!-- Texte Question -->
-        <p class="text-sm md:text-base font-bold mb-3 text-gray-700">Question 3/7</p>
-        
-        <!-- Barre de progression -->
-        <!-- Tu pourras la remplacer par <ProgressBar /> plus tard si tu le souhaites -->
-        <div class="w-full max-w-md h-4 bg-gray-200 rounded-full relative">
-          <div class="h-full bg-[#FF6B00] rounded-full w-2/5 relative">
-            <!-- Raton laveur -->
-            <div class="absolute -right-4 -top-3 w-10 h-10 bg-white rounded-full border-2 border-black flex items-center justify-center shadow-sm">
-              🦊
+    <Header />
+
+    <main class="flex-grow flex flex-col justify-between">
+      
+     <!-- Barre de progression -->
+      <div class="bg-white rounded-b-3xl py-6 px-4 shadow-sm relative z-10">
+        <div class="max-w-5xl mx-auto relative flex flex-col items-center">
+          <a href="/" class="absolute left-0 top-0 text-black hover:text-[#FF6200] transition-colors" title="Quitter la leçon">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </a>
+          
+          <p id="compteur-question" class="text-sm md:text-base font-bold mb-3 text-gray-700 font-cal-sans">Question 1/5</p>
+          
+          <div class="w-full max-w-md h-4 bg-gray-200 rounded-full relative">
+            <div id="barre-progression" class="h-full bg-[#FF6200] rounded-full transition-all duration-300" style="width: 20%;">
+              <!-- Raton laveur parfaitement centré sur le bout de la barre -->
+              <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 flex items-center justify-center">
+                <img src="/src/assets/mascotte.svg" alt="Mascotte Wenddy" class="w-full h-full drop-shadow-md object-contain" onerror="this.style.display='none'"/>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </header>
 
-    <!-- Contenu principal : Flex Column sur mobile, Flex Row sur PC (md:) -->
-    <section class="flex-grow flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 px-4 py-12 max-w-5xl mx-auto w-full">
-      
-      <!-- BLOC GAUCHE : La Vidéo -->
-      <div class="w-full max-w-sm md:w-1/2 bg-white rounded-2xl p-2 shadow-sm border border-gray-200 aspect-[4/5] md:aspect-square lg:aspect-[4/5] overflow-hidden flex items-center justify-center">
-        {signe.videoUrl ? (
-          <video 
-            src={signe.videoUrl} 
-            class="w-full h-full object-cover rounded-xl"
-            autoplay 
-            loop 
-            muted 
-            playsinline
-          ></video>
-        ) : (
-          <p class="text-gray-400 font-medium">Vidéo introuvable</p>
-        )}
-      </div>
-
-      <!-- BLOC DROIT : Informations et Boutons -->
-      <div class="w-full max-w-sm md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
-        <!-- Emoji main -->
-        <div class="mb-6">
-          <img src="/src/assets/waving-hand.png" alt="Coucou" class="w-20 h-20 md:w-24 md:h-24 drop-shadow-md" />
-        </div>
+      <!-- Zone de Leçon Principale -->
+      <section class="flex-grow flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 px-6 py-12 max-w-5xl mx-auto w-full">
         
-        <!-- Titre dynamique -->
-        <h1 class="text-3xl md:text-5xl font-black text-black mb-4 md:mb-6 leading-tight">
-          Comment signer <br class="hidden md:block" />
-          <span class="text-[#FF6B00] capitalize">{signe.nom}</span> ?
-        </h1>
-
-        <!-- Description -->
-        {signe.description && (
-          <p class="text-gray-600 text-base md:text-lg mb-8 max-w-sm">
-            {signe.description}
-          </p>
-        )}
-
-        <!-- Boutons de navigation de la leçon -->
-        <div class="flex w-full gap-4 mt-auto md:mt-8">
-          <button class="flex-1 py-3 px-4 bg-white border-2 border-gray-200 text-black font-bold rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
-            Précédent
-          </button>
-          <button class="flex-1 py-3 px-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-colors shadow-sm">
-            Suivant
-          </button>
+        <!-- Vidéo LSF (Sans interface et en lecture automatique) -->
+        <div class="w-full max-w-sm md:w-1/2 bg-white rounded-3xl p-2 shadow-md border border-gray-100 aspect-[4/5] md:aspect-square lg:aspect-[4/5] overflow-hidden flex items-center justify-center relative">
+          <video id="video-player" class="w-full h-full object-cover rounded-2xl bg-black" loop muted playsinline autoplay></video>
+          
+          <div id="video-error" class="hidden absolute inset-0 bg-gray-100 flex-col items-center justify-center text-center p-4 rounded-2xl z-20">
+            <span class="text-3xl mb-2">⚠️</span>
+            <p class="text-sm text-gray-500 font-medium font-alexandria">La vidéo n'a pas pu charger.</p>
+          </div>
         </div>
-      </div>
 
-    </section>
+        <!-- Contenu Texte -->
+        <div class="w-full max-w-sm md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
+          
+          <!-- Titre unifié en noir, description retirée -->
+          <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-slate-950 mb-8 md:mb-12 leading-tight font-cal-sans">
+            Comment signer <br class="hidden md:block" />
+            <span id="titre-signe" class="capitalize text-[#FF6200]">Chargement...</span> ?
+          </h1>
 
-    <!-- Footer : J'utilise ton composant Footer.astro ! -->
+          <!-- Boutons de navigation -->
+          <div class="flex w-full gap-4 mt-auto">
+            <button id="btn-precedent" class="flex-1 py-4 px-4 bg-white border-2 border-gray-200 text-slate-950 font-bold font-alexandria rounded-2xl hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50">Précédent</button>
+            <button id="btn-suivant" class="flex-1 py-4 px-4 bg-slate-950 text-white font-bold font-alexandria rounded-2xl hover:bg-slate-800 transition-colors shadow-sm">Suivant</button>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
     <Footer />
-    
-  </main>
+  </div>
 </Layout>
+
+<script define:vars={{ signes }}>
+  if (signes && signes.length > 0) {
+    let currentIndex = 0;
+    const totalQuestions = 5;
+
+    const videoPlayer = document.getElementById('video-player');
+    const videoError = document.getElementById('video-error');
+    const titreSigne = document.getElementById('titre-signe');
+    const btnSuivant = document.getElementById('btn-suivant');
+    const btnPrecedent = document.getElementById('btn-precedent');
+    const compteur = document.getElementById('compteur-question');
+    const barre = document.getElementById('barre-progression');
+
+    function updateUI() {
+      const currentSigne = signes[currentIndex];
+      
+      // Correction automatique des accents pour "A Bientot"
+      let nomAffiche = currentSigne.nom;
+      if (nomAffiche.toLowerCase() === 'a bientot') {
+        nomAffiche = 'À Bientôt';
+      }
+      titreSigne.innerText = nomAffiche;
+      
+      videoPlayer.src = currentSigne.videoUrl;
+      videoPlayer.load(); 
+      videoPlayer.play().catch(() => console.log("Lecture automatique bloquée"));
+      
+      videoPlayer.onerror = () => { videoError.classList.remove('hidden'); videoError.classList.add('flex'); };
+      videoPlayer.onloadeddata = () => { videoError.classList.add('hidden'); videoError.classList.remove('flex'); };
+
+      const numeroQuestion = currentIndex + 1;
+      compteur.innerText = `Question ${numeroQuestion}/${totalQuestions}`;
+      barre.style.width = `${(numeroQuestion / totalQuestions) * 100}%`;
+
+      btnPrecedent.disabled = currentIndex === 0;
+      
+      if (currentIndex === totalQuestions - 1 || currentIndex === signes.length - 1) {
+        btnSuivant.innerText = "Terminer";
+        btnSuivant.classList.add("bg-[#FF6200]", "hover:bg-orange-600");
+        btnSuivant.classList.remove("bg-slate-950", "hover:bg-slate-800");
+      } else {
+        btnSuivant.innerText = "Suivant";
+        btnSuivant.classList.add("bg-slate-950", "hover:bg-slate-800");
+        btnSuivant.classList.remove("bg-[#FF6200]", "hover:bg-orange-600");
+      }
+    }
+
+    btnSuivant.addEventListener('click', () => {
+      if (currentIndex < Math.min(signes.length, totalQuestions) - 1) {
+        currentIndex++;
+        updateUI();
+      } else {
+        window.location.href = '/progres'; 
+      }
+    });
+
+    btnPrecedent.addEventListener('click', () => {
+      if (currentIndex > 0) { currentIndex--; updateUI(); }
+    });
+
+    updateUI();
+  } else {
+    document.getElementById('titre-signe').innerText = "Erreur";
+  }
+</script>

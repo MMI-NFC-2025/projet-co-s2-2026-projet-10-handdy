@@ -1,242 +1,245 @@
 ---
 import Button from './Button.astro';
-import FeatureCard from './FeatureCard.astro';
-import GameCard from './GameCard.astro';
 import heroPhone from '../assets/mode_arcade_landing_page.svg';
 import parcoursImage from '../assets/parcour_utilisateur_landing_page.svg';
 import wavesBig from '../assets/vagues_grandes.svg';
 import wavesSmall from '../assets/vagues_petites.svg';
 import logo from '../assets/logo_wendy.svg';
+
+// Import de TOUTES tes nouvelles icônes
+import iconBook from '../assets/bookopen.svg';
+import iconGamepad from '../assets/gamepad2.svg';
+import mascotte from '../assets/mascotte.svg';
+import iconCartes from '../assets/cartes1.svg';
+import iconMemory from '../assets/div.svg';
+import iconVraiFaux from '../assets/vraifaux1.svg';
+import iconCamera from '../assets/camera.svg';
+import iconWifiOff from '../assets/wifioff.svg';
 ---
 
-<main class="min-h-screen bg-white text-slate-950">
+<main class="min-h-screen bg-white text-slate-950 font-sans overflow-x-hidden">
+  
+  <!-- En-tête : Logo et Bouton -->
+  <nav class="relative z-50 w-full bg-white flex items-center justify-between py-6 px-6 md:px-12 max-w-[1440px] mx-auto">
+    <img src={logo.src} alt="Wenddy Logo" class="h-12 md:h-16 w-auto" />
+    <Button 
+      href="#play" 
+      variant="secondary" 
+      class="bg-black text-white rounded-full px-8 py-3 md:py-4 text-sm md:text-xl font-bold hover:bg-slate-800 transition whitespace-nowrap"
+    >
+      Commencer à jouer !
+    </Button>
+  </nav>
+
   <!-- Hero Section -->
-  <section class="relative bg-[#FF6200] text-white" style="width: 100%; height: 850px; overflow: hidden;">
-    <!-- Wave SVG -->
-    <img src={wavesBig.src} alt="" class="absolute pointer-events-none" style="right: 0; top: 0; width: 559px; height: 850px;" />
+  <section class="relative bg-[#FF6200] overflow-hidden w-full flex items-center min-h-[600px] md:h-[750px]">
+    <img src={wavesBig.src} alt="" class="absolute right-0 top-0 h-full w-auto object-cover object-left pointer-events-none hidden md:block" />
 
-    <!-- Header with Logo and Button -->
-    <div class="relative w-full h-[155px] bg-white flex items-center justify-between px-6 md:px-10 z-20">
-      <img src={logo.src} alt="Wendy Logo" class="h-[124px] w-[271px]" />
-      <Button href="#play" variant="secondary" class="bg-black text-white rounded-full h-[94px] w-[429px] text-[36px] font-semibold hover:bg-slate-900 flex items-center justify-center">Commencer à jouer !</Button>
+    <div class="relative z-10 w-full max-w-[1440px] mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center h-full">
+      <div class="w-full md:w-[60%] pt-12 pb-8 md:py-0">
+        <h1 class="text-4xl md:text-5xl lg:text-[64px] leading-[1.1] font-black text-white mb-6 font-cal-sans">
+          Apprendre la langue des<br class="hidden lg:block"/> signes différemment !
+        </h1>
+        <p class="text-lg md:text-2xl text-white font-medium leading-relaxed max-w-xl font-alexandria">
+          Mini-jeux, défis multijoueurs et progression fun pour maîtriser la langue des signes française
+        </p>
+      </div>
+
+      <div class="w-full md:w-[40%] h-[400px] md:h-full relative mt-8 md:mt-0 flex justify-center md:block">
+        <img src={parcoursImage.src} alt="Parcours" class="absolute z-10 w-[160px] md:w-[240px] drop-shadow-2xl transform -rotate-[7deg] right-[45%] md:right-[55%] top-[10%] md:top-[25%]" />
+        <img src={heroPhone.src} alt="Mode arcade" class="absolute z-20 w-[150px] md:w-[220px] drop-shadow-2xl transform rotate-[12deg] right-[15%] md:right-[15%] top-[25%] md:top-[40%]" />
+      </div>
     </div>
+  </section>
 
-    <!-- Content Area -->
-    <div class="relative w-full z-10" style="height: 695px;">
-      <div class="h-full flex items-center px-6 md:px-10">
-        <div class="space-y-4 md:space-y-6 max-w-xl">
-          <h1 class="text-5xl md:text-6xl leading-tight font-black text-white font-cal-sans" style="line-height: 1.2;">Apprendre la langue des<br />signes différemment !</h1>
-          <p class="text-base md:text-lg leading-relaxed text-white font-alexandria font-normal" style="line-height: 1.6;">Mini-jeux, défis multijoueurs et progression fun pour<br />maîtriser la langue des signes française</p>
+  <!-- Section: Cartes de Mode (Même hauteur garantie avec tes icônes) -->
+  <section class="max-w-6xl mx-auto px-6 py-20">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-stretch">
+      
+      <!-- Carte Mode Entraînement -->
+      <div class="h-full flex flex-col bg-[#FF6200] text-white p-8 md:p-12 rounded-[2rem] shadow-xl transform hover:-translate-y-2 transition duration-300">
+        <!-- Boîte noire avec l'icône Livre -->
+        <div class="mb-6 md:mb-8 inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-3xl bg-black shadow-md">
+          <img src={iconBook.src} alt="Livre" class="w-8 h-8 md:w-10 md:h-10 object-contain" />
         </div>
+        
+        <h2 class="text-2xl font-bold mb-4 font-cal-sans">Mode Entraînement</h2>
+        <p class="mb-8 font-medium font-alexandria text-lg">Un parcours pédagogique par paliers thématiques</p>
+        
+        <ul class="mt-auto space-y-3 text-sm opacity-90 list-disc list-inside font-alexandria">
+          <li>Mini-jeux éducatifs (Memory, Cards, QCM)</li>
+          <li>Système de vies et streak</li>
+          <li>Mode hors ligne disponible</li>
+        </ul>
       </div>
 
-      <!-- Phone Images -->
-      <img src={heroPhone.src} alt="Mode arcade" class="absolute pointer-events-none z-30" style="right: 357px; top: 213px; width: 136px; height: 281px; transform: rotate(12.75deg); border: 4px solid: 20px; 0 8px 16px rgba(0,0,0,0.3);" />
-      <img src={parcoursImage.src} alt="Parcours" class="absolute pointer-events-none z-20" style="right: 201px; top: 277px; width: 154px; height: 317px; transform: rotate(-7.31deg); border: 3px solid  16px;  0 8px 16px rgba(0,0,0,0.3);" />
+      <!-- Carte Mode Arcade -->
+      <div class="h-full flex flex-col bg-[#FF6200] text-white p-8 md:p-12 rounded-[2rem] shadow-xl transform hover:-translate-y-2 transition duration-300">
+        <!-- Boîte noire avec l'icône Manette -->
+        <div class="mb-6 md:mb-8 inline-flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-3xl bg-black shadow-md">
+          <img src={iconGamepad.src} alt="Manette" class="w-8 h-8 md:w-10 md:h-10 object-contain" />
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-4 font-cal-sans">Mode Arcade</h2>
+        <p class="mb-8 font-medium font-alexandria text-lg">Action et compétition !<br/>Joue en solo ou en multijoueur.</p>
+        
+        <ul class="mt-auto space-y-3 text-sm opacity-90 list-disc list-inside font-alexandria">
+          <li>Mini-jeux dynamiques et compétitifs</li>
+          <li>Mode Battle multijoueur en temps réel</li>
+          <li>Classements et scores</li>
+          <li>Éliminations progressives</li>
+        </ul>
+      </div>
+
     </div>
   </section>
 
-  <!-- Mode Cards Section -->
-  <section class="relative px-6 py-16 md:py-24 lg:py-32 md:px-10" style="min-height: 950px;">
-    <div class="relative" style="height: 750px; max-width: 1440px; margin: 0 auto;">
-      <!-- Card 1 - Position X=170, Y=1079 relative to container -->
-      <div class="absolute" style="left: 170px; top: 0;">
-        <FeatureCard 
-          icon="📖"
-          title="Mode Entraînement" 
-          description="Un parcours pédagogique par paliers thématiques"
-          features={["Mini-jeux éducatifs (Memory, Cards, Quiz)", "Système de vies et streak", "Mode hors ligne disponible"]}
-        />
+  <!-- Diviseur Raton Laveur -->
+  <div class="flex items-center justify-center gap-4 md:gap-8 my-8 px-6">
+    <img src={mascotte.src} alt="Mascotte Wenddy" class="w-16 h-16 md:w-20 md:h-20 transform -scale-x-100 object-contain" />
+    <div class="bg-black text-white font-bold py-4 px-8 md:px-16 rounded-full text-xl md:text-3xl text-center shadow-lg font-cal-sans whitespace-nowrap">
+      3 mini-jeux variés
+    </div>
+    <img src={mascotte.src} alt="Mascotte Wenddy" class="w-16 h-16 md:w-20 md:h-20 object-contain" />
+  </div>
+
+  <!-- Section: Les 3 Mini-Jeux -->
+  <section id="play" class="max-w-5xl mx-auto px-6 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+      
+      <div class="bg-[#FF6200] text-white p-8 rounded-[1.5rem] flex flex-col items-center justify-center text-center shadow-md transform hover:scale-105 transition min-h-[200px]">
+        <img src={iconCartes.src} alt="Cards" class="h-20 w-20 mx-auto mb-4 object-contain" />
+        <h3 class="font-bold mb-2 text-xl font-cal-sans">Cards</h3>
+        <p class="text-xs font-medium font-alexandria">Associe les bonnes cartes</p>
       </div>
 
-      <!-- Card 2 - Position X=850, Y=1079 relative to container -->
-      <div class="absolute" style="left: 850px; top: 0;">
-        <FeatureCard 
-          icon="🎮"
-          title="Mode Arcade" 
-          description="Action et compétition ! Joue en solo ou en multijoueur."
-          features={["Mini-jeux dynamiques et compétitifs", "Mode Battle multijoueur en temps réel", "Classements et scores", "Éliminations progressives"]}
-        />
+      <div class="bg-[#FF6200] text-white p-8 rounded-[1.5rem] flex flex-col items-center justify-center text-center shadow-md transform hover:scale-105 transition min-h-[200px]">
+        <!-- Le 'transform scale-150' zoome l'image pour compenser le vide autour du cerveau -->
+        <img src={iconMemory.src} alt="Memory" class="h-20 w-20 mx-auto mb-4 object-contain transform scale-150" />
+        <h3 class="font-bold mb-2 text-xl font-cal-sans">Memory</h3>
+        <p class="text-xs font-medium font-alexandria">Associe mots et signes</p>
       </div>
+
+      <div class="bg-[#FF6200] text-white p-8 rounded-[1.5rem] flex flex-col items-center justify-center text-center shadow-md transform hover:scale-105 transition min-h-[200px]">
+        <img src={iconVraiFaux.src} alt="Vrai/Faux" class="h-20 w-20 mx-auto mb-4 object-contain" />
+        <h3 class="font-bold mb-2 text-xl font-cal-sans">Vrai/Faux</h3>
+        <p class="text-xs font-medium font-alexandria">Réponds rapidement</p>
+      </div>
+
     </div>
   </section>
-
-  <!-- Mini Games Section -->
-  <section id="play" class="relative px-6 py-16 md:py-24 lg:py-32 md:px-10">
-    <div class="flex justify-center mb-12">
-      <!-- Button 5 minis-jeux variés: X=364, Y=1839, W=712, H=94 -->
-      <div class="flex items-center justify-center gap-6" style="width: 712px; height: 94px; background-color: #000000; border-radius: 50px;">
-        <div class="text-white font-cal-sans" style="font-size: 48px; line-height: 1;">5 minis-jeux variés</div>
-      </div>
+  <!-- Section: Fonctionnalités Uniques -->
+  <section id="features" class="py-16 md:py-24 overflow-hidden relative">
+    <div class="max-w-7xl mx-auto px-6 mb-12">
+      <h2 class="text-4xl md:text-5xl lg:text-[64px] font-black text-center font-cal-sans text-slate-950">Fonctionnalités uniques</h2>
     </div>
-
-    <!-- Mini Games Grid -->
-    <div class="mx-auto max-w-8xl">
-      <div class="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-        <GameCard title="Cards" description="Apprends par flashcards visuelles." />
-        <GameCard title="Memory" description="Teste ta mémoire des signes." />
-        <GameCard title="Mode Héros" description="Des aventures guidées et défis quotidiens." />
-        <GameCard title="Traduction" description="Convertis des mots en gestes facilement." />
-        <GameCard title="Vitesse" description="Défie le chrono et améliore ta réactivité." />
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section id="features" class="relative overflow-hidden bg-white py-16 md:py-24 lg:py-32">
-    <div class="mx-auto max-w-7xl px-6 md:px-10">
-      <h2 class="text-center text-[64px] font-normal text-slate-950 mb-12 md:mb-16 font-cal-sans">Fonctionnalités uniques</h2>
-    </div>
-
+    
     <div class="relative w-full">
-      <div class="relative bg-[#FF6200] text-white overflow-hidden" style="width: 100%; height: 546px;">
-        <!-- Vague petite en bas à gauche -->
-        <img src={wavesSmall.src} alt="" class="pointer-events-none absolute" style="left: -150px; bottom: -50px; width: 700px; height: 700px; transform: scaleX(-1) scaleY(-1);" />
+      <div class="bg-[#FF6200] py-24 px-6 relative overflow-hidden rounded-[3rem] md:rounded-[6rem] mx-4 md:mx-12" style="min-height: 500px;">
+        
+        <img src={wavesSmall.src} alt="" class="pointer-events-none absolute left-[-100px] bottom-[-50px] opacity-40 transform scale-x-[-1] scale-y-[-1] w-[500px]" />
+        <img src={wavesSmall.src} alt="" class="pointer-events-none absolute right-0 top-0 opacity-40 w-[400px]" />
 
-        <!-- Vague petite en haut à droite -->
-        <img src={wavesSmall.src} alt="" class="pointer-events-none absolute" style="right: 0; top: 0; width: 650px; height: 650px;" />
-
-        <!-- Conteneur pour les ronds -->
-        <div class="absolute inset-0 flex items-center justify-center gap-20 px-6 md:px-10">
-          <!-- Rond 1: Miroir Interactif -->
-          <div class="flex flex-col items-center justify-center rounded-full bg-white text-black" style="width: 314px; height: 314px; flex-shrink: 0;">
-            <div class="mb-4 text-4xl">📷</div>
-            <h3 class="text-[20px] font-bold mb-3 text-center px-6 font-cal-sans">Miroir Interactif</h3>
-            <p class="text-[16px] leading-relaxed text-center px-6 font-alexandria">Comprendre les gestes avec la modalité en temps réel via la caméra</p>
+        <div class="absolute inset-0 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24 px-6 z-10">
+          
+          <!-- Rond 1: Miroir -->
+          <div class="bg-white text-black p-8 rounded-full w-64 h-64 md:w-[320px] md:h-[320px] flex flex-col items-center justify-center text-center shadow-2xl transform hover:scale-105 transition">
+            <div class="mb-4">
+              <!-- Icône Appareil Photo / Miroir -->
+              <img src={iconCamera.src} alt="Miroir" class="w-12 h-12 md:w-16 md:h-16 object-contain" />
+            </div>
+            <h3 class="font-bold text-lg md:text-xl mb-3 font-cal-sans">Miroir Interactif</h3>
+            <p class="text-xs md:text-sm text-gray-800 px-6 font-alexandria font-medium leading-relaxed">
+              Compare tes gestes avec le modèle en temps réel via ta caméra
+            </p>
           </div>
 
-          <!-- Rond 2: Mode Hors Ligne -->
-          <div class="flex flex-col items-center justify-center rounded-full bg-white text-black" style="width: 314px; height: 314px; flex-shrink: 0;">
-            <div class="mb-4 text-4xl">📡</div>
-            <h3 class="text-[20px] font-bold mb-3 text-center px-6 font-cal-sans">Mode Hors Ligne</h3>
-            <p class="text-[16px] leading-relaxed text-center px-6 font-alexandria">Télécharge les packs de lignes pour progresser partout facilement</p>
+          <!-- Rond 2: Hors Ligne -->
+          <div class="bg-white text-black p-8 rounded-full w-64 h-64 md:w-[320px] md:h-[320px] flex flex-col items-center justify-center text-center shadow-2xl transform hover:scale-105 transition">
+            <div class="mb-4">
+              <!-- Icône Nuage / Wifi Off -->
+              <img src={iconWifiOff.src} alt="Hors Ligne" class="w-12 h-12 md:w-16 md:h-16 object-contain" />
+            </div>
+            <h3 class="font-bold text-lg md:text-xl mb-3 font-cal-sans">Mode Hors Ligne</h3>
+            <p class="text-xs md:text-sm text-gray-800 px-6 font-alexandria font-medium leading-relaxed">
+              Télécharge des packs de leçons pour apprendre partout facilement
+            </p>
           </div>
+          
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="mx-auto max-w-7xl px-6 py-12 md:py-16 lg:py-20 md:px-10">
+  <!-- CTA Section Footer -->
+  <section class="max-w-7xl mx-auto px-6 py-16 mb-12">
     <div class="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
-      <div class="flex-1">
-        <img src={logo.src} alt="Wendy Logo" class="h-12 md:h-14 w-auto mb-4" />
-        <h2 class="text-3xl md:text-4xl lg:text-5xl font-black text-slate-950 font-cal-sans">Prêt à maîtriser la LSF ?</h2>
+      <div class="flex-1 text-center md:text-left">
+        <img src={logo.src} alt="Wenddy Logo" class="h-12 md:h-16 w-auto mb-6 mx-auto md:mx-0" />
+        <h2 class="text-4xl md:text-5xl lg:text-[64px] font-black text-slate-950 font-cal-sans leading-tight">Prêt à maîtriser la LSF ?</h2>
       </div>
+      
       <div class="flex-1 w-full">
-        <div class="bg-slate-950 rounded-[28px] px-6 md:px-8 py-6 md:py-8">
-          <p class="text-white text-sm md:text-base mb-4 font-medium">Rejoins la communauté Wendy et commence ton aventure des aujourd'hui!</p>
-          <form class="flex flex-col sm:flex-row gap-3">
-            <input type="email" placeholder="Ton email" class="flex-1 rounded-full border-none bg-white/95 px-5 py-3 text-slate-950 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6200]" />
-            <Button type="submit" class="bg-[#FF6200] text-white hover:bg-orange-600 rounded-full px-6 py-3 font-semibold text-sm md:text-base">Commencer gratuitement</Button>
+        <!-- Conteneur du formulaire -->
+        <div class="bg-slate-950 rounded-[28px] px-8 py-10 shadow-2xl transition-all duration-500" id="newsletter-container">
+          
+          <p id="newsletter-text" class="text-white text-base md:text-lg mb-6 font-medium font-alexandria text-center md:text-left">
+            Rejoins la communauté Wenddy et commence ton aventure dès aujourd'hui !
+          </p>
+          
+          <!-- Le Formulaire -->
+          <form id="newsletter-form" class="flex flex-col sm:flex-row gap-4">
+            <input 
+              type="email" 
+              id="newsletter-email"
+              required
+              placeholder="Ton email" 
+              class="flex-1 rounded-full border-none bg-white px-6 py-4 text-slate-950 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#FF6200] font-alexandria" 
+            />
+            <Button type="submit" class="bg-[#FF6200] hover:bg-orange-600 text-white rounded-full px-8 py-4 font-bold transition transform hover:scale-105 shadow-md border-none whitespace-nowrap">
+              Commencer
+            </Button>
           </form>
+
+          <!-- Le Message de succès (Caché par défaut) -->
+          <div id="newsletter-success" class="hidden text-center md:text-left">
+            <div class="text-[#FF6200] text-4xl mb-2">✅</div>
+            <h3 class="text-xl font-bold text-white font-cal-sans">Inscription validée !</h3>
+            <p class="text-white/80 font-alexandria mt-2">Merci de nous avoir rejoints. Prépare-toi à découvrir la LSF différemment !</p>
+          </div>
+          
         </div>
       </div>
     </div>
   </section>
+
 </main>
+<script>
+  // On attend que la page soit bien chargée
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('newsletter-form');
+    const emailInput = document.getElementById('newsletter-email');
+    const successMsg = document.getElementById('newsletter-success');
+    const textMsg = document.getElementById('newsletter-text');
 
-      <header class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <img src={logo.src} alt="Handdy Logo" class="h-12 w-auto" />
-          <div class="space-y-1">
-          </div>
-        </div>
-        <Button href="#play" variant="secondary" class="hidden md:inline-flex">Commencer à jouer !</Button>
-      </header>
-
-      <section class="mt-12 grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div class="space-y-8">
-          <div class="space-y-6">
-            <h1 class="max-w-2xl text-4xl font-black leading-tight tracking-tight sm:text-5xl">Apprendre la langue des signes facilement !</h1>
-            <p class="max-w-xl text-base leading-8 text-white/90 sm:text-lg">Mini-jeux multijoueurs, défis progressifs et parcours ludiques pour maîtriser la langue des signes française.</p>
-          </div>
-          <div class="flex flex-wrap gap-4">
-            <Button href="#features" variant="secondary">Découvrir l’app</Button>
-          </div>
-        </div>
-
-        <div class="relative mx-auto max-w-[520px]">
-          <div class="absolute -left-10 top-10 hidden h-36 w-36 rounded-full bg-white/15 blur-3xl md:block" />
-          <div class="relative overflow-hidden rounded-[36px] border border-white/20 bg-white/10 p-4 shadow-[0_40px_80px_rgba(0,0,0,0.16)] backdrop-blur-xl">
-            <img src={heroPhone.src} alt="Aperçu de l’application Handdy" class="w-full rounded-[32px] object-cover" />
-          </div>
-          <div class="pointer-events-none absolute -bottom-10 right-4 hidden h-40 w-40 opacity-90 md:block">
-            <img src={parcoursImage.src} alt="Illustration parcours utilisateur" class="h-full w-full object-contain" />
-          </div>
-        </div>
-      </section>
-    </div>
-  </section>
-
-  <section id="play" class="mx-auto max-w-7xl px-6 py-14 md:px-10 lg:py-20">
-    <div class="grid gap-6 lg:grid-cols-2">
-      <FeatureCard title="Mode Entraînement" description="Un parcours pédagogique par paliers thématiques pour apprendre à ton rythme." />
-      <FeatureCard title="Mode Arcade" description="Action et compétition : joue seul ou à plusieurs avec des défis chronométrés." />
-    </div>
-
-    <div class="mt-10 flex flex-col items-center justify-between gap-4 rounded-full bg-slate-950 px-6 py-5 text-white shadow-[0_30px_80px_rgba(0,0,0,0.18)] md:flex-row">
-      <p class="text-sm font-semibold uppercase tracking-[0.35em]">5 mini-jeux variés</p>
-      <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-3xl bg-white/10"></div>
-        <div class="h-10 w-10 rounded-3xl bg-white/10"></div>
-      </div>
-    </div>
-
-    <div class="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-5">
-      <GameCard title="Cards" description="Apprends par flashcards visuelles." />
-      <GameCard title="Memory" description="Teste ta mémoire des signes." />
-      <GameCard title="Mode Héros" description="Des aventures guidées et défis quotidiens." />
-      <GameCard title="Traduction" description="Convertis des mots en gestes facilement." />
-      <GameCard title="Vitesse" description="Défie le chrono et améliore ta réactivité." />
-    </div>
-  </section>
-
-  <section id="features" class="relative overflow-hidden bg-slate-50 px-6 py-16 md:px-10 lg:py-24">
-    <div class="absolute right-0 top-0 hidden h-72 w-72 rounded-full bg-[#FF6200]/10 blur-3xl md:block"></div>
-    <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-      <div class="space-y-6">
-        <p class="text-sm font-semibold uppercase tracking-[0.35em] text-[#FF6200]">Fonctionnalités uniques</p>
-        <h2 class="max-w-xl text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Des outils pensés pour progresser en LSF</h2>
-        <p class="max-w-xl text-base leading-8 text-slate-600">Une expérience immersive, même hors ligne, avec des modes conçus pour t’aider à mémoriser et pratiquer au quotidien.</p>
-      </div>
-
-      <div class="space-y-6">
-        <div class="rounded-[36px] bg-[#FF6200] p-8 text-white shadow-[0_40px_120px_rgba(255,98,0,0.18)]">
-          <div class="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-black text-white">
-            <span class="text-base font-black">i</span>
-          </div>
-          <h3 class="text-2xl font-bold">Mode immersif</h3>
-          <p class="mt-4 text-sm leading-7 text-white/90">Entraînement avec retours visuels et progression étape par étape pour ancrer chaque signe.</p>
-        </div>
-
-        <div class="rounded-[36px] bg-white p-8 shadow-[0_30px_80px_rgba(0,0,0,0.08)]">
-          <div class="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#FF6200] text-white">
-            <span class="text-base font-black">☁</span>
-          </div>
-          <h3 class="text-2xl font-bold text-slate-950">Mode Hors Ligne</h3>
-          <p class="mt-4 text-sm leading-7 text-slate-600">Télécharge ton parcours pour réviser sans connexion et garder ta progression.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="bg-slate-950 px-6 py-16 text-white md:px-10 lg:py-20">
-    <div class="mx-auto max-w-7xl rounded-[36px] bg-slate-900/90 p-8 shadow-[0_40px_120px_rgba(0,0,0,0.26)] sm:p-12">
-      <div class="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
-        <div class="space-y-4">
-          <div class="inline-flex h-12 items-center gap-3 rounded-3xl bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.35em] text-white/90">Handdy</div>
-          <div>
-            <h2 class="text-3xl font-black tracking-tight sm:text-4xl">Prêt à maîtriser la LSF ?</h2>
-            <p class="mt-2 max-w-2xl text-base leading-8 text-white/70">Reçois des conseils gratuits et sois notifié du lancement de la version complète.</p>
-          </div>
-        </div>
-
-        <form class="flex flex-col gap-4 sm:flex-row">
-          <input type="email" placeholder="Ton email" class="min-w-0 rounded-full border border-white/10 bg-white/10 px-5 py-3 text-sm text-white placeholder:text-white/50 outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20" />
-          <Button type="submit">Essayer la version gratuite</Button>
-        </form>
-      </div>
-    </div>
-  </section>
-</main>
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        // Empêche la page de se rafraîchir
+        e.preventDefault();
+        
+        // Vérifie qu'il y a bien quelque chose dans l'input
+        if (emailInput && (emailInput as HTMLInputElement).value) {
+          // Animation fictive : on cache le formulaire et on affiche le succès
+          form.style.display = 'none';
+          if (textMsg) textMsg.style.display = 'none';
+          
+          if (successMsg) {
+            successMsg.classList.remove('hidden');
+            // Optionnel : petite animation d'apparition
+            successMsg.classList.add('animate-fade-in'); 
+          }
+        }
+      });
+    }
+  });
+</script>

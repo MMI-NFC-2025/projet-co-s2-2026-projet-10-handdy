@@ -1,128 +1,46 @@
 ---
-interface Props {
+export interface Props {
   title: string;
-  image?: string;
-  videoUrl?: string;
-  description?: string;
-  hasAudio?: boolean;
-  hasDownload?: boolean;
+  image: string;
+  description: string;
+  videoUrl: string;
 }
 
-const { 
-  title, 
-  image, 
-  videoUrl, 
-  description = "Vie quotidienne",
-  hasAudio = true,
-  hasDownload = true 
-} = Astro.props;
-
-const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
+const { title, image, description, videoUrl } = Astro.props;
 ---
 
-<div
-  data-searchable
-  class="bg-white rounded-2xl border-2 border-orange-300 overflow-hidden shadow-md hover:shadow-lg transition duration-200 flex flex-col h-full hover:-translate-y-1 sign-card"
-  data-card-id={cardId}
-  data-video-url={videoUrl}
-  data-sign-title={title}
->
-  <!-- Image with Play Button Overlay -->
-  <div class="aspect-square bg-gradient-to-br from-orange-100 to-orange-50 overflow-hidden flex items-center justify-center border-b-2 border-orange-300 relative group">
+<div class="sign-card bg-white border border-gray-200 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col" data-video-url={videoUrl} data-sign-title={title}>
+  
+  <!-- Zone image / miniature cliquable pour lancer la vidéo -->
+  <div class="relative aspect-[4/3] bg-black group cursor-pointer video-overlay-btn">
     {image ? (
-      <img src={image} alt={title} class="w-full h-full object-cover" />
+      <img src={image} alt={title} class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
     ) : (
-      <div class="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-white text-xs font-semibold">
-        ◻
+      <div class="w-full h-full flex items-center justify-center text-gray-400">
+        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
       </div>
     )}
     
-    <!-- Play Button Overlay - appears on hover -->
-    {videoUrl && (
-      <button
-        class="video-overlay-btn absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition duration-200 cursor-pointer"
-        type="button"
-        title="Voir le signe en grand"
-      >
-        <div class="bg-orange-500 hover:bg-orange-600 rounded-full p-4 transition duration-200 opacity-0 group-hover:opacity-100 transform group-hover:scale-110">
-          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z"></path>
-          </svg>
-        </div>
-      </button>
-    )}
+    <!-- Bouton Play géant au survol -->
+    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+       <svg class="w-16 h-16 text-white ml-2 drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </div>
   </div>
 
-  <!-- Content -->
-  <div class="p-4 md:p-5 flex-grow flex flex-col justify-between gap-4">
-    <!-- Title and Description -->
+  <!-- Contenu texte et actions -->
+  <div class="p-5 flex-grow flex flex-col justify-between">
     <div>
-      <h3 class="font-bold text-base md:text-lg text-gray-900 mb-1">
-        {title}
-      </h3>
-      <p class="text-xs md:text-sm text-gray-600">
-        {description}
-      </p>
+      <h3 class="text-xl font-bold text-gray-900 capitalize font-cal-sans">{title}</h3>
+      <p class="text-sm text-gray-500 mt-1 font-alexandria line-clamp-1">{description}</p>
     </div>
-
-    <!-- Buttons -->
-    <div class="flex flex-col gap-3">
-      <!-- Primary Button - Play Video -->
-      {videoUrl ? (
-        <button
-          class="video-play-btn w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-full transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base shadow-sm hover:shadow-md active:scale-95"
-          type="button"
-          title="Lancer la vidéo du signe"
-        >
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z"></path>
-          </svg>
-          Voir le signe
-        </button>
-      ) : (
-        <button
-          disabled
-          class="w-full bg-gray-400 text-white font-semibold py-2.5 px-4 rounded-full transition duration-200 flex items-center justify-center gap-2 text-sm md:text-base shadow-sm cursor-not-allowed opacity-60"
-          type="button"
-        >
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z"></path>
-          </svg>
-          Voir le signe
-        </button>
-      )}
-
-      <!-- Secondary Buttons - Audio & Download -->
-      <div class="flex gap-2">
-        {hasAudio && videoUrl && (
-          <button
-            class="audio-play-btn flex-1 border-2 border-gray-300 hover:border-orange-500 text-gray-700 hover:text-orange-500 font-semibold py-2.5 px-3 rounded-full transition duration-200 flex items-center justify-center hover:bg-orange-50 active:scale-95"
-            type="button"
-            title="Écouter le signe"
-          >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 3C6.48 3 2 7.48 2 13s4.48 10 10 10 10-4.48 10-10S17.52 3 12 3zm-2 15l-5-5h4V7h2v6h4l-5 5z"></path>
-            </svg>
-          </button>
-        )}
-        {hasDownload && videoUrl && (
-          <a
-            href={videoUrl}
-            download={title}
-            class="flex-1 border-2 border-gray-300 hover:border-orange-500 text-gray-700 hover:text-orange-500 font-semibold py-2.5 px-3 rounded-full transition duration-200 flex items-center justify-center hover:bg-orange-50 active:scale-95"
-            title="Télécharger le signe"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              ></path>
-            </svg>
-          </a>
-        )}
-      </div>
+    
+    <!-- Ligne de l'icône de téléchargement -->
+    <div class="mt-4 flex justify-end items-center border-t border-gray-100 pt-4">
+      <a href={videoUrl} target="_blank" download={`${title}.mp4`} class="p-2 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-black transition-colors" title="Télécharger la vidéo">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+      </a>
     </div>
   </div>
 </div>

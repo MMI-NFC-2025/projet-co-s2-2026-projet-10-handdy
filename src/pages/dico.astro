@@ -1,12 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import SearchBar from '../components/SearchBar.astro';
 import CategoryCard from '../components/CategoryCard.astro';
 import SignCard from '../components/SignCard.astro';
 import VideoModal from '../components/VideoModal.astro';
 import Footer from '../components/Footer.astro';
-import { Image } from 'astro:assets';
+import logo from '../assets/logo_wendy.svg';
+import iconeDico from '../assets/image22.svg';
+
+
+// Récupération des icônes
 import iconePolitesse from '../assets/icone_politesse.svg';
 import iconeEmotions from '../assets/icone_emotions.svg';
 import iconeAlimentation from '../assets/icone_pomme.svg';
@@ -14,7 +16,6 @@ import iconeFamille from '../assets/icone_famille.svg';
 import iconeVerbes from '../assets/icone_casque.svg';
 import iconeQuotidien from '../assets/icone_arbre.svg';
 
-// Récupérer les données de PocketBase
 const POCKETBASE_URL = 'http://127.0.0.1:8090/api';
 
 interface Sign {
@@ -34,7 +35,6 @@ interface Category {
   keywords: string[];
 }
 
-// Catégories avec les icônes et mots-clés pour le mappage
 const categories: Category[] = [
   { id: 'politesse', nom: 'Politesse', icon: iconePolitesse, keywords: ['politesse', 'bonjour', 'merci', 'aurevoir', 'bonsoir', "s'il vous plaît"] },
   { id: 'emotions', nom: 'Emotions', icon: iconeEmotions, keywords: ['emotion', 'heureux', 'triste', 'colère', 'peur', 'joie'] },
@@ -44,22 +44,16 @@ const categories: Category[] = [
   { id: 'quotidien', nom: 'Quotidien', icon: iconeQuotidien, keywords: ['jour', "aujourd'hui", 'hier', 'demain', 'temps', 'heure', 'semaine', 'lentement', 'rapidement'] },
 ];
 
-// Fonction pour catégoriser un signe
 function categorizeSign(sign: Sign): string {
   const signName = (sign.nom || '').toLowerCase();
-  
   for (const category of categories) {
     for (const keyword of category.keywords) {
-      if (signName.includes(keyword.toLowerCase())) {
-        return category.id;
-      }
+      if (signName.includes(keyword.toLowerCase())) return category.id;
     }
   }
-  
-  return 'quotidien'; // catégorie par défaut
+  return 'quotidien';
 }
 
-// Fonction pour obtenir l'URL de l'image
 function getImageUrl(sign: Sign, baseUrl: string = POCKETBASE_URL): string {
   if (sign.miniature && sign.collectionId) {
     return `${baseUrl}/files/${sign.collectionId}/${sign.id}/${sign.miniature}`;
@@ -67,7 +61,6 @@ function getImageUrl(sign: Sign, baseUrl: string = POCKETBASE_URL): string {
   return '';
 }
 
-// Fonction pour obtenir l'URL de la vidéo
 function getVideoUrl(sign: Sign, baseUrl: string = POCKETBASE_URL): string {
   if (sign.video && sign.collectionId) {
     return `${baseUrl}/files/${sign.collectionId}/${sign.id}/${sign.video}`;
@@ -80,84 +73,118 @@ let signCategories: Map<string, string> = new Map();
 let error: string | null = null;
 
 try {
-  // Récupérer tous les signes
   const signsResponse = await fetch(`${POCKETBASE_URL}/collections/signs/records?perPage=500`);
-  
-  if (!signsResponse.ok) {
-    throw new Error(`Erreur ${signsResponse.status}: ${signsResponse.statusText}`);
-  }
-  
+  if (!signsResponse.ok) throw new Error(`Erreur ${signsResponse.status}`);
   const signsData = await signsResponse.json();
   signs = signsData.items || [];
   
-  // Pré-calculer les catégories pour chaque signe
   signs.forEach((sign) => {
-    const category = categorizeSign(sign);
-    signCategories.set(sign.id, category);
+    signCategories.set(sign.id, categorizeSign(sign));
   });
 } catch (err) {
-  error = err instanceof Error ? err.message : 'Erreur inconnue lors de la récupération des données';
-  console.error('Erreur PocketBase:', error);
+  error = err instanceof Error ? err.message : 'Erreur inconnue';
 }
 ---
-  <div class="min-h-screen bg-white flex flex-col">
-    <Header />
-    <SearchBar placeholder="Recherchez un signe" />
 
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
+<Layout title="Dictionnaire LSF - Wenddy">
+  <div class="min-h-screen bg-[#F3F4F6] flex flex-col font-sans overflow-x-hidden">
+    
+    <header class="bg-[#FF6200] rounded-b-[2rem] md:rounded-b-[3rem] pt-6 pb-12 px-6 md:px-12 shadow-sm relative z-20">
+      <div class="max-w-7xl mx-auto flex flex-col gap-8">
+        
+        <div class="flex justify-between items-center">
+          <a href="/">
+            <img src={logo.src} alt="Wenddy" class="h-10 md:h-14 w-auto" />
+          </a>
+          <button class="text-black hover:opacity-70 transition">
+            <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+
+        <h1 class="text-white text-3xl md:text-5xl lg:text-6xl font-black font-cal-sans flex items-center gap-3">
+          Dictionnaire LSF 
+          <img src={iconeDico.src} alt="Icône dictionnaire" class="w-10 h-10 md:w-16 md:h-16 object-contain" />
+        </h1>
+        
+      </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-10 md:py-16">
+      
+      <div class="w-full mb-12 md:mb-16">
+        <div class="bg-white rounded-full flex items-center px-6 py-4 md:py-5 shadow-sm border border-gray-200 focus-within:ring-2 focus-within:ring-[#FF6200] transition-all">
+          <svg class="w-6 h-6 text-gray-400 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input 
+            type="text" 
+            id="dico-search-input"
+            placeholder="Recherchez un signe" 
+            class="w-full bg-transparent outline-none text-slate-900 font-alexandria placeholder:text-gray-400 text-lg md:text-xl" 
+          />
+        </div>
+      </div>
+
       {error && (
-        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6">
+        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-8">
           <p><strong>Attention:</strong> {error}</p>
         </div>
       )}
 
-      <!-- Categories Section -->
-      <section class="mb-12 md:mb-16">
-        <h2 class="text-2xl md:text-3xl font-bold font-cal-sans text-gray-900 mb-6 md:mb-8">
+      <section class="mb-16 md:mb-20">
+        <h2 class="text-3xl md:text-4xl font-bold font-cal-sans text-slate-950 mb-8">
           Catégories
         </h2>
         
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+        <div class="flex flex-wrap gap-4 md:gap-6" id="category-filters">
+          <div class="category-btn cursor-pointer transition-all duration-300 transform hover:scale-105 opacity-100 ring-2 ring-[#FF6200] ring-offset-2 rounded-2xl md:rounded-3xl bg-white w-[100px] h-[100px] md:w-[130px] md:h-[130px] flex-shrink-0" data-category="all">
+            <div class="border border-gray-100 rounded-2xl md:rounded-3xl p-2 flex flex-col items-center justify-center h-full shadow-sm">
+              <span class="text-3xl md:text-4xl mb-2">🌍</span>
+              <span class="font-bold text-slate-900 text-xs md:text-sm font-cal-sans text-center">Toutes</span>
+            </div>
+          </div>
+
           {categories.map((category) => (
-            <CategoryCard
-              title={category.nom}
-              icon={category.icon.src}
-            />
+            <div class="category-btn cursor-pointer transition-all duration-300 transform hover:scale-105 opacity-60 hover:opacity-100 rounded-2xl md:rounded-3xl bg-white w-[100px] h-[100px] md:w-[130px] md:h-[130px] flex-shrink-0" data-category={category.id}>
+              <div class="border border-gray-100 rounded-2xl md:rounded-3xl p-2 flex flex-col items-center justify-center h-full shadow-sm">
+                 <img src={category.icon.src} alt={category.nom} class="w-8 h-8 md:w-12 md:h-12 mb-2 object-contain" />
+                 <span class="font-bold text-slate-900 text-xs md:text-sm font-cal-sans text-center truncate w-full px-1">{category.nom}</span>
+              </div>
+            </div>
           ))}
         </div>
       </section>
 
-      <!-- Signs Section -->
       <section>
-        <h2 class="text-2xl md:text-3xl font-bold font-cal-sans text-gray-900 mb-6 md:mb-8">
+        <h2 class="text-3xl md:text-4xl font-bold font-cal-sans text-slate-950 mb-8">
           Signes
         </h2>
 
         {signs.length > 0 ? (
           <>
-            <div id="signs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div id="signs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
               {signs.map((sign) => (
-                <div data-sign={sign.id} data-category={signCategories.get(sign.id) || 'quotidien'}>
+                <div class="sign-item w-full h-full" data-sign={sign.id} data-category={signCategories.get(sign.id) || 'quotidien'} data-title={(sign.nom || '').toLowerCase()}>
                   <SignCard
-                    title={sign.nom}
+                    title={sign.nom.replace(/_/g, ' ')}
                     image={getImageUrl(sign)}
-                    description={sign.description || 'Langue des signes française'}
+                    description={sign.description || 'Signe LSF'}
                     videoUrl={getVideoUrl(sign)}
                   />
                 </div>
               ))}
             </div>
-            <div 
-              id="no-results"
-              class="hidden text-center text-gray-500 py-12"
-            >
-              <p class="text-lg">Aucun signe ne correspond à votre recherche.</p>
+            
+            <div id="no-results" class="hidden text-center text-gray-500 py-16 md:py-24 bg-white rounded-3xl border border-gray-100 mt-8 shadow-sm">
+              <span class="text-6xl block mb-4">🔍</span>
+              <p class="text-2xl font-bold font-cal-sans text-slate-900">Oups, aucun signe trouvé !</p>
+              <p class="text-base font-alexandria mt-2">Essayez de chercher un autre mot ou changez de catégorie.</p>
             </div>
           </>
         ) : (
-          <p class="text-center text-gray-500 py-12">
-            {error ? 'Impossible de charger les signes' : 'Aucun signe disponible'}
-          </p>
+          <p class="text-center text-gray-500 py-12">Aucun signe disponible</p>
         )}
       </section>
     </main>
@@ -165,63 +192,84 @@ try {
     <Footer />
     <VideoModal />
   </div>
-
-  <style>
-    :global(body) {
-      background-color: #f9fafb;
-    }
-  </style>
+</Layout>
 
 <script>
-  // Setup event listeners for all video play buttons
   function setupAllVideoListeners() {
     document.querySelectorAll('.sign-card').forEach(card => {
       const videoUrl = card.getAttribute('data-video-url');
       const signTitle = card.getAttribute('data-sign-title');
-      
       if (!videoUrl || !signTitle) return;
       
-      // Main play button
-      const playBtn = card.querySelector('.video-play-btn');
-      if (playBtn) {
-        playBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const win = window as any; // Cast window to 'any' to avoid TS errors
-          if (win.openVideoModal) {
-            win.openVideoModal(videoUrl, signTitle);
-          }
-        });
-      }
-      
-      // Overlay button on image
       const overlayBtn = card.querySelector('.video-overlay-btn');
       if (overlayBtn) {
         overlayBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const win = window as any; // Cast window to 'any'
-          if (win.openVideoModal) {
-            win.openVideoModal(videoUrl, signTitle);
-          }
-        });
-      }
-      
-      // Audio button
-      const audioBtn = card.querySelector('.audio-play-btn');
-      if (audioBtn) {
-        audioBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const audio = new Audio(videoUrl);
-          audio.play();
+          const win = window as any;
+          if (win.openVideoModal) win.openVideoModal(videoUrl, signTitle);
         });
       }
     });
   }
+
+  function setupSearchAndFilters() {
+    const searchInput = document.getElementById('dico-search-input') as HTMLInputElement;
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    const signItems = document.querySelectorAll('.sign-item');
+    const noResults = document.getElementById('no-results');
+    
+    let currentSearch = '';
+    let currentCategory = 'all';
+
+    function filterSigns() {
+      let visibleCount = 0;
+      signItems.forEach((item) => {
+        const element = item as HTMLElement;
+        const title = element.getAttribute('data-title') || '';
+        const category = element.getAttribute('data-category') || '';
+        
+        const matchesSearch = title.includes(currentSearch);
+        const matchesCategory = currentCategory === 'all' || category === currentCategory;
+        
+        if (matchesSearch && matchesCategory) {
+          element.style.display = 'block';
+          visibleCount++;
+        } else {
+          element.style.display = 'none';
+        }
+      });
+      if (noResults) noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        currentSearch = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        filterSigns();
+      });
+    }
+
+    categoryBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentCategory = btn.getAttribute('data-category') || 'all';
+        categoryBtns.forEach(b => {
+          b.classList.remove('opacity-100', 'ring-2', 'ring-[#FF6200]', 'ring-offset-2');
+          b.classList.add('opacity-60');
+        });
+        btn.classList.remove('opacity-60');
+        btn.classList.add('opacity-100', 'ring-2', 'ring-[#FF6200]', 'ring-offset-2');
+        filterSigns();
+      });
+    });
+  }
   
-  // Run on page load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupAllVideoListeners);
+    document.addEventListener('DOMContentLoaded', () => {
+      setupAllVideoListeners();
+      setupSearchAndFilters();
+    });
   } else {
     setupAllVideoListeners();
+    setupSearchAndFilters();
   }
 </script>
