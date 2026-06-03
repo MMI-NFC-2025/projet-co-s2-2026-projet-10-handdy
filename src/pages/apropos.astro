@@ -1,0 +1,60 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <svelte:fragment slot="title">À propos • Wenddy</svelte:fragment>
+  
+  <div class="bg-[#Eef1f4] min-h-screen text-slate-900 font-sans pb-20">
+    
+    <section class="bg-[#FF6200] text-white rounded-b-[40px] pt-10 pb-8 px-6 shadow-orange shadow-sm flex items-center justify-between sticky top-0 z-10">
+      <h1 class="text-2xl font-bold tracking-wide flex-grow text-center pr-7">À propos</h1>
+    </section>
+
+    <main class="max-w-md mx-auto px-6 mt-10 space-y-20 leading-relaxed">
+      
+      <div>
+        <h2 class="text-2xl text-[#FF6200] font-extrabold mb-4">Le projet Wenddy</h2>
+        <p class="text-lg text-slate-700">
+          Wenddy est né d'une volonté simple : <strong>rendre la Langue des Signes Française (LSF) accessible à tous</strong>, de manière ludique et quotidienne.
+        </p>
+        <p class="mt-4 text-slate-600">
+          Grâce à des mini-jeux, des défis quotidiens et un suivi de progression, notre site transforme l'apprentissage de la LSF en un moment de partage et de découverte. Apprendre à signer, c'est ouvrir une nouvelle porte vers l'inclusion et la communication.
+        </p>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl border-2 border-[#FF6200]/20 shadow-sm">
+        <h2 class="text-xl font-bold text-[#FF6200] mb-2">Un projet éducatif</h2>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          Wenddy est un projet réalisé dans le cadre de notre cursus d'études. Cette application est le fruit de notre travail de recherche et de conception, visant à allier compétences techniques et engagement social pour favoriser l'inclusion numérique.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl text-[#FF6200] font-extrabold mb-6">Notre équipe</h2>
+        <div class="grid grid-cols-1 gap-6">
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg">Laura Bailly</h3>
+            <p class="text-sm text-slate-500">Co-fondatrice</p>
+          </div>
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg">Bambou Franceschini</h3>
+            <p class="text-sm text-slate-500">Co-fondatrice</p>
+          </div>
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg">Izya Thiriet</h3>
+            <p class="text-sm text-slate-500">Co-fondatrice</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-[#FF6200] p-8 rounded-[30px] text-white">
+        <h2 class="text-2xl font-extrabold mb-4">Notre Vision</h2>
+        <p>
+          Nous croyons qu'une société inclusive passe par la compréhension mutuelle. En brisant les barrières de la communication grâce au numérique, nous voulons créer une communauté où chaque geste compte.
+        </p>
+      </div>
+
+    </main>
+  </div>
+</Layout>
