@@ -1,0 +1,100 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ArcadeGameCard from '../components/ArcadeGameCard.astro';
+import { gameTypesAll, scoresAll, getFileUrl } from '../../backend/backend.mjs';
+
+// 1. Récupération et calcul du classement
+let leaderboard: any[] = [];
+let gameModes: any[] = [];
+
+try {
+  // Chargement du classement
+  const allScores = await scoresAll();
+  const userMap: Record<string, any> = {};
+  
+  allScores.forEach((score: any) => {
+    const user = score.expand?.user;
+    if (!user) return;
+    
+    if (!userMap[user.id]) {
+      userMap[user.id] = { 
+        name: user.pseudo || user.username || 'Joueur', 
+        xp: 0,
+        avatar: user.avatar 
+      };
+    }
+    userMap[user.id].xp += Number(score.xp_earned) || 0;
+  });
+
+  leaderboard = Object.values(userMap)
+    .sort((a, b) => b.xp - a.xp)
+    .slice(0, 10);
+
+  // Chargement des modes de jeu
+  gameModes = await gameTypesAll();
+
+} catch (e) {
+  console.error("Erreur chargement données :", e);
+}
+---
+
+<Layout title="Arcade | Wendy">
+  <section class="bg-[#FF6200] text-white rounded-b-[40px] pt-10 pb-10 px-6 shadow-lg mb-10">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl md:text-5xl font-bold">Mode Arcade</h1>
+        <p class="text-lg opacity-90 mt-2">Prêt à relever le défi ?</p>
+      </div>
+      <img 
+        src="/src/assets/icones/icon_arcade_accueil.svg" 
+        alt="Arcade" 
+        class="w-24 h-24 md:w-32 md:h-32 object-contain"
+      />
+    </div>
+  </section>
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-12 space-y-12">
+    
+    <section>
+      <h2 class="text-3xl font-bold text-slate-900 mb-8">Classement de la semaine</h2>
+      <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-100">
+        <div class="space-y-4">
+          {leaderboard.length > 0 ? leaderboard.map((player, index) => (
+            <div class="flex items-center gap-4 p-3 hover:bg-orange-50 rounded-xl transition">
+              <span class="text-xl font-bold text-slate-400 w-8">#{index + 1}</span>
+              <div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden">
+                <div class="w-full h-full bg-orange-200 flex items-center justify-center text-orange-700 font-bold">
+                  {player.name[0].toUpperCase()}
+                </div>
+              </div>
+              <span class="flex-1 font-semibold text-slate-800">{player.name}</span>
+              <span class="font-bold text-orange-600">{player.xp} XP</span>
+            </div>
+          )) : (
+            <p class="text-center text-slate-500">Pas encore de classement cette semaine.</p>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-3xl font-bold text-slate-900 mb-8">Minis-jeux disponibles</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {gameModes.map((mode) => {
+    // Ajoute .trim() avant le toLowerCase() pour supprimer les espaces invisibles
+          const slug = mode.nom.trim().toLowerCase().replace(/\s+/g, '-');
+
+          return (
+            <ArcadeGameCard 
+              title={mode.nom}
+              description={mode.description}
+              icon={getFileUrl(mode, mode.icon)}
+              soloLink={`/games/${slug}`}
+            />
+          );
+      })}
+
+      </div>
+    </section>
+  </main>
+</Layout>

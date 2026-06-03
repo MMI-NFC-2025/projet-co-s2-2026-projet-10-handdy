@@ -2,11 +2,11 @@
 import Button from './Button.astro';
 import FeatureCard from './FeatureCard.astro';
 import GameCard from './GameCard.astro';
-import heroPhone from '../assets/icones/mode_arcade_landing_page.svg';
-import parcoursImage from '../assets/icones/parcour_utilisateur_landing_page.svg';
-import wavesBig from '../assets/icones/vagues_grandes.svg';
-import wavesSmall from '../assets/icones/vagues_petites.svg';
-import logo from '../assets/icones/logo_wendy.svg';
+import heroPhone from '../assets/mode_arcade_landing_page.svg';
+import parcoursImage from '../assets/parcour_utilisateur_landing_page.svg';
+import wavesBig from '../assets/vagues_grandes.svg';
+import wavesSmall from '../assets/vagues_petites.svg';
+import logo from '../assets/logo_wendy.svg';
 ---
 
 <main class="min-h-screen bg-white text-slate-950">
@@ -18,7 +18,7 @@ import logo from '../assets/icones/logo_wendy.svg';
     <!-- Header with Logo and Button -->
     <div class="relative w-full h-[155px] bg-white flex items-center justify-between px-6 md:px-10 z-20">
       <img src={logo.src} alt="Wendy Logo" class="h-[124px] w-[271px]" />
-      <Button href="/login" variant="secondary" class="bg-black text-white rounded-full h-[94px] w-[429px] text-[36px] font-semibold hover:bg-slate-900 flex items-center justify-center">Commencer à jouer !</Button>
+      <Button href="#play" variant="secondary" class="bg-black text-white rounded-full h-[94px] w-[429px] text-[36px] font-semibold hover:bg-slate-900 flex items-center justify-center">Commencer à jouer !</Button>
     </div>
 
     <!-- Content Area -->
@@ -125,10 +125,10 @@ import logo from '../assets/icones/logo_wendy.svg';
       </div>
       <div class="flex-1 w-full">
         <div class="bg-slate-950 rounded-[28px] px-6 md:px-8 py-6 md:py-8">
-          <p class="text-white text-sm md:text-base mb-4 font-medium">Rejoins la communauté Wenddy et commence ton aventure des aujourd'hui!</p>
+          <p class="text-white text-sm md:text-base mb-4 font-medium">Rejoins la communauté Wendy et commence ton aventure des aujourd'hui!</p>
           <form class="flex flex-col sm:flex-row gap-3">
             <input type="email" placeholder="Ton email" class="flex-1 rounded-full border-none bg-white/95 px-5 py-3 text-slate-950 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6200]" />
-            <Button href="/login" variant="primary" class="bg-[#FF6200] text-white hover:bg-orange-600 rounded-full px-6 py-3 font-semibold text-sm md:text-base">Commencer gratuitement</Button>
+            <Button type="submit" class="bg-[#FF6200] text-white hover:bg-orange-600 rounded-full px-6 py-3 font-semibold text-sm md:text-base">Commencer gratuitement</Button>
           </form>
         </div>
       </div>

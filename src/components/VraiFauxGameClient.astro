@@ -1,0 +1,273 @@
+---
+// Il est recommandé de typer les props qu'on reçoit !
+interface Question {
+  id: string;
+  video?: string;
+  word?: string;
+  correct_answer: boolean;
+  question_text?: string;
+}
+
+const { questions } = Astro.props as { questions: Question[] };
+---
+
+<div id="vrai-faux-game" class="app-container" data-questions={JSON.stringify(questions)}>
+    
+    <header class="header">
+        <button id="close-btn" class="close-btn">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+        </button>
+    </header>
+
+    <div class="progress-section">
+        <h2 id="question-counter">Question 1/{questions.length}</h2>
+        <div class="progress-track">
+            <div id="progress-fill" class="progress-fill"></div>
+            <img src="/mascot-head.png" alt="Masc" class="progress-mascot" id="progress-mascot" />
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <p id="question-text" class="question-text">
+            Le signe présenté dans la vidéo correspond-il au mot proposé ?
+        </p>
+
+        <div class="media-container">
+            <video id="sign-video" autoplay loop muted playsinline>
+                Votre navigateur ne supporte pas la vidéo.
+            </video>
+        </div>
+
+        <div class="word-proposal">
+            <h3 id="proposed-word">Mot</h3>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button id="btn-vrai" class="btn btn-vrai">Vrai</button>
+        <button id="btn-faux" class="btn btn-faux">Faux</button>
+    </div>
+</div>
+
+<style>
+    :global(body) {
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+    }
+
+    .app-container {
+        width: 100%;
+        max-width: 450px;
+        margin: 0 auto;
+        background-color: #EAECEF;
+        min-height: 100dvh;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Arial', sans-serif;
+        box-sizing: border-box;
+    }
+
+    .header {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .progress-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    #question-counter {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .progress-track {
+        height: 12px;
+        background-color: #D1D5DB;
+        border-radius: 10px;
+        position: relative;
+        width: 80%;
+        margin: 0 auto;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background-color: #FF5722;
+        border-radius: 10px;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .progress-mascot {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        transition: left 0.3s ease;
+        left: 0%;
+        color: transparent; 
+    }
+
+    .content-wrapper {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .question-text {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 20px;
+        line-height: 1.4;
+    }
+
+    .media-container {
+        background: black;
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #sign-video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .word-proposal {
+        background: white;
+        border-radius: 20px;
+        padding: 15px;
+        text-align: center;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    #proposed-word {
+        margin: 0;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin-top: auto;
+        padding-bottom: 10px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        border-radius: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+
+    .btn:active {
+        transform: scale(0.95);
+    }
+
+    .btn-vrai { background-color: #4CAF50; border: 2px solid #388E3C; }
+    .btn-faux { background-color: #E53935; border: 2px solid #B71C1C; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const gameContainer = document.getElementById('vrai-faux-game');
+        
+        if (!gameContainer || !gameContainer.dataset.questions) return;
+
+        const questions = JSON.parse(gameContainer.dataset.questions);
+        let currentIndex = 0;
+        let score = 0;
+
+        const videoEl = document.getElementById('sign-video') as HTMLVideoElement;
+        const wordEl = document.getElementById('proposed-word') as HTMLElement;
+        const counterEl = document.getElementById('question-counter') as HTMLElement;
+        const progressFill = document.getElementById('progress-fill') as HTMLElement;
+        const progressMascot = document.getElementById('progress-mascot') as HTMLElement;
+        const questionTextEl = document.getElementById('question-text') as HTMLElement;
+        
+        const btnVrai = document.getElementById('btn-vrai') as HTMLButtonElement;
+        const btnFaux = document.getElementById('btn-faux') as HTMLButtonElement;
+        const closeBtn = document.getElementById('close-btn') as HTMLButtonElement;
+
+        function updateUI() {
+            if (currentIndex >= questions.length) {
+                alert(`Jeu terminé ! Score : ${score}/${questions.length}`);
+                // window.location.href = '/resultats';
+                return;
+            }
+
+            const currentQ = questions[currentIndex];
+
+            // Mise à jour du texte
+            wordEl.textContent = currentQ.word || '';
+            questionTextEl.textContent = currentQ.question_text || '';
+            
+            // Mise à jour de la vidéo
+            if (currentQ.video) {
+                videoEl.src = currentQ.video;
+                videoEl.load(); // Indispensable pour forcer le rechargement de la source
+                videoEl.play().catch(e => console.log("Autoplay bloqué", e));
+            } else {
+                // Si la question n'a pas de vidéo, on vide la source
+                videoEl.removeAttribute('src');
+                videoEl.load();
+            }
+
+            // Mise à jour de la barre de progression
+            const progressPercentage = ((currentIndex + 1) / questions.length) * 100;
+            counterEl.textContent = `Question ${currentIndex + 1}/${questions.length}`;
+            progressFill.style.width = `${progressPercentage}%`;
+            progressMascot.style.left = `${progressPercentage}%`;
+        }
+
+        function handleAnswer(isTrue: boolean) {
+            const currentQ = questions[currentIndex];
+            if (currentQ.correct_answer === isTrue) {
+                score++;
+                console.log('Bonne réponse !');
+            } else {
+                console.log('Mauvaise réponse !');
+            }
+            
+            currentIndex++;
+            updateUI();
+        }
+
+        if (btnVrai) btnVrai.addEventListener('click', () => handleAnswer(true));
+        if (btnFaux) btnFaux.addEventListener('click', () => handleAnswer(false));
+        if (closeBtn) closeBtn.addEventListener('click', () => {
+            window.location.href = '/'; 
+        });
+
+        // Initialiser le premier affichage
+        updateUI();
+    });
+</script>

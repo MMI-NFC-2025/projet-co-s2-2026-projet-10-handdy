@@ -1,5 +1,7 @@
 ---
 import '../style/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <!doctype html>
@@ -12,7 +14,9 @@ import '../style/global.css';
     <meta name="description" content="Wenddy — Apprends la langue des signes française avec des mini-jeux et défis." />
     <title>Wenddy – Maîtrise la LSF</title>
   </head>
-  <body class="antialiased bg-white text-slate-950">
+  <body class="bg-gray-100 min-h-screen text-slate-900">
+  <body>
+    <Header />
     <slot />
 
     <script>
@@ -28,5 +32,6 @@ import '../style/global.css';
       });
       window.addEventListener('load', initNotifications);
     </script>
+    <Footer />
   </body>
 </html>

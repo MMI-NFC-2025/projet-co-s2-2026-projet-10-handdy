@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import VraiFauxGameClient from '../../components/VraiFauxGameClient.astro';
+import { gamesVraiFauxAll, getFileUrl } from '../../../backend/backend.mjs';
+
+// On force le type à 'any[]' pour éviter les erreurs de compilation de l'éditeur
+let questions: any[] = [];
+
+try {
+  const rawData = await gamesVraiFauxAll();
+  
+  questions = rawData.map((q: any) => ({
+    id: q.id,
+    // On utilise getFileUrl de ton backend pour récupérer l'URL correcte de la vidéo
+    video: getFileUrl(q, q.video), 
+    word: q.nom || 'Mot',
+    correct_answer: q.reponse === true,
+    question_text: 'Le signe présenté correspond-il au mot proposé ?'
+  }));
+} catch (e) {
+  console.error("Erreur chargement questions:", e);
+}
+---
+
+<Layout>
+  <main class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <VraiFauxGameClient questions={questions} />
+  </main>
+</Layout>

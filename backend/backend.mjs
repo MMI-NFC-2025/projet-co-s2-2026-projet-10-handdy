@@ -3,6 +3,8 @@ import PocketBase from 'pocketbase';
 const pbUrl = 'https://wenddy.bambou-franceschini.fr';
 const pb = new PocketBase(pbUrl);
 
+export { pb };
+
 export function getFileUrl(record, filename) {
   if (!record || !filename) return null;
   return `${pbUrl}/api/files/${record.collectionId}/${record.id}/${encodeURIComponent(filename)}`;

@@ -371,5 +371,32 @@ import { searchUsers, followUser, unfollowUser, isAuthenticated, isFollowing, ge
       triggerNotification("Test Wenddy", "Si tu lis ceci, les notifications fonctionnent !");
     });
   });
+
+  // --- LOGIQUE DE CONNEXION / DÉCONNEXION ---
+  const authBtn = document.querySelector('#logoutBtn');
+
+  if (authBtn) {
+    if (!isAuthenticated()) {
+      // Si non connecté : Bouton "Se connecter"
+      authBtn.textContent = "Se connecter";
+      authBtn.classList.remove('bg-red-600', 'text-red-50');
+      authBtn.classList.add('bg-orange-500', 'text-white');
+      
+      authBtn.addEventListener('click', () => {
+        window.location.href = '/login'; // Ou le chemin vers ta page de login
+      });
+    } else {
+      // Si connecté : Bouton "Se déconnecter" (ton code actuel)
+      authBtn.textContent = "Se déconnecter";
+      authBtn.classList.add('bg-red-600', 'text-red-50');
+      
+      authBtn.addEventListener('click', () => {
+        logout();
+        localStorage.removeItem('pocketbase_auth'); 
+        localStorage.removeItem('pb_auth');
+        window.location.href = '/login'; 
+      });
+    }
+  }
   </script>
 </Layout>

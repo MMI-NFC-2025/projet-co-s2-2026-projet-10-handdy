@@ -1,0 +1,33 @@
+---
+/**
+ * AnswerButton Component
+ * Bouton de réponse pour le jeu Vrai/Faux
+ */
+
+interface Props {
+  label: string;
+  type?: 'vrai' | 'faux' | 'neutral';
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+const { label, type = 'neutral', onClick, disabled = false } = Astro.props;
+
+const getStyles = () => {
+  switch (type) {
+    case 'vrai':
+      return 'bg-green-500 hover:bg-green-600 text-white disabled:bg-green-400';
+    case 'faux':
+      return 'bg-red-500 hover:bg-red-600 text-white disabled:bg-red-400';
+    default:
+      return 'bg-slate-200 hover:bg-slate-300 text-slate-800 disabled:bg-slate-100';
+  }
+};
+---
+
+<button
+  class={`w-full py-3 md:py-4 rounded-2xl font-semibold text-base md:text-lg transition-colors duration-200 disabled:cursor-not-allowed ${getStyles()}`}
+  {disabled}
+>
+  {label}
+</button>

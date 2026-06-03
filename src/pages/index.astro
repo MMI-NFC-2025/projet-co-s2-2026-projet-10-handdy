@@ -1,11 +1,81 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import ProgressSection from '../components/ProgressSection.astro';
+import GameModeCard from '../components/GameModeCard.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout>
-	<Welcome />
+  <section class="bg-[#FF6200] text-white rounded-b-[40px] pt-10 pb-10 px-6 shadow-lg">
+    <div class="max-w-6xl mx-auto">
+      <h1 class="text-3xl font-bold">
+        Bonjour <span id="user-pseudo">...</span> !
+      </h1>
+      <p class="text-lg opacity-90 mb-8">Prêt à apprendre aujourd'hui ?</p>
+      
+      <div class="flex gap-4">
+        <div class="flex items-center gap-2.5 bg-white/20 px-5 py-2.5 rounded-full">
+          <img src="/src/assets/icones/flammes.svg" alt="Flamme" class="w-6 h-6 object-contain" />
+          <span class="font-bold text-lg"><span id="series-value">0</span> séries</span>
+        </div>
+        <div class="flex items-center gap-2.5 bg-white/20 px-5 py-2.5 rounded-full">
+          <img src="/src/assets/icones/etoile.svg" alt="Étoile" class="w-6 h-6 object-contain" />
+          <span class="font-bold text-lg"><span id="xp-value">0</span> XP</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-12">
+    <section>
+      <ProgressSection
+        image="/images/chemin_utilisateur_accueil.webp"
+        buttonText="Voir l'avancée"
+      />
+    </section>
+
+    <section>
+      <div class="md:gap-6">
+        <a href="/arcade" class="block transition-transform hover:scale-105">
+          <GameModeCard
+            title="Arcade"
+            description="Entraîne-toi sur tes signes favoris !"
+            icon="/src/assets/icones/icon_arcade_accueil.svg" 
+          />
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    import { pb, getUserProfileStats } from '../../backend/backend.mjs';
+
+    async function initUser() {
+      // pb.authStore est accessible ici car on est dans le navigateur
+      const user = pb.authStore.model;
+      
+      if (user) {
+        // 1. Affiche le pseudo
+        const pseudoEl = document.getElementById('user-pseudo');
+        if (pseudoEl) pseudoEl.textContent = user.pseudo || user.username || "Joueur";
+
+        // 2. Récupère les stats et affiche-les
+        try {
+          const stats = await getUserProfileStats(user.id);
+          const seriesEl = document.getElementById('series-value');
+          const xpEl = document.getElementById('xp-value');
+          
+          if (seriesEl) seriesEl.textContent = String(stats.seriesCount || 0);
+          if (xpEl) xpEl.textContent = String(stats.xpTotal || 0);
+        } catch (e) {
+          console.error("Erreur de chargement des stats:", e);
+        }
+      } else {
+        // Optionnel : Rediriger vers login si non connecté
+        // window.location.href = '/login'; 
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initUser);
+  </script>
 </Layout>
