@@ -9,11 +9,13 @@ import bellIcon from '../assets/icones/cloche.svg?url';
 import mailIcon from '../assets/icones/mail.svg?url';
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/Button.astro';
+
 import { searchUsers, followUser, unfollowUser, isAuthenticated, isFollowing, getFollowCounts } from '../../backend/backend.mjs';
 ---
 
 <Layout>
   <svelte:fragment slot="title">Profil • Wenddy</svelte:fragment>
+ 
   <div class="bg-slate-100 min-h-screen text-slate-900 font-sans">
     <main class="max-w-md mx-auto px-4 pb-10 sm:max-w-3xl lg:max-w-4xl sm:px-6">
       
@@ -121,10 +123,14 @@ import { searchUsers, followUser, unfollowUser, isAuthenticated, isFollowing, ge
         </Button>
       </div>
 
+      <button id="test-btn" class="bg-orange-500 text-blue-400 p-4 rounded-full">
+  Test Notif Immédiat
+</button>
     </main>
   </div>
 
   <script>
+
   import { 
     isAuthenticated, 
     logout, 
@@ -133,7 +139,7 @@ import { searchUsers, followUser, unfollowUser, isAuthenticated, isFollowing, ge
     followUser, 
     unfollowUser, 
     isFollowing, 
-    getFollowCounts 
+    getFollowCounts,
   } from '../../backend/backend.mjs';
 
   function getPersistedAuth() { 
@@ -144,6 +150,7 @@ import { searchUsers, followUser, unfollowUser, isAuthenticated, isFollowing, ge
       return null; 
     } 
   }
+
 
   function getCurrentUser() { 
     const auth = getPersistedAuth(); 
@@ -350,5 +357,19 @@ import { searchUsers, followUser, unfollowUser, isAuthenticated, isFollowing, ge
   }
 
   loadProfileData();
+  
+
+  import { triggerNotification } from '../../backend/notifications.js';
+
+  // On attend que le DOM soit chargé
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('test-btn');
+    
+    // On ajoute l'écouteur d'événement directement sur le bouton
+    btn?.addEventListener('click', () => {
+      console.log("Tentative d'envoi...");
+      triggerNotification("Test Wenddy", "Si tu lis ceci, les notifications fonctionnent !");
+    });
+  });
   </script>
 </Layout>

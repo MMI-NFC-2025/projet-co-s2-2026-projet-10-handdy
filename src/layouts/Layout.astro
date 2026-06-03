@@ -1,6 +1,7 @@
 ---
 import '../style/global.css';
 ---
+
 <!doctype html>
 <html lang="fr">
   <head>
@@ -13,5 +14,19 @@ import '../style/global.css';
   </head>
   <body class="antialiased bg-white text-slate-950">
     <slot />
+
+    <script>
+      import { initNotifications, planifierRappelQuotidien,} from '../../backend/notifications.js';
+    
+          window.addEventListener('load', () => {
+            initNotifications();
+            planifierRappelQuotidien(14, 0); 
+  });
+    
+      window.addEventListener('load', () => {
+        initNotifications();
+      });
+      window.addEventListener('load', initNotifications);
+    </script>
   </body>
 </html>

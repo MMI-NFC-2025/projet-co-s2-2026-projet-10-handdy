@@ -281,13 +281,27 @@ export async function login(email, password) {
 }
 
 export async function registerUser({ email, password, passwordConfirm, pseudo, username }) {
-  const user = await pb.collection('users').create({ email, password, passwordConfirm, pseudo, username });
-  return await addUser({
-    email,
-    password,
-    passwordConfirm,
-    id: user.id,
-  });
+  // On crée d'abord l'utilisateur dans 'users'
+  const user = await pb.collection('users').create({ 
+    email, 
+    password, 
+    passwordConfirm, 
+    pseudo, 
+    username 
+  })
+
+  try {
+    await pb.collection('utilisateurs').create({
+      id: user.id, // On utilise le même ID pour faire le lien
+      xp_total: 0,
+      niveau: 1,
+      streak_count: 0
+    });
+  } catch (e) {
+    console.error("Le profil a échoué mais l'utilisateur est créé :", e);
+  }
+  
+  return user;
 }
 
 export function logout() {
@@ -355,3 +369,38 @@ export async function isFollowing(targetUserId) {
     return false;
   }
 }
+
+export function planifierRappelQuotidien(heure, minute) {
+  setInterval(() => {
+    const maintenant = new Date();
+    if (maintenant.getHours() === heure && maintenant.getMinutes() === minute) {
+      triggerNotification("Rappel Wenddy", "C'est l'heure de ta session du jour !");
+    }
+  }, 60000); // Vérifie toutes les minutes
+}
+        async function initAmisListener() {
+        const currentUser = pb.authStore.model;
+          if (!currentUser) return;
+
+        // On récupère la liste des IDs des personnes suivies
+        const follows = await pb.collection('follows').getFullList({
+          filter: `follower="${currentUser.id}"`
+        });
+          const mesAmisIds = follows.map(f => f.followed);
+
+            // 2. S'abonner aux changements dans la collection 'scores'
+            pb.collection('scores').subscribe('*', (e) => {
+              // Si c'est une création de score
+              if (e.action === 'create') {
+                const nouveauScore = e.record;
+
+                // 3. Vérifier si l'auteur du score est un ami
+                if (mesAmisIds.includes(nouveauScore.user)) {
+                  triggerNotification(
+                    "Succès de mes amis !", 
+                    "Un de tes amis vient de terminer une leçon !"
+                  );
+                }
+              }
+            });
+          }

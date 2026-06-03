@@ -2,7 +2,149 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<layout>
+<Layout>
+  <svelte:fragment slot="title">Contact • Wenddy</svelte:fragment>
   
-</layout>
+  <div class="bg-[#Eef1f4] min-h-screen text-slate-900 font-sans pb-20">
+    
+    <section class="bg-[#FF6200] text-white rounded-b-[40px] pt-10 pb-8 px-6 shadow-orange shadow-sm flex items-center justify-between sticky top-0 z-10">
+      <a href="/profil" class="hover:opacity-80 transition cursor-pointer flex-shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-7 h-7">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </a>
+      <h1 class="text-2xl font-bold tracking-wide flex-grow text-center pr-7">Contact</h1>
+    </section>
 
+    <main class="max-w-md mx-auto px-6 mt-10">
+      
+      <form id="contact-form" class="space-y-6">
+        
+        <div class="flex flex-col gap-3">
+          <label for="nom" class="text-lg font-extrabold text-slate-900">Nom</label>
+          <input 
+            type="text" 
+            id="nom" 
+            name="nom" 
+            placeholder="Ex : Thiriet..." 
+            class="w-full rounded-[24px] border-none px-5 py-4 focus:ring-2 focus:ring-[#FF6200] outline-none shadow-sm text-base placeholder:text-slate-500" 
+            required 
+          />
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <label for="prenom" class="text-lg font-extrabold text-slate-900">Prénom</label>
+          <input 
+            type="text" 
+            id="prenom" 
+            name="prenom" 
+            placeholder="Ex : Izya..." 
+            class="w-full rounded-[24px] border-none px-5 py-4 focus:ring-2 focus:ring-[#FF6200] outline-none shadow-sm text-base placeholder:text-slate-500" 
+            required 
+          />
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <label for="sujet" class="text-lg font-extrabold text-slate-900">Sujet</label>
+          <input 
+            type="text" 
+            id="sujet" 
+            name="sujet" 
+            class="w-full rounded-[24px] border-none px-5 py-4 focus:ring-2 focus:ring-[#FF6200] outline-none shadow-sm text-base" 
+            required 
+          />
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <label for="message" class="text-lg font-extrabold text-slate-900">Votre message</label>
+          <textarea 
+            id="message" 
+            name="message" 
+            placeholder="Ecrivez ici.." 
+            rows="5" 
+            class="w-full rounded-[24px] border-none px-5 py-4 focus:ring-2 focus:ring-[#FF6200] outline-none shadow-sm text-base placeholder:text-slate-500 resize-none" 
+            required
+          ></textarea>
+        </div>
+
+        <div class="pt-4">
+          <button 
+            type="submit" 
+            id="btn-envoyer"
+            class="w-full rounded-full bg-[#FF6200] text-white font-bold text-lg py-4 hover:bg-orange-600 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Envoyer
+          </button>
+        </div>
+
+      </form>
+
+    </main>
+  </div>
+
+  <script>
+    import { addSupportMessage } from '../../backend/backend.mjs';
+
+    // Fonction pour récupérer l'utilisateur connecté via le localStorage (identique à ton profil)
+    function getPersistedAuth() { 
+      try { 
+        const raw = localStorage.getItem('pb_auth'); 
+        return raw ? JSON.parse(raw) : null; 
+      } catch { 
+        return null; 
+      } 
+    }
+
+    function getCurrentUser() { 
+      const auth = getPersistedAuth(); 
+      return auth?.record || auth?.model || null; 
+    }
+
+    const contactForm = document.getElementById('contact-form') as HTMLFormElement;
+    const btnEnvoyer = document.getElementById('btn-envoyer') as HTMLButtonElement;
+
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+
+        // 1. Vérifier que l'utilisateur est bien connecté
+        const currentUser = getCurrentUser();
+        if (!currentUser) {
+          alert("Vous devez être connecté pour nous envoyer un message.");
+          return;
+        }
+
+        // 2. Récupérer les valeurs du formulaire
+        const formData = new FormData(contactForm);
+        const sujet = formData.get('sujet');
+        const message = formData.get('message');
+
+        // On bloque le bouton pendant l'envoi pour éviter les clics multiples
+        btnEnvoyer.disabled = true;
+        btnEnvoyer.textContent = 'Envoi en cours...';
+
+        try {
+          // 3. Envoi à PocketBase selon le schéma de ta base de données
+          await addSupportMessage({
+            utilisateur : currentUser.id,  // Relie le message au compte de l'utilisateur
+            objet: sujet,                 // "objet" correspond au champ dans ton PocketBase
+            message: message,             // "message" correspond au champ texte
+            statut: "Ouvert"              // Optionnel : statut par défaut de ton Select
+          });
+
+          // Succès
+          alert('Votre message a été envoyé avec succès ! Nous vous répondrons très vite.');
+          contactForm.reset(); 
+          
+        } catch (error) {
+          console.error("Erreur lors de l'envoi du message :", error);
+          alert("Une erreur est survenue lors de l'envoi. Veuillez vérifier votre connexion ou réessayer plus tard.");
+        } finally {
+          // On réactive le bouton
+          btnEnvoyer.disabled = false;
+          btnEnvoyer.textContent = 'Envoyer';
+        }
+      });
+    }
+  </script>
+</Layout>
