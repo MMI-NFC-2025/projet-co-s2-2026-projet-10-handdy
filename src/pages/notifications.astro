@@ -2,6 +2,121 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<layout>
+<Layout>
+  <svelte:fragment slot="title">Notifications • Wenddy</svelte:fragment>
   
-</layout>
+  <div class="bg-[#Eef1f4] min-h-screen text-slate-900 font-sans pb-20">
+    
+    <section class="bg-[#FF6200] text-white rounded-b-[40px] pt-10 pb-8 px-6 shadow-orange shadow-sm flex items-center justify-between sticky top-0 z-10">
+      <a href="/profil" class="hover:opacity-80 transition cursor-pointer flex-shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-7 h-7">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </a>
+      <h1 class="text-2xl font-bold tracking-wide flex-grow text-center pr-7">Notifications</h1>
+    </section>
+
+    <main class="max-w-md mx-auto px-6 mt-10 space-y-8">
+      
+      <div class="flex items-center justify-between">
+        <div class="pr-4">
+          <h2 class="text-xl font-extrabold text-slate-900">Rappels</h2>
+          <p class="text-sm text-slate-500 mt-1 leading-tight">Préviens-moi pour faire ma session du jour.</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+          <input type="checkbox" id="toggle-rappels" class="sr-only peer toggle-input" checked>
+          <div class="w-14 h-8 bg-slate-300 rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-[#FFD166] after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#FF6200]"></div>
+        </label>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <div class="pr-4">
+          <h2 class="text-xl font-extrabold text-slate-900">Succès de mes amis</h2>
+          <p class="text-sm text-slate-500 mt-1 leading-tight">Suis l'avancée et les records de tes amis.</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+          <input type="checkbox" id="toggle-amis" class="sr-only peer toggle-input" checked>
+          <div class="w-14 h-8 bg-slate-300 rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-[#FFD166] after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#FF6200]"></div>
+        </label>
+      </div>
+
+      <hr class="border-slate-300" />
+
+      <div class="flex items-center justify-between">
+        <div class="pr-4">
+          <h2 class="text-xl font-extrabold text-slate-900">Désactivez toutes les notifications</h2>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+          <input type="checkbox" id="toggle-desactiver-tout" class="sr-only peer">
+          <div class="w-14 h-8 bg-slate-300 rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-[#FFD166] after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#FF6200]"></div>
+        </label>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // --- Logique pour gérer les interrupteurs (Toggles) ---
+    const toggleRappels = document.getElementById('toggle-rappels') as HTMLInputElement;
+    const toggleAmis = document.getElementById('toggle-amis') as HTMLInputElement;
+    const toggleDesactiverTout = document.getElementById('toggle-desactiver-tout') as HTMLInputElement;
+
+    // 1. Charger les préférences sauvegardées dans le navigateur au démarrage
+    function loadSettings() {
+      const savedSettings = JSON.parse(localStorage.getItem('wenddy_notif_settings') || '{}');
+      
+      // Si on a des données sauvegardées, on met à jour les boutons
+      if (savedSettings.rappels !== undefined) toggleRappels.checked = savedSettings.rappels;
+      if (savedSettings.amis !== undefined) toggleAmis.checked = savedSettings.amis;
+      if (savedSettings.desactiverTout !== undefined) toggleDesactiverTout.checked = savedSettings.desactiverTout;
+
+      updateUI();
+    }
+
+    // 2. Sauvegarder les préférences quand on clique
+    function saveSettings() {
+      const settings = {
+        rappels: toggleRappels.checked,
+        amis: toggleAmis.checked,
+        desactiverTout: toggleDesactiverTout.checked,
+      };
+      localStorage.setItem('wenddy_notif_settings', JSON.stringify(settings));
+    }
+
+    // 3. Gérer le comportement du bouton "Désactiver tout"
+    function updateUI() {
+      if (toggleDesactiverTout.checked) {
+        // Si "Désactiver tout" est coché, on décoche et on grise les autres
+        toggleRappels.checked = false;
+        toggleRappels.disabled = true;
+        toggleRappels.parentElement?.classList.add('opacity-50');
+
+        toggleAmis.checked = false;
+        toggleAmis.disabled = true;
+        toggleAmis.parentElement?.classList.add('opacity-50');
+      } else {
+        // Sinon, on les réactive
+        toggleRappels.disabled = false;
+        toggleRappels.parentElement?.classList.remove('opacity-50');
+
+        toggleAmis.disabled = false;
+        toggleAmis.parentElement?.classList.remove('opacity-50');
+      }
+    }
+
+    // --- Écouteurs d'événements ---
+    if (toggleRappels && toggleAmis && toggleDesactiverTout) {
+      
+      toggleRappels.addEventListener('change', saveSettings);
+      toggleAmis.addEventListener('change', saveSettings);
+      
+      toggleDesactiverTout.addEventListener('change', () => {
+        updateUI();
+        saveSettings();
+      });
+
+      // Lancement initial
+      loadSettings();
+    }
+  </script>
+</Layout>

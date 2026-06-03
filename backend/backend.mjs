@@ -293,3 +293,65 @@ export async function registerUser({ email, password, passwordConfirm, pseudo, u
 export function logout() {
   pb.authStore.clear();
 }
+
+
+export async function searchUsers(query, limit = 20) {
+  const q = query.trim();
+  
+  const filter = [
+    `pseudo~"${q}"`,
+    `email~"${q}"`
+  ].join(' || ');
+  
+  const userId = pb.authStore.model?.id || '';
+  
+  return await pb.collection('users').getList(1, limit, {
+    filter: `(${filter}) && id != "${userId}"`,
+    sort: 'created',
+  });
+}
+
+
+export async function followUser(targetUserId) {
+  const userId = pb.authStore.model?.id;
+  if (!userId) throw new Error('Non authentifié.');
+  
+  return await pb.collection('follows').create({
+    follower: userId,
+    followed: targetUserId,
+  }, { requestKey: null }); 
+}
+
+export async function unfollowUser(targetUserId) {
+  const userId = pb.authStore.model?.id;
+  if (!userId) throw new Error('Non authentifié.');
+  
+  const rec = await pb.collection('follows').getFirstListItem(
+    `follower="${userId}" && followed="${targetUserId}"`, 
+    { requestKey: null }
+  );
+  return await pb.collection('follows').delete(rec.id, { requestKey: null });
+}
+
+export async function getFollowCounts(userId) {
+  const [follower, followed] = await Promise.all([
+    pb.collection('follows').getFullList({ filter: `followed="${userId}"`, requestKey: null }),
+    pb.collection('follows').getFullList({ filter: `follower="${userId}"`, requestKey: null }),
+  ]);
+  return { followers: follower.length, following: followed.length };
+}
+
+export async function isFollowing(targetUserId) {
+  const userId = pb.authStore.model?.id;
+  if (!userId) return false;
+  
+  try {
+    await pb.collection('follows').getFirstListItem(
+      `follower="${userId}" && followed="${targetUserId}"`, 
+      { requestKey: null }
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
