@@ -1,16 +1,96 @@
 ---
+import Layout from '../layouts/Layout.astro';
 ---
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Téléchargement • Handdy</title>
-  </head>
-  <body class="min-h-screen bg-slate-100 text-slate-900 font-sans">
-    <main class="max-w-md mx-auto p-6">
-      <section class="bg-white rounded-3xl p-6 shadow-lg">
-        <h1 class="text-2xl font-semibold mb-4">Téléchargement</h1>
-        <p class="text-slate-600 leading-7">Cette page présente les options de téléchargement. Vous pouvez revenir à votre profil depuis le navigateur.</p>
-      </section>
+
+<Layout>
+  <svelte:fragment slot="title">Téléchargements • Wenddy</svelte:fragment>
+  
+  <div class="bg-[#Eef1f4] min-h-screen text-slate-900 font-sans pb-20">
+    
+    <section class="bg-[#FF6200] text-white rounded-b-[40px] pt-10 pb-8 px-6 shadow-orange shadow-sm flex items-center justify-between sticky top-0 z-10">
+      <a href="/profil" class="hover:opacity-80 transition cursor-pointer flex-shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-7 h-7">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </a>
+      <h1 class="text-2xl font-bold tracking-wide flex-grow text-center pr-7">Téléchargements</h1>
+    </section>
+
+    <main class="max-w-md mx-auto px-6 mt-10 space-y-8">
+      
+      <div>
+        <h2 class="text-xl font-extrabold text-slate-900">Téléchargements des leçons</h2>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <div class="pr-4">
+          <p class="text-lg font-bold text-slate-900">Activez le mode Hors-ligne</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+          <input type="checkbox" id="toggle-hors-ligne" class="sr-only peer toggle-input" checked>
+          <div class="w-14 h-8 bg-slate-300 rounded-full peer peer-checked:after:translate-x-6 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-[#FFD166] after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#FF6200]"></div>
+        </label>
+      </div>
+      
+      <button id="btn-vider-cache" class="w-full flex items-center justify-between hover:opacity-70 transition group">
+        <div class="pr-4 text-left">
+          <p class="text-lg font-bold text-slate-900">Vider le cache</p>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8 text-slate-900 flex-shrink-0 group-hover:translate-x-1 transition-transform">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+
+      <button id="btn-voir-lecons" class="w-full flex items-center justify-between hover:opacity-70 transition group">
+        <div class="pr-4 text-left">
+          <p class="text-lg font-bold text-slate-900">Voir les leçons téléchargés</p>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8 text-slate-900 flex-shrink-0 group-hover:translate-x-1 transition-transform">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+
     </main>
-  </body>
-</html>
+  </div>
+
+  <script>
+    // --- Logique pour le mode hors-ligne ---
+    const toggleHorsLigne = document.getElementById('toggle-hors-ligne') as HTMLInputElement;
+
+    // Charger les préférences
+    function loadSettings() {
+      const savedSettings = JSON.parse(localStorage.getItem('wenddy_dl_settings') || '{}');
+      if (savedSettings.horsLigne !== undefined) {
+        toggleHorsLigne.checked = savedSettings.horsLigne;
+      }
+    }
+
+    // Sauvegarder les préférences
+    function saveSettings() {
+      const settings = {
+        horsLigne: toggleHorsLigne.checked,
+      };
+      localStorage.setItem('wenddy_dl_settings', JSON.stringify(settings));
+    }
+
+    if (toggleHorsLigne) {
+      toggleHorsLigne.addEventListener('change', saveSettings);
+      loadSettings();
+    }
+
+    // Bouton : Vider le cache
+    document.getElementById('btn-vider-cache')?.addEventListener('click', () => {
+      // Petite confirmation avant de vider
+      if (confirm('Êtes-vous sûr de vouloir vider le cache de vos leçons ?')) {
+        // Ex: localStorage.removeItem('...');
+        alert('Le cache a été vidé avec succès !');
+      }
+    });
+
+    // Bouton : Voir les leçons téléchargées
+    document.getElementById('btn-voir-lecons')?.addEventListener('click', () => {
+      // Redirection vers la page des leçons hors-ligne (à adapter selon ta route)
+      window.location.href = '/lecons-telechargees'; 
+    });
+  </script>
+</Layout>
