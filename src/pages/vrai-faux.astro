@@ -1,0 +1,102 @@
+---
+import VraiFauxGameClient from '../components/VraiFauxGameClient.astro';
+
+interface Question {
+  id: string;
+  video?: string;
+  word?: string;
+  correct_answer: boolean;
+  question_text?: string;
+}
+
+let questions: Question[] = [];
+
+// Données de test si PocketBase ne répond pas
+const testQuestions: Question[] = [
+  {
+    id: '1',
+    word: 'Bonjour',
+    correct_answer: true,
+    question_text: 'Le signe présenté dans la vidéo correspond-il au mot proposé ?',
+    video: undefined
+  },
+  {
+    id: '2',
+    word: 'Merci',
+    correct_answer: false,
+    question_text: 'Le signe présenté dans la vidéo correspond-il au mot proposé ?',
+    video: undefined
+  },
+  {
+    id: '3',
+    word: 'Vous',
+    correct_answer: true,
+    question_text: 'Le signe présenté dans la vidéo correspond-il au mot proposé ?',
+    video: undefined
+  },
+  {
+    id: '4',
+    word: 'Manger',
+    correct_answer: true,
+    question_text: 'Le signe présenté dans la vidéo correspond-il au mot proposé ?',
+    video: undefined
+  }
+];
+
+try {
+  console.log('🔄 Attempting to connect to PocketBase...');
+  console.log('📍 URL: http://127.0.0.1:8090');
+  console.log('📋 Collection: jeux_vrai_faux with expand=relation');
+  
+  // Fetch with expand to include related signs data
+  const questionsData = await pb.collection('jeux_vrai_faux').getFullList({
+    expand: 'relation'
+  });
+
+  console.log('✅ Connected to PocketBase!');
+  console.log('📊 Total records:', questionsData.length);
+  
+  if (questionsData.length > 0) {
+    console.log('📋 First record:', questionsData[0]);
+    
+    questions = questionsData.map((q: any) => {
+      // Construire l'URL de la vidéo depuis la relation
+      let videoUrl = undefined;
+      if (q.expand && q.expand.relation && q.expand.relation.video) {
+        const videoFile = q.expand.relation.video;
+        const relationId = q.relation;
+        videoUrl = `http://127.0.0.1:8090/api/files/signs/${relationId}/${videoFile}`;
+      }
+      
+      return {
+        id: q.id,
+        video: videoUrl,
+        word: q.select ? q.select.trim() : 'Mot',
+        correct_answer: q.bool === true || q.bool === 'true' || q.bool === 1,
+        question_text: q.questions || 'Le signe présenté dans la vidéo correspond-il au mot proposé ?'
+      };
+    });
+    
+  } else {
+    console.warn('⚠️ No questions found in PocketBase, using test data');
+    questions = testQuestions;
+  }
+
+} catch (error: any) {
+  console.error('❌ Could not connect to PocketBase');
+  console.warn('📝 Using test data instead...');
+  questions = testQuestions;
+}
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu Vrai ou Faux</title>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <VraiFauxGameClient questions={questions} />
+</body>
+</html>
