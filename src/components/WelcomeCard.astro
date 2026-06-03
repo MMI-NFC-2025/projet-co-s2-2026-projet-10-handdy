@@ -1,0 +1,26 @@
+---
+/**
+ * WelcomeCard Component
+ * Affiche la section de bienvenue avec message de salutation
+ * Les données (nombre de jours, total appris) seront récupérées depuis PocketBase
+ */
+
+interface Props {
+  greetings?: string;
+  subtitle?: string;
+}
+
+const {
+  greetings = 'Bonjour',
+  subtitle = 'Prêt à apprendre aujourd\'hui ?'
+} = Astro.props;
+---
+
+<div class="bg-orange-500 rounded-3xl p-6 md:p-8 text-white">
+  <h1 class="text-3xl md:text-4xl font-bold mb-2">
+    {greetings}
+  </h1>
+  <p class="text-base md:text-lg text-white/90">
+    {subtitle}
+  </p>
+</div>
