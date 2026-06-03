@@ -1,0 +1,32 @@
+---
+interface Props {
+  title: string;
+  icon?: string;
+  onClick?: string;
+  isActive?: boolean;
+}
+
+const { title, icon, onClick, isActive = false } = Astro.props;
+---
+
+<button
+  data-category={title}
+  onclick={onClick}
+  class:list={[
+    "flex flex-col items-center justify-center p-5 md:p-6 rounded-2xl border-2 transition duration-200 cursor-pointer hover:shadow-md active:scale-95",
+    "w-full h-full aspect-square",
+    isActive
+      ? "border-orange-500 bg-orange-50 shadow-md"
+      : "border-orange-300 bg-white hover:border-orange-500 hover:bg-orange-50"
+  ]}
+>
+  {icon && (
+    <div class="w-16 md:w-20 h-16 md:h-20 mb-2 md:mb-3">
+      <img src={icon} alt={title} class="w-full h-full object-contain" />
+    </div>
+  )}
+  <span class="font-semibold text-gray-900 text-center text-xs md:text-sm leading-tight">
+    {title}
+  </span>
+</button>
+

@@ -1,0 +1,85 @@
+---
+---
+<!-- Fenêtre modale cachée par défaut -->
+<div id="video-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 hidden opacity-0 transition-opacity duration-300">
+  
+  <!-- Contenu de la modale -->
+  <div class="bg-white rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl relative transform scale-95 transition-transform duration-300" id="video-modal-content">
+    
+    <!-- En-tête -->
+    <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
+      <h3 id="video-modal-title" class="text-2xl font-bold text-gray-900 capitalize">Titre</h3>
+      <button id="close-modal-btn" class="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Conteneur Vidéo -->
+    <div class="aspect-video bg-black w-full flex items-center justify-center relative" id="video-container">
+      <!-- Le lecteur vidéo sera injecté ici par JavaScript -->
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('video-modal');
+  const modalContent = document.getElementById('video-modal-content');
+  const videoTitle = document.getElementById('video-modal-title');
+  const closeBtn = document.getElementById('close-modal-btn');
+  const videoContainer = document.getElementById('video-container');
+
+  (window as any).openVideoModal = function(url: string, title: string) {
+    if (videoTitle) {
+      videoTitle.textContent = title.replace(/_/g, ' '); // Enlève les underscores
+    }
+    
+    if (videoContainer) {
+      // On vide complètement le conteneur
+      videoContainer.innerHTML = '';
+      
+      // On crée un tout nouveau lecteur vidéo propre
+      const newVideo = document.createElement('video');
+      newVideo.className = "w-full h-full object-contain";
+      newVideo.controls = true;
+      newVideo.playsInline = true;
+      newVideo.autoplay = true; 
+      newVideo.src = url; 
+      
+      // On l'ajoute dans la modale
+      videoContainer.appendChild(newVideo);
+    }
+    
+    // Affichage de la modale avec animation
+    if (modal && modalContent) {
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modalContent.classList.remove('scale-95');
+      }, 10);
+    }
+  };
+
+  function closeModal() {
+    if (modal && modalContent) {
+      modal.classList.add('opacity-0');
+      modalContent.classList.add('scale-95');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        if (videoContainer) {
+          videoContainer.innerHTML = ''; // Détruit la vidéo à la fermeture
+        }
+      }, 300); 
+    }
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal(); 
+    });
+  }
+</script>

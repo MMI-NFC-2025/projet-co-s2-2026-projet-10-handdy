@@ -1,0 +1,57 @@
+---
+import { Image } from 'astro:assets';
+import logoWenddy from '../assets/logo_wendy.svg';
+import fbLogo from '../assets/fb.svg';
+import instaLogo from '../assets/insta.svg';
+import tiktokLogo from '../assets/tiktok.svg';
+import ytbLogo from '../assets/ytb.svg';
+---
+
+<footer class="w-full bg-gray-200 mt-12 md:mt-16">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 py-8">
+    
+    <!-- Section Haut : Logo & Réseaux Sociaux -->
+    <div class="flex justify-between items-center mb-10">
+      <a href="/">
+        <!-- Logo agrandi (h-16 sur mobile, h-24 sur PC) -->
+        <Image src={logoWenddy} alt="Wenddy" class="h-16 md:h-24 w-auto" />
+      </a>
+      
+      <div class="flex items-center gap-4 md:gap-6">
+        <!-- Icônes agrandies (w-8 h-8 sur mobile, w-10 h-10 sur PC) -->
+        <a href="#" class="text-gray-900 hover:text-orange-500 transition" title="Facebook">
+          <Image src={fbLogo} alt="Facebook" class="w-8 h-8 md:w-10 md:h-10" />
+        </a>
+        <a href="#" class="text-gray-900 hover:text-orange-500 transition" title="Instagram">
+          <Image src={instaLogo} alt="Instagram" class="w-8 h-8 md:w-10 md:h-10" />
+        </a>
+        <a href="#" class="text-gray-900 hover:text-orange-500 transition" title="TikTok">
+          <Image src={tiktokLogo} alt="TikTok" class="w-8 h-8 md:w-10 md:h-10" />
+        </a>
+        <a href="#" class="text-gray-900 hover:text-orange-500 transition" title="YouTube">
+          <Image src={ytbLogo} alt="YouTube" class="w-8 h-8 md:w-10 md:h-10" />
+        </a>
+      </div>
+    </div>
+
+    <!-- Section Milieu : Navigation -->
+    <nav class="flex flex-wrap justify-between md:justify-center gap-x-2 gap-y-4 md:gap-16 mb-12 text-sm md:text-base font-semibold text-gray-900">
+      <a href="/" class="hover:text-orange-500 transition">Accueil</a>
+      <a href="/dico" class="hover:text-orange-500 transition">Dico</a>
+      <a href="/arcade" class="hover:text-orange-500 transition">Arcade</a>
+      <!-- Correction de l'accent avec l'entité HTML &egrave; -->
+      <a href="/progres" class="hover:text-orange-500 transition">Progr&egrave;s</a>
+      <a href="/profile" class="hover:text-orange-500 transition">Profil</a>
+    </nav>
+
+    <!-- Section Bas : Mentions & Contact -->
+    <div class="flex flex-wrap justify-between items-center text-xs md:text-sm text-gray-500 gap-4">
+      <a href="mailto:handdy@gmail.com" class="hover:text-orange-500 transition">handdy@gmail.com</a>
+      <!-- Correction de l'accent avec l'entité HTML &eacute; -->
+      <a href="/mentions-legales" class="hover:text-orange-500 transition">Mentions l&eacute;gales</a>
+      <!-- Correction de l'accent avec l'entité HTML &eacute; -->
+      <span>25200 Montb&eacute;liard</span>
+    </div>
+
+  </div>
+</footer>

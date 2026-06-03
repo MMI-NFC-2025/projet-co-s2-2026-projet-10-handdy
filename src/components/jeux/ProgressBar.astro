@@ -1,0 +1,22 @@
+---
+interface Props {
+  current: number;
+  total: number;
+}
+
+const { current, total } = Astro.props;
+const percent = Math.round((current / total) * 100);
+---
+
+<div class="flex items-center gap-3 w-full">
+  <span class="text-sm font-semibold text-slate-500 whitespace-nowrap font-alexandria">
+    Question {current}/{total}
+  </span>
+  <div class="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
+    <div
+      id="progress-bar-fill"
+      class="h-full rounded-full transition-all duration-500 ease-out"
+      style={`width: ${percent}%; background-color: #FF6200;`}
+    ></div>
+  </div>
+</div>
