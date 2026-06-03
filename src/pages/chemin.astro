@@ -1,0 +1,215 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import LevelCard from '../components/LevelCard.astro';
+import StatsSection from '../components/StatsSection.astro';
+import WeeklyStats from '../components/WeeklyStats.astro';
+import BadgeGrid from '../components/BadgeGrid.astro';
+import LearningTimeCard from '../components/LearningTimeCard.astro';
+import ContinueButton from '../components/ContinueButton.astro';
+import PocketBase from 'pocketbase';
+import bonhommeImage from '../assets/images/bonhomme_chemin.webp';
+import tempsImage from '../assets/images/temps_apprentissage.webp';
+import cheminImage from '../assets/images/chemin_utilisateur_accueil.webp';
+import cadenaImage from '../assets/images/cadena.webp';
+import flammeIcon from '../assets/icons/image 18.svg';
+import leconIcon from '../assets/icons/icon_lecon.svg';
+import mascotteIcon from '../assets/icons/mascotte.svg';
+import wendyLogo from '../assets/icons/logo_wendy.svg';
+
+const pb = new PocketBase('http://127.0.0.1:8090');
+const userId = 'user_id_placeholder';
+
+interface UserData {
+  level: number;
+  currentXP: number;
+  maxXP: number;
+  seriesCurrent: number;
+  lessonsCompleted: number;
+  totalLearningMinutes: number;
+  weeklyStats: Array<{day: string; shortDay: string; xp: number}>;
+}
+
+interface Badge {
+  id: string;
+  name: string;
+  icon?: string;
+  unlocked: boolean;
+}
+
+const defaultUserData: UserData = {
+  level: 2,
+  currentXP: 1250,
+  maxXP: 1500,
+  seriesCurrent: 67,
+  lessonsCompleted: 121,
+  totalLearningMinutes: 320, 
+  weeklyStats: [
+    { day: 'Lundi', shortDay: 'Lun', xp: 120 },
+    { day: 'Mardi', shortDay: 'Mar', xp: 95 },
+    { day: 'Mercredi', shortDay: 'Mer', xp: 140 },
+    { day: 'Jeudi', shortDay: 'Jeu', xp: 110 },
+    { day: 'Vendredi', shortDay: 'Ven', xp: 85 },
+    { day: 'Samedi', shortDay: 'Sam', xp: 0 },
+    { day: 'Dimanche', shortDay: 'Dim', xp: 0 }
+  ]
+};
+
+const defaultBadges: Badge[] = [
+  { id: '1', name: 'série de 14 jours', icon: flammeIcon.src, unlocked: true },
+  { id: '2', name: '50 leçon', icon: leconIcon.src, unlocked: true },
+  { id: '3', name: 'Novice LSF', icon: mascotteIcon.src, unlocked: true },
+  { id: '4', name: 'série de 50 jours', icon: cadenaImage.src, unlocked: false },
+  { id: '5', name: '100 leçon', icon: cadenaImage.src, unlocked: false },
+  { id: '6', name: 'Maître LSF', icon: cadenaImage.src, unlocked: false }
+];
+
+let userData = { ...defaultUserData };
+let badges = [...defaultBadges];
+
+try {
+  console.log('🔄 Fetching user badges from PocketBase...');
+  const userBadgesData = await pb.collection('user_badges').getFullList({
+    filter: `user = "${userId}"`
+  });
+  console.log('✅ User badges loaded:', userBadgesData.length, 'badges');
+
+  console.log('🔄 Fetching badges from PocketBase...');
+  const badgesData = await pb.collection('badges').getFullList();
+  console.log('✅ Badges loaded:', badgesData.length, 'badges');
+
+  console.log('🔄 Fetching user games from PocketBase...');
+  const userGamesData = await pb.collection('user_games').getFullList({
+    filter: `user = "${userId}"`
+  });
+  console.log('✅ User games loaded:', userGamesData.length, 'games');
+
+  if (badgesData && badgesData.length > 0) {
+    const unlockedBadgeIds = new Set(userBadgesData?.map(ub => ub.badge) || []);
+    
+    badges = badgesData.map(badge => ({
+      id: badge.id,
+      name: badge.name || badge.title || 'Badge sans nom',
+      icon: badge.icon || undefined,
+      unlocked: unlockedBadgeIds.has(badge.id)
+    }));
+  }
+
+  if (userGamesData && userGamesData.length > 0) {
+    const totalMinutes = userGamesData.reduce((acc, game) => {
+      return acc + (game.duration_minutes || 0);
+    }, 0);
+    userData.totalLearningMinutes = totalMinutes;
+
+    const seriesCount = userGamesData.filter(g => g.is_series === true).length;
+    userData.seriesCurrent = seriesCount;
+    userData.lessonsCompleted = userGamesData.length;
+
+    const now = new Date();
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const weekStats = userData.weeklyStats.map(day => ({ ...day, xp: 0 }));
+
+    userGamesData.forEach(game => {
+      const gameDate = new Date(game.created);
+      if (gameDate >= weekStart) {
+        const dayOfWeek = gameDate.getDay();
+        weekStats[dayOfWeek].xp += (game.xp_earned || 0);
+      }
+    });
+
+    userData.weeklyStats = weekStats;
+  }
+
+  console.log('✅ Page data prepared successfully!');
+} catch (error) {
+  console.warn('⚠️ PocketBase not available or collections empty. Using default data.');
+  console.warn('Error:', error);
+  console.log('📝 Collections status:');
+  console.log('  - user_badges: Ready to receive data');
+  console.log('  - badges: Ready to receive data');
+  console.log('  - user_games: Ready to receive data');
+}
+
+const hours = Math.floor(userData.totalLearningMinutes / 60);
+const minutes = userData.totalLearningMinutes % 60;
+const dailyAverageMinutes = Math.round(userData.totalLearningMinutes / 7);
+
+const totalXPWeek = userData.weeklyStats.reduce((acc, day) => acc + day.xp, 0);
+---
+
+<Layout>
+  <Header />
+  
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8 md:space-y-12">
+    <section class="bg-gradient-to-r from-orange-400 to-orange-500 rounded-3xl p-6 md:p-8 text-white shadow-md">
+      <h1 class="text-3xl md:text-4xl font-bold">Tes progrès</h1>
+    </section>
+
+    <section>
+      <LevelCard 
+        level={userData.level}
+        currentXP={userData.currentXP}
+        maxXP={userData.maxXP}
+        icon={bonhommeImage.src}
+      />
+    </section>
+
+    <section>
+      <StatsSection 
+        seriesCurrent={userData.seriesCurrent}
+        lessonsCompleted={userData.lessonsCompleted}
+        flammeIcon={flammeIcon.src}
+        leconIcon={leconIcon.src}
+      />
+    </section>
+
+    <section>
+      <WeeklyStats 
+        weekStats={userData.weeklyStats}
+        totalXPWeek={totalXPWeek}
+        mascotteIcon={mascotteIcon.src}
+        wendyLogo={wendyLogo.src}
+      />
+    </section>
+
+    <section>
+      <BadgeGrid badges={badges} />
+    </section>
+
+    <section>
+      <LearningTimeCard 
+        hours={hours}
+        minutes={minutes}
+        dailyAverageMinutes={dailyAverageMinutes}
+        image={tempsImage.src}
+      />
+    </section>
+
+    <section>
+      <ContinueButton 
+        text="Voir l'avancé"
+        image={cheminImage.src}
+      />
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  main {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
