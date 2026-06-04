@@ -2,41 +2,94 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Mon Parcours - Wenddy">
+<Layout title="Mon Parcours - Wenddy"showHeader={false} showFooter={false}>
   <div class="min-h-screen bg-[#E5E7EB] flex flex-col font-sans overflow-x-hidden">
     
-    <!-- En-tête avec la Croix de fermeture -->
     <header class="bg-white py-6 shadow-sm z-20 text-center relative px-4">
-      <a href="/" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-black hover:text-[#FF6200] transition-colors" title="Quitter">
+      <a href="/accueil" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-black hover:text-[#FF6200] transition-colors" title="Quitter">
         <svg class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </a>
-
-      <h1 class="text-2xl md:text-3xl font-black text-slate-950 font-cal-sans">
-        Mon Parcours
-      </h1>
+      <h1 class="text-2xl md:text-3xl font-black text-slate-950 font-cal-sans">Mon Parcours</h1>
       <p class="text-[#FF6200] font-bold mt-1 text-sm md:text-base">Niveau 1 - Débutant</p>
     </header>
 
-    <!-- Zone de la Carte - Centrée type Application Mobile sur PC -->
-    <main class="flex-grow flex flex-col items-center justify-center w-full py-8 px-4">
+    <main class="flex-grow flex flex-col items-center justify-center w-full py-4 px-4">
       
-      <!-- Conteneur "Style Smartphone" pour garder de super proportions sur PC -->
-      <div class="relative w-full max-w-[360px] rounded-3xl shadow-xl overflow-hidden flex justify-center items-center border-4 border-white" style="background-color: #87B44E;">
+      <div class="relative w-full max-w-[360px] min-h-[640px] rounded-[32px] overflow-hidden flex flex-col justify-between pt-4 pb-6 border-4 border-white shadow-xl bg-[#87B44E]">
         
-        <!-- JAUGE DE PROGRESSION ORANGE (Fixée à gauche, z-40 tout devant) -->
-        <div class="absolute left-4 top-8 bottom-8 w-5 bg-black/25 rounded-full z-40 shadow-inner border border-white/10 overflow-hidden">
-          <div id="xp-gauge" class="absolute bottom-0 left-0 w-full bg-[#FF6200] rounded-full transition-all duration-1000 shadow-[0_0_12px_rgba(255,98,0,0.9)]" style="height: 0%;"></div>
+        <!-- CARD PROFIL → cliquable vers /profil -->
+        <a href="/profil" class="w-[calc(100%-2rem)] bg-white rounded-2xl p-4 flex items-center gap-4 shadow-md z-30 border border-gray-100 mx-4 shrink-0 relative hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center shadow-inner shrink-0">
+            <svg class="w-7 h-7 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+          <div class="flex-grow">
+            <div class="flex justify-between items-baseline mb-1">
+              <span id="user-pseudo" class="font-black text-slate-800 text-sm md:text-base">...</span>
+              <span class="text-xs text-gray-500 font-bold">niv. 1</span>
+            </div>
+            <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+              <div id="mini-xp-bar" class="bg-[#FF6200] h-full rounded-full transition-all duration-1000" style="width: 0%;"></div>
+            </div>
+          </div>
+        </a>
+
+        <!-- ZONE DU CHEMIN -->
+        <div class="relative flex-grow w-full flex justify-center items-center px-0 -mt-10 -mb-14 z-10">
+          
+          <div class="absolute top-[20%] left-[8%] z-0 flex items-end pointer-events-none">
+            <img src="/src/assets/component18.png" alt="" class="w-9 h-9" />
+            <img src="/src/assets/component18.png" alt="" class="w-11 h-11 -ml-3 z-10" />
+          </div>
+          <img src="/src/assets/component18.png" alt="" class="absolute top-[26%] left-[24%] w-8 h-8 z-0 pointer-events-none" />
+          <div class="absolute top-[24%] right-[4%] z-0 flex flex-col items-end pointer-events-none">
+            <img src="/src/assets/component18.png" alt="" class="w-10 h-10" />
+            <img src="/src/assets/component18.png" alt="" class="w-8 h-8 -mt-2 mr-3 z-10" />
+          </div>
+          <div class="absolute top-[46%] right-[6%] z-0 flex items-center pointer-events-none">
+            <img src="/src/assets/component18.png" alt="" class="w-12 h-12" />
+            <img src="/src/assets/component18.png" alt="" class="w-8 h-8 -ml-3 mt-4 z-10" />
+          </div>
+          <img src="/src/assets/component18.png" alt="" class="absolute top-[54%] left-[10%] w-10 h-10 z-0 pointer-events-none" />
+          <div class="absolute bottom-[30%] left-[6%] z-0 flex items-center pointer-events-none">
+            <img src="/src/assets/component18.png" alt="" class="w-10 h-10" />
+            <img src="/src/assets/component18.png" alt="" class="w-8 h-8 -ml-2 mt-2 z-10" />
+          </div>
+          <img src="/src/assets/component18.png" alt="" class="absolute bottom-[36%] left-[18%] w-7 h-7 z-0 pointer-events-none" />
+          <div class="absolute bottom-[20%] right-[10%] z-0 flex items-start pointer-events-none">
+            <img src="/src/assets/component18.png" alt="" class="w-11 h-11" />
+            <img src="/src/assets/component18.png" alt="" class="w-7 h-7 -ml-4 mt-3 z-10" />
+          </div>
+
+          <img src="/src/assets/component25.png" alt="Chemin de dalles" class="w-full h-auto object-contain block relative z-10 select-none px-0" />
+
+          <div 
+            class="absolute inset-0 pointer-events-none z-20 px-0"
+            style="mask-image: url('/src/assets/component25.png'); -webkit-mask-image: url('/src/assets/component25.png'); mask-size: contain; -webkit-mask-size: contain; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-position: center; -webkit-mask-position: center;"
+          >
+            <div 
+              id="xp-road-fill" 
+              class="absolute bottom-0 left-0 right-0 bg-[#FF6200] transition-all duration-1000 origin-bottom shadow-[inset_0_4px_14px_rgba(0,0,0,0.15)]" 
+              style="height: 0%;"
+            ></div>
+          </div>
         </div>
 
-        <!-- Ton chemin vectorisé qui garde sa taille parfaite -->
-        <img src="/src/assets/icones/frame.png" alt="Chemin de progression XP" class="w-full h-auto relative z-10 object-contain block" onerror="this.style.display='none'"/>
-
+        <!-- BOUTON → /arcade -->
+        <div class="w-full px-4 z-30 shrink-0 relative">
+          <a 
+            href="/arcade" 
+            class="block w-full text-center bg-white hover:bg-slate-50 text-[#FF6200] font-black py-3.5 rounded-2xl shadow-md transform active:scale-95 transition-all uppercase tracking-wider text-sm border-b-4 border-slate-200"
+          >
+            Continuer l'apprentissage
+          </a>
+        </div>
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="w-full py-4 text-center text-gray-400 text-xs bg-white border-t border-gray-200 z-20">
       Projet Wenddy - MMI Montbéliard | ID: o4g3yq8bkgg4bxz
     </footer>
@@ -44,20 +97,33 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const gauge = document.getElementById('xp-gauge');
-    
-    // Récupère dynamiquement le nombre de mini-jeux réussis mis en mémoire.
-    // Par défaut, réglé sur 1 (20%) pour que tu puisses voir la jauge au chargement.
-    let jeuxRealises = parseInt(localStorage.getItem('wenddy_games_completed') || '1');
-    const totalJeux = 5; 
-    
-    if (gauge) {
-      setTimeout(() => {
-        // Sécurité pour ne pas dépasser 100%
-        const percentage = Math.min((jeuxRealises / totalJeux) * 100, 100);
-        gauge.style.height = `${percentage}%`;
-      }, 300);
+  import { pb, getUserProfileStats } from '../../backend/backend.mjs';
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const roadFill = document.getElementById('xp-road-fill');
+    const miniBar = document.getElementById('mini-xp-bar');
+    const pseudoEl = document.getElementById('user-pseudo');
+
+    const user = pb.authStore.model;
+
+    if (user) {
+      if (pseudoEl) pseudoEl.textContent = user.pseudo || user.username || 'Joueur';
+
+      try {
+        const stats = await getUserProfileStats(user.id);
+        // La jauge représente l'XP sur un max de 500 (palier niveau 1)
+        const maxXP = 500;
+        const percentage = Math.min((stats.xpTotal / maxXP) * 100, 100);
+
+        setTimeout(() => {
+          if (roadFill) roadFill.style.height = `${percentage}%`;
+          if (miniBar) miniBar.style.width = `${percentage}%`;
+        }, 300);
+      } catch (e) {
+        console.error('Erreur chargement stats chemin:', e);
+      }
+    } else {
+      if (pseudoEl) pseudoEl.textContent = 'Invité';
     }
   });
 </script>
