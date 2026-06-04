@@ -1,0 +1,193 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { gamesCardsAll, getFileUrl, gameTypesAll } from '../../../backend/backend.mjs';
+
+let questions: any[] = [];
+let gameTypeId = '';
+
+const rawData = await gamesCardsAll();
+console.log("Premier enregistrement:", JSON.stringify(rawData[0], null, 2));
+console.log("expand:", JSON.stringify(rawData[0]?.expand, null, 2));
+
+try {
+  const rawData = await gamesCardsAll();
+
+  questions = rawData.map((q: any) => {
+  const relations = q.expand?.relation || [];
+  const correct = q.expand?.relation2;
+
+  return {
+    id: q.id,
+    mot: q.nom,
+    options: relations.map((sign: any) => ({
+      id: sign.id,
+      videoUrl: getFileUrl(sign, sign.video),
+      correct: sign.id === correct?.id
+    }))
+  };
+});
+
+  const allGameTypes = await gameTypesAll();
+  const cardsType = allGameTypes.find((g: any) => g.nom.toLowerCase().includes('card'));
+  gameTypeId = cardsType?.id || '';
+
+} catch (e) {
+  console.error("Erreur chargement Cards:", e);
+}
+---
+
+<Layout title="Mode Cards - Wenddy" showHeader={false} showFooter={false}>
+  <div class="min-h-screen bg-[#E5E7EB] flex flex-col font-sans overflow-x-hidden">
+    
+    <main class="flex-grow flex flex-col justify-between pb-12">
+      
+      <div class="bg-white rounded-b-3xl py-6 px-4 shadow-sm relative z-10 mb-8 md:mb-12">
+        <div class="max-w-5xl mx-auto relative flex flex-col items-center">
+          <a href="/arcade" class="absolute left-0 top-0 text-black hover:text-[#FF6200] transition-colors" title="Quitter le jeu">
+            <svg class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </a>
+          <p id="compteur-question" class="text-sm md:text-lg font-bold mb-3 text-gray-700 font-cal-sans">Question 1/5</p>
+          <div class="w-full max-w-md md:max-w-xl h-4 md:h-5 bg-gray-200 rounded-full relative">
+            <div id="barre-progression" class="h-full bg-[#FF6200] rounded-full transition-all duration-300" style="width: 20%;">
+              <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center">
+                <img src="/src/assets/icones/mascotte.svg" alt="Mascotte" class="w-full h-full drop-shadow-md object-contain" onerror="this.style.display='none'"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="flex-grow flex flex-col items-center justify-center px-4 max-w-3xl mx-auto w-full">
+        <h1 class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-950 mb-8 md:mb-12 text-center leading-tight font-cal-sans">
+          Comment signer : <br class="block md:hidden" />
+          <span id="mot-cible" class="capitalize text-[#FF6200]">Chargement...</span> ?
+        </h1>
+        <div id="cards-grid" class="grid grid-cols-2 gap-4 md:gap-6 w-full max-w-2xl"></div>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style is:global>
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-8px); }
+    80% { transform: translateX(8px); }
+  }
+  .animate-shake { animation: shake 0.4s ease-in-out; }
+</style>
+
+<script define:vars={{ questions, gameTypeId }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    let currentIndex = 0;
+    let correctAnswers = 0;
+    const totalQuestions = questions.length;
+    let questionResolu = false;
+
+    const motCible = document.getElementById('mot-cible');
+    const cardsGrid = document.getElementById('cards-grid');
+    const compteur = document.getElementById('compteur-question');
+    const barre = document.getElementById('barre-progression');
+
+    function loadQuestion() {
+      if (!questions[currentIndex]) return;
+      const currentData = questions[currentIndex];
+      questionResolu = false;
+
+      if (motCible) motCible.innerText = currentData.mot;
+
+      const progressPercent = Math.max(5, (currentIndex / totalQuestions) * 100);
+      if (compteur) compteur.innerText = `Question ${currentIndex + 1}/${totalQuestions}`;
+      if (barre) barre.style.width = `${progressPercent}%`;
+
+      if (cardsGrid) {
+        cardsGrid.innerHTML = '';
+        currentData.options.forEach((option) => {
+          const btn = document.createElement('button');
+          btn.className = "card-option relative aspect-square bg-gray-200 rounded-3xl border-4 border-transparent shadow-sm overflow-hidden transition-all hover:shadow-md transform hover:-translate-y-1";
+          btn.dataset.correct = option.correct ? "true" : "false";
+
+          btn.innerHTML = option.videoUrl
+            ? `<video src="${option.videoUrl}" class="w-full h-full object-cover" muted loop playsinline autoplay></video>`
+            : `<div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">Pas de vidéo</div>`;
+
+          btn.addEventListener('click', () => handleCardClick(btn, option.correct));
+          cardsGrid.appendChild(btn);
+        });
+      }
+    }
+
+    async function finDePartie() {
+      const pointsGagnes = correctAnswers * 10;
+      try {
+        const pbKey = Object.keys(localStorage).find(k => k.startsWith('pocketbase_'));
+        const token = pbKey ? localStorage.getItem(pbKey) : null;
+        if (token) {
+          const authData = JSON.parse(token);
+          const userId = authData?.model?.id;
+          const authToken = authData?.token;
+          if (userId && authToken) {
+            await fetch('https://wenddy.bambou-franceschini.fr/api/collections/scores/records', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+              },
+              body: JSON.stringify({
+                user: userId,
+                game_type: gameTypeId,
+                points: pointsGagnes,
+                duration: 0
+              })
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Erreur sauvegarde score:", e);
+      }
+      window.location.href = `/progres?points=${pointsGagnes}`;
+    }
+
+    function handleCardClick(btn, isCorrect) {
+      if (questionResolu) return;
+
+      if (isCorrect) {
+        questionResolu = true;
+        correctAnswers++;
+        btn.classList.remove('border-transparent');
+        btn.classList.add('border-green-500', 'bg-green-50', 'ring-4', 'ring-green-200');
+
+        const vid = btn.querySelector('video');
+        if (vid) vid.play();
+
+        const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+        if (barre) barre.style.width = `${progressPercent}%`;
+
+        setTimeout(async () => {
+          if (currentIndex < totalQuestions - 1) {
+            currentIndex++;
+            loadQuestion();
+          } else {
+            await finDePartie();
+          }
+        }, 1500);
+
+      } else {
+        btn.classList.remove('border-transparent');
+        btn.classList.add('border-red-500', 'animate-shake');
+        setTimeout(() => {
+          btn.classList.remove('animate-shake', 'border-red-500');
+          btn.classList.add('border-transparent');
+        }, 400);
+      }
+    }
+
+    if (totalQuestions > 0) {
+      loadQuestion();
+    } else {
+      if (cardsGrid) cardsGrid.innerHTML = '<p class="col-span-2 text-center text-slate-500">Aucune question disponible.</p>';
+    }
+  });
+</script>

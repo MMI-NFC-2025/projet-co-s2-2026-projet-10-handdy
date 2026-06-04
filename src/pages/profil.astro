@@ -128,9 +128,7 @@ import { searchUsers, followUser, unfollowUser, isAuthenticated, isFollowing, ge
 </button>
     </main>
   </div>
-
-  <script>
-
+<script>
   import { 
     isAuthenticated, 
     logout, 
@@ -139,264 +137,88 @@ import { searchUsers, followUser, unfollowUser, isAuthenticated, isFollowing, ge
     followUser, 
     unfollowUser, 
     isFollowing, 
-    getFollowCounts,
+    getFollowCounts 
   } from '../../backend/backend.mjs';
+  import { triggerNotification } from '../../backend/notifications.js';
 
   function getPersistedAuth() { 
     try { 
       const raw = localStorage.getItem('pb_auth'); 
       return raw ? JSON.parse(raw) : null; 
-    } catch { 
-      return null; 
-    } 
+    } catch { return null; } 
   }
-
 
   function getCurrentUser() { 
     const auth = getPersistedAuth(); 
     return auth?.record || auth?.model || null; 
   }
 
-  // Éléments du DOM (Profil & Stats)
+  // --- Éléments du DOM ---
   const profileNameEl = document.querySelector('#profileName');
   const xpValueEl = document.querySelector('#xpValue');
   const seriesValueEl = document.querySelector('#seriesValue');
   const badgeGrid = document.querySelector('#badgeGrid');
   const followersValueEl = document.querySelector('#followersValue');
   const followingValueEl = document.querySelector('#followingValue');
-  const logoutBtn = document.querySelector('#logoutBtn');
-
-  // Éléments du DOM (Recherche d'amis)
   const addFriendBtn = document.querySelector('#addFriendBtn');
   const userSearchPanel = document.querySelector('#userSearchPanel');
-  const userSearchBtn = document.querySelector('#userSearchBtn');
-  const userSearchResults = document.querySelector('#userSearchResults');
-  const userSearchInput = document.querySelector('#userSearchInput') as HTMLInputElement;
+  
+  const authBtn = document.querySelector('#logoutBtn'); // C'est lui qui gère co/déco
 
+  // --- Affichage du nom ---
   const currentUser = getCurrentUser(); 
   if (currentUser && profileNameEl) { 
-    profileNameEl.textContent = currentUser.pseudo || currentUser.username || currentUser.email || 'Utilisateur'; 
+    profileNameEl.textContent = currentUser.pseudo || currentUser.username || 'Utilisateur'; 
   }
 
-  const badgeDefinitions = [
-    { id: 'serie', title: 'Série 14 jours', description: 'Atteins 14 jours consécutifs de pratique pour débloquer ce badge.', unlockedIcon: '🏆', lockedIcon: '🔒' },
-    { id: 'lecon', title: '50 leçons', description: 'Complète 50 sessions pour débloquer ce badge.', unlockedIcon: '🎓', lockedIcon: '🔒' },
-    { id: 'novice', title: 'Novice', description: 'Obtiens les deux premiers badges pour le débloquer.', unlockedIcon: '✨', lockedIcon: '🔒' },
-  ];
-
-  function renderBadges({ seriesCount, lessonCount, serieUnlocked, lessonUnlocked, noviceUnlocked }: any) {
-    if (!badgeGrid) return;
-
-    badgeGrid.innerHTML = badgeDefinitions
-      .map((badge) => {
-        const unlocked = badge.id === 'serie' ? serieUnlocked : badge.id === 'lecon' ? lessonUnlocked : noviceUnlocked;
-        const progress = badge.id === 'serie' ? `${seriesCount}/14 jours` : badge.id === 'lecon' ? `${lessonCount}/50 leçons` : `${serieUnlocked && lessonUnlocked ? 'Débloqué' : 'Bloqué'}`;
-
-        return `
-          <div class="rounded-[32px] border p-4 text-center shadow-sm transition ${unlocked ? 'border-orange-200 bg-orange-50' : 'border-slate-200 bg-white'}">
-            <div class="mb-3 mx-auto flex h-14 w-14 items-center justify-center rounded-3xl text-3xl ${unlocked ? 'bg-orange-100' : 'bg-slate-100 grayscale opacity-70'}">
-              ${unlocked ? badge.unlockedIcon : badge.lockedIcon}
-            </div>
-            <p class="text-sm font-semibold ${unlocked ? 'text-slate-900' : 'text-slate-400'}">${badge.title}</p>
-            <p class="mt-2 text-xs ${unlocked ? 'text-slate-600' : 'text-slate-500'}">${badge.description}</p>
-            <p class="mt-3 text-[0.75rem] ${unlocked ? 'text-orange-600' : 'text-slate-400'}">${progress}</p>
-          </div>
-        `;
-      })
-      .join('');
+  // --- BOUTON DYNAMIQUE (Connexion / Déconnexion) ---
+  if (authBtn) {
+    if (!isAuthenticated()) {
+      // Non connecté -> "Se connecter" en orange
+      authBtn.textContent = "Se connecter";
+      authBtn.className = "w-full rounded-full bg-orange-500 text-white font-semibold py-3 hover:bg-orange-600 transition shadow-none";
+      authBtn.addEventListener('click', () => window.location.href = '/login');
+    } else {
+      // Connecté -> "Se déconnecter" en rouge
+      authBtn.textContent = "Se déconnecter";
+      authBtn.className = "w-full rounded-full bg-red-600 text-red-50 font-semibold py-3 hover:bg-red-100 hover:text-red-600 transition shadow-none";
+      authBtn.addEventListener('click', () => {
+        logout();
+        localStorage.removeItem('pb_auth');
+        window.location.href = '/login'; 
+      });
+    }
   }
 
+  // --- Stats & Badges ---
   async function loadProfileData() {
     if (!isAuthenticated()) {
       if (xpValueEl) xpValueEl.textContent = '—';
       if (seriesValueEl) seriesValueEl.textContent = '—';
-      if (badgeGrid) {
-        badgeGrid.innerHTML = '<div class="rounded-[32px] border border-slate-200 bg-white p-4 text-sm text-slate-500">Connecte-toi pour voir tes badges et tes stats.</div>';
-      }
       return;
     }
-
     const user = getCurrentUser();
     if (user) {
       try {
         const stats = await getUserProfileStats(user.id);
         if (xpValueEl) xpValueEl.textContent = String(stats.xpTotal);
         if (seriesValueEl) seriesValueEl.textContent = String(stats.seriesCount);
-        renderBadges(stats);
         
         const counts = await getFollowCounts(user.id);
         if (followersValueEl) followersValueEl.textContent = String(counts.followers);
         if (followingValueEl) followingValueEl.textContent = String(counts.following);
       } catch (error) {
-        console.error("Erreur lors du chargement des statistiques", error);
+        console.error("Erreur stats", error);
       }
     }
   }
 
-  // --- Toggle d'affichage du panneau ---
-  if (addFriendBtn && userSearchPanel) {
-    addFriendBtn.addEventListener('click', () => {
-      userSearchPanel.classList.toggle('hidden');
-    });
-  }
-
-  // --- Logique de recherche ---
-  if (userSearchInput && userSearchResults) {
-    const doSearch = async () => {
-      const query = userSearchInput.value.trim();
-      
-      if (!query) {
-        userSearchResults.innerHTML = '';
-        return;
-      }
-
-      userSearchResults.innerHTML = '<p class="text-sm text-slate-500">Recherche en cours...</p>';
-
-      try {
-        const results = await searchUsers(query);
-        
-        if (results.items.length === 0) {
-          userSearchResults.innerHTML = '<p class="text-sm text-slate-500">Aucun utilisateur trouvé.</p>';
-          return;
-        }
-
-        userSearchResults.innerHTML = ''; 
-        
-        for (const targetUser of results.items) {
-          const alreadyFollowing = await isFollowing(targetUser.id);
-          
-          const userDiv = document.createElement('div');
-          userDiv.className = 'flex items-center justify-between p-3 border border-slate-100 rounded-2xl bg-slate-50';
-          
-          const nameSpan = document.createElement('span');
-          nameSpan.className = 'font-semibold text-sm text-slate-800';
-          nameSpan.textContent = targetUser.pseudo || targetUser.username || 'Utilisateur';
-
-          const actionBtn = document.createElement('button');
-          actionBtn.className = `text-xs px-4 py-2 rounded-full font-semibold transition ${alreadyFollowing ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-orange-100 text-orange-600 hover:bg-orange-200'}`;
-          actionBtn.textContent = alreadyFollowing ? 'Ne plus suivre' : 'Suivre';
-          
-          actionBtn.addEventListener('click', async () => {
-            const isNowFollowing = actionBtn.textContent === 'Ne plus suivre';
-            actionBtn.disabled = true;
-            actionBtn.classList.add('opacity-50');
-            
-            try {
-        
-              let currentFollowingCount = 0;
-              if (followingValueEl) {
-                currentFollowingCount = parseInt(followingValueEl.textContent || '0', 10);
-              }
-
-              if (isNowFollowing) {
-          
-                await unfollowUser(targetUser.id);
-                actionBtn.textContent = 'Suivre';
-                actionBtn.className = 'text-xs px-4 py-2 rounded-full font-semibold transition bg-orange-100 text-orange-600 hover:bg-orange-200';
-                
-               
-                if (followingValueEl) followingValueEl.textContent = String(Math.max(0, currentFollowingCount - 1));
-
-              } else {
-               
-                await followUser(targetUser.id);
-                actionBtn.textContent = 'Ne plus suivre';
-                actionBtn.className = 'text-xs px-4 py-2 rounded-full font-semibold transition bg-slate-200 text-slate-700 hover:bg-slate-300';
-                
-                
-                if (followingValueEl) followingValueEl.textContent = String(currentFollowingCount + 1);
-              }
-              
-            } catch(err) {
-              console.error(err);
-            } finally {
-              actionBtn.disabled = false;
-              actionBtn.classList.remove('opacity-50');
-            }
-          });
-
-          userDiv.appendChild(nameSpan);
-          userDiv.appendChild(actionBtn);
-          userSearchResults.appendChild(userDiv);
-        }
-      } catch (error) {
-        console.error(error);
-        userSearchResults.innerHTML = '<p class="text-sm text-red-500">Erreur lors de la recherche.</p>';
-      }
-    };
-
-    
-    if (userSearchBtn) {
-      userSearchBtn.addEventListener('click', doSearch);
-    }
-
-   
-    userSearchInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault(); 
-        doSearch();
-      }
-    });
-
-   
-    userSearchInput.addEventListener('search', () => {
-      if (userSearchInput.value === '') {
-        userSearchResults.innerHTML = ''; 
-      }
-    });
-  }
-
-  // --- LOGIQUE DE DÉCONNEXION ---
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      logout();
-      localStorage.removeItem('pocketbase_auth'); 
-      localStorage.removeItem('pb_auth');
-      window.location.href = '/login'; 
-    });
-  }
-
+  // Initialisation
   loadProfileData();
-  
 
-  import { triggerNotification } from '../../backend/notifications.js';
-
-  // On attend que le DOM soit chargé
-  document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('test-btn');
-    
-    // On ajoute l'écouteur d'événement directement sur le bouton
-    btn?.addEventListener('click', () => {
-      console.log("Tentative d'envoi...");
-      triggerNotification("Test Wenddy", "Si tu lis ceci, les notifications fonctionnent !");
-    });
+  // Test notif
+  document.querySelector('#test-btn')?.addEventListener('click', () => {
+    triggerNotification("Test Wenddy", "Notifications OK !");
   });
-
-  // --- LOGIQUE DE CONNEXION / DÉCONNEXION ---
-  const authBtn = document.querySelector('#logoutBtn');
-
-  if (authBtn) {
-    if (!isAuthenticated()) {
-      // Si non connecté : Bouton "Se connecter"
-      authBtn.textContent = "Se connecter";
-      authBtn.classList.remove('bg-red-600', 'text-red-50');
-      authBtn.classList.add('bg-orange-500', 'text-white');
-      
-      authBtn.addEventListener('click', () => {
-        window.location.href = '/login'; // Ou le chemin vers ta page de login
-      });
-    } else {
-      // Si connecté : Bouton "Se déconnecter" (ton code actuel)
-      authBtn.textContent = "Se déconnecter";
-      authBtn.classList.add('bg-red-600', 'text-red-50');
-      
-      authBtn.addEventListener('click', () => {
-        logout();
-        localStorage.removeItem('pocketbase_auth'); 
-        localStorage.removeItem('pb_auth');
-        window.location.href = '/login'; 
-      });
-    }
-  }
   </script>
 </Layout>

@@ -1,0 +1,142 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SignCard from '../components/SignCard.astro';
+import VideoModal from '../components/VideoModal.astro';
+import Footer from '../components/Footer.astro';
+import { signsAll, thematicsAll, getFileUrl } from '../../backend/backend.mjs';
+
+const categories = [
+  { id: 'politesse', nom: 'Politesse', emoji: '🤝', keywords: ['bonjour', 'merci', 'aurevoir', 'bonsoir', 'politesse', 'svp'] },
+  { id: 'emotions', nom: 'Emotions', emoji: '😊', keywords: ['heureux', 'triste', 'colère', 'peur', 'joie', 'emotion', 'content', 'fatigué'] },
+  { id: 'alimentation', nom: 'Alimentation', emoji: '🍎', keywords: ['manger', 'boire', 'nourriture', 'repas', 'faim', 'soif', 'eau', 'pain'] },
+  { id: 'famille', nom: 'Famille', emoji: '👨‍👩‍👧', keywords: ['maman', 'papa', 'frère', 'soeur', 'enfant', 'famille', 'homme', 'femme'] },
+  { id: 'verbes', nom: 'Verbes', emoji: '⚡', keywords: ['faire', 'aller', 'venir', 'avoir', 'être', 'pouvoir', 'vouloir', 'dormir', 'travailler', 'apprendre'] },
+  { id: 'quotidien', nom: 'Quotidien', emoji: '📅', keywords: ['jour', 'aujourd', 'hier', 'demain', 'temps', 'heure', 'semaine', 'maison', 'école'] },
+];
+
+function getCategoryForSign(nom: string): string {
+  const lower = nom.toLowerCase();
+  for (const cat of categories) {
+    for (const kw of cat.keywords) {
+      if (lower.includes(kw)) return cat.id;
+    }
+  }
+  return 'quotidien';
+}
+
+let signs: any[] = [];
+try {
+  const rawSigns = await signsAll();
+  signs = rawSigns.map((s: any) => ({
+    id: s.id,
+    collectionId: s.collectionId,
+    nom: s.nom || 'Sans nom',
+    description: s.description || '',
+    videoUrl: getFileUrl(s, s.video),
+    imageUrl: getFileUrl(s, s.miniature),
+    category: getCategoryForSign(s.nom || ''),
+  }));
+} catch (err) {
+  console.error("Erreur chargement signes:", err);
+}
+---
+
+<Layout title="Dictionnaire LSF - Wenddy">
+  <div class="min-h-screen bg-[#F3F4F6] flex flex-col font-sans">
+    <header class="bg-[#FF6200] rounded-b-[2rem] pt-6 pb-12 px-6 shadow-sm">
+      <div class="max-w-7xl mx-auto">
+        <h1 class="text-white text-3xl md:text-5xl font-black flex items-center gap-3">
+          Dictionnaire LSF 📖
+        </h1>
+      </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-10">
+      <div class="bg-white rounded-full flex items-center px-6 py-4 shadow-sm border mb-12">
+        <input type="text" id="dico-search-input" placeholder="Recherchez un signe..." class="w-full bg-transparent outline-none text-lg" />
+      </div>
+
+      <div class="flex flex-wrap gap-4 mb-12" id="category-filters">
+        <button class="category-btn rounded-2xl bg-white px-5 py-3 shadow-sm font-bold ring-2 ring-[#FF6200]" data-category="all">
+          🌍 Toutes
+        </button>
+        {categories.map((cat) => (
+          <button class="category-btn rounded-2xl bg-white px-5 py-3 shadow-sm font-bold opacity-60 hover:opacity-100 transition-opacity" data-category={cat.id}>
+            {cat.emoji} {cat.nom}
+          </button>
+        ))}
+      </div>
+
+      <div id="signs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {signs.map((sign) => (
+          <div class="sign-item" data-category={sign.category} data-title={sign.nom.toLowerCase()}>
+            <SignCard
+              title={sign.nom}
+              image={sign.imageUrl}
+              description={sign.description}
+              videoUrl={sign.videoUrl}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div id="no-results" class="hidden text-center py-16">
+        <span class="text-5xl block mb-4">🔍</span>
+        <p class="text-xl font-bold text-slate-900">Aucun signe trouvé</p>
+      </div>
+    </main>
+
+    <VideoModal />
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('dico-search-input') as HTMLInputElement;
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    const signItems = document.querySelectorAll('.sign-item');
+    const noResults = document.getElementById('no-results');
+
+    let currentSearch = '';
+    let currentCategory = 'all';
+
+    function filter() {
+      let visible = 0;
+      signItems.forEach((item) => {
+        const el = item as HTMLElement;
+        const title = el.dataset.title || '';
+        const cat = el.dataset.category || '';
+        const matchSearch = title.includes(currentSearch);
+        const matchCat = currentCategory === 'all' || cat === currentCategory;
+        el.style.display = matchSearch && matchCat ? 'block' : 'none';
+        if (matchSearch && matchCat) visible++;
+      });
+      if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    searchInput?.addEventListener('input', (e) => {
+      currentSearch = (e.target as HTMLInputElement).value.toLowerCase().trim();
+      filter();
+    });
+
+    categoryBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentCategory = btn.getAttribute('data-category') || 'all';
+        categoryBtns.forEach(b => {
+          b.classList.remove('ring-2', 'ring-[#FF6200]', 'opacity-100');
+          b.classList.add('opacity-60');
+        });
+        btn.classList.remove('opacity-60');
+        btn.classList.add('ring-2', 'ring-[#FF6200]', 'opacity-100');
+        filter();
+      });
+    });
+
+    document.querySelectorAll('.video-overlay-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.getAttribute('data-video-url');
+        const title = btn.getAttribute('data-sign-title');
+        const win = window as any;
+        if (win.openVideoModal) win.openVideoModal(url, title);
+      });
+    });
+  </script>
+</Layout>

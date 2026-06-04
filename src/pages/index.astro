@@ -1,81 +1,228 @@
 ---
+import Button from '../components/Button.astro';
+import heroPhone from '../../src/assets/icones/mode_arcade_landing_page.svg';
+import parcoursImage from '../../src/assets/icones/parcour_utilisateur_landing_page.svg';
+import wavesBig from '../../src/assets/icones/vagues_grandes.svg';
+import wavesSmall from '../../src/assets/icones/vagues_petites.svg';
+import logo from '../../src/assets/icones/logo_wendy.svg';
 import Layout from '../layouts/Layout.astro';
-import ProgressSection from '../components/ProgressSection.astro';
-import GameModeCard from '../components/GameModeCard.astro';
-import Footer from '../components/Footer.astro';
----
 
-<Layout>
-  <section class="bg-[#FF6200] text-white rounded-b-[40px] pt-10 pb-10 px-6 shadow-lg">
-    <div class="max-w-6xl mx-auto">
-      <h1 class="text-3xl font-bold">
-        Bonjour <span id="user-pseudo">...</span> !
-      </h1>
-      <p class="text-lg opacity-90 mb-8">Prêt à apprendre aujourd'hui ?</p>
+// Import de TOUTES tes nouvelles icônes
+import iconBook from '../../src/assets/icones/bookopen.svg';
+import iconGamepad from '../../src/assets/icones/gamepad2.svg';
+import mascotte from '../../src/assets/icones/mascotte.svg';
+import iconCartes from '../../src/assets/icones/cartes1.svg';
+import iconMemory from '../../src/assets/icones/div.svg';
+import iconVraiFaux from '../../src/assets/icones/vraifaux1.svg';
+import iconCamera from '../../src/assets/icones/camera.svg';
+import iconWifiOff from '../../src/assets/icones/wifioff.svg';
+---
+<Layout showHeader={false} showFooter={false}>
+<main class="min-h-screen bg-white text-slate-950 font-sans overflow-x-hidden">
+  
+  <!-- En-tête : Logo et Bouton -->
+  <nav class="relative z-50 w-full bg-white flex items-center justify-between py-6 px-6 md:px-12 max-w-[1440px] mx-auto">
+    <img src={logo.src} alt="Wenddy Logo" class="h-12 md:h-16 w-auto" />
+    <Button 
+      href="/login" 
+      variant="secondary" 
+      class="bg-black text-white rounded-full px-8 py-3 md:py-4 text-sm md:text-xl font-bold hover:bg-slate-800 transition whitespace-nowrap"
+    >
+      Commencer à jouer !
+    </Button>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative bg-[#FF6200] overflow-hidden w-full flex items-center min-h-[600px] md:h-[750px]">
+    <img src={wavesBig.src} alt="" class="absolute right-0 top-0 h-full w-auto object-cover object-left pointer-events-none hidden md:block" />
+
+    <div class="relative z-10 w-full max-w-[1440px] mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center h-full">
+      <div class="w-full md:w-[60%] pt-12 pb-8 md:py-0">
+        <h1 class="text-4xl md:text-5xl lg:text-[64px] leading-[1.1] font-black text-white mb-6 font-cal-sans">
+          Apprendre la langue des<br class="hidden lg:block"/> signes différemment !
+        </h1>
+        <p class="text-lg md:text-2xl text-white font-medium leading-relaxed max-w-xl font-alexandria">
+          Mini-jeux et progression fun pour maîtriser la langue des signes française
+        </p>
+      </div>
+
+      <div class="w-full md:w-[40%] h-[400px] md:h-full relative mt-8 md:mt-0 flex justify-center md:block">
+        <img src={parcoursImage.src} alt="Parcours" class="absolute z-10 w-[160px] md:w-[240px] drop-shadow-2xl transform -rotate-[7deg] right-[45%] md:right-[55%] top-[10%] md:top-[25%]" />
+        <img src={heroPhone.src} alt="Mode arcade" class="absolute z-20 w-[150px] md:w-[220px] drop-shadow-2xl transform rotate-[12deg] right-[15%] md:right-[15%] top-[25%] md:top-[40%]" />
+      </div>
+    </div>
+  </section>
+
       
-      <div class="flex gap-4">
-        <div class="flex items-center gap-2.5 bg-white/20 px-5 py-2.5 rounded-full">
-          <img src="/src/assets/icones/flammes.svg" alt="Flamme" class="w-6 h-6 object-contain" />
-          <span class="font-bold text-lg"><span id="series-value">0</span> séries</span>
-        </div>
-        <div class="flex items-center gap-2.5 bg-white/20 px-5 py-2.5 rounded-full">
-          <img src="/src/assets/icones/etoile.svg" alt="Étoile" class="w-6 h-6 object-contain" />
-          <span class="font-bold text-lg"><span id="xp-value">0</span> XP</span>
+      <!-- Carte Mode Entraînement -->
+    <section class="w-full px-6 py-20">
+  
+  <div class="max-w-4xl mx-auto">
+    
+    <a href="/login" class="block h-full flex flex-col bg-[#FF6200] text-white p-8 md:p-16 rounded-[2rem] shadow-xl transform hover:-translate-y-2 transition duration-300">
+      
+      <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-black shadow-md">
+        <img src={iconBook.src} alt="Livre" class="w-10 h-10 object-contain" />
+      </div>
+      
+      <h2 class="text-3xl md:text-4xl font-bold mb-6 font-cal-sans">Mode Entraînement</h2>
+      <p class="mb-10 font-medium font-alexandria text-xl md:text-2xl opacity-90">
+        Un parcours pédagogique complet par paliers thématiques pour apprendre à ton rythme.
+      </p>
+      
+      <ul class="mt-auto space-y-4 text-base md:text-lg opacity-90 list-disc list-inside font-alexandria">
+        <li>Mini-jeux éducatifs (Memory, Cards, QCM)</li>
+        <li>Système de vies et streak pour garder la motivation</li>
+        <li>Mode hors ligne disponible pour apprendre partout</li>
+      </ul>
+    </a>
+    
+  </div>
+</section>
+
+
+  <!-- Diviseur Raton Laveur -->
+  <div class="flex items-center justify-center gap-4 md:gap-8 my-8 px-6">
+    <img src={mascotte.src} alt="Mascotte Wenddy" class="w-16 h-16 md:w-20 md:h-20 transform -scale-x-100 object-contain" />
+    <div class="bg-black text-white font-bold py-4 px-8 md:px-16 rounded-full text-xl md:text-3xl text-center shadow-lg font-cal-sans whitespace-nowrap">
+      3 mini-jeux variés
+    </div>
+    <img src={mascotte.src} alt="Mascotte Wenddy" class="w-16 h-16 md:w-20 md:h-20 object-contain" />
+  </div>
+
+  <!-- Section: Les 3 Mini-Jeux -->
+  <section id="play" class="max-w-5xl mx-auto px-6 py-12">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 justify-items-center">
+    
+    {[
+      { img: iconCartes, title: 'Cards', desc: 'Associe les bonnes cartes' },
+      { img: iconMemory, title: 'Memory', desc: 'Associe mots et signes' },
+      { img: iconVraiFaux, title: 'Vrai/Faux', desc: 'Réponds rapidement' }
+    ].map(game => (
+      <a href="/login" class="bg-[#FF6200] w-full text-white p-8 rounded-[1.5rem] flex flex-col items-center justify-center text-center shadow-md transform hover:scale-105 transition min-h-[200px]">
+        <img src={game.img.src} alt={game.title} class={`h-20 w-20 mx-auto mb-4 object-contain ${game.title === 'Memory' ? 'scale-150' : ''}`} />
+        <h3 class="font-bold mb-2 text-xl font-cal-sans">{game.title}</h3>
+        <p class="text-xs font-medium font-alexandria">{game.desc}</p>
+      </a>
+    ))}
+  </div>
+</section>
+
+    </div>
+  </section>
+  <!-- Section: Fonctionnalités Uniques -->
+  <section id="features" class="py-16 md:py-24 overflow-hidden relative">
+    <div class="max-w-7xl mx-auto px-6 mb-12">
+      <h2 class="text-4xl md:text-5xl lg:text-[64px] font-black text-center font-cal-sans text-slate-950">Fonctionnalités uniques</h2>
+    </div>
+    
+    <div class="relative w-full">
+      <div class="bg-[#FF6200] py-24 px-6 relative overflow-hidden rounded-[3rem] md:rounded-[6rem] mx-4 md:mx-12" style="min-height: 500px;">
+        
+        <img src={wavesSmall.src} alt="" class="pointer-events-none absolute left-[-100px] bottom-[-50px] opacity-40 transform scale-x-[-1] scale-y-[-1] w-[500px]" />
+        <img src={wavesSmall.src} alt="" class="pointer-events-none absolute right-0 top-0 opacity-40 w-[400px]" />
+
+        <div class="absolute inset-0 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24 px-6 z-10">
+          
+          <!-- Rond 1: Miroir -->
+          <div class="bg-white text-black p-8 rounded-full w-64 h-64 md:w-[320px] md:h-[320px] flex flex-col items-center justify-center text-center shadow-2xl transform hover:scale-105 transition">
+            <div class="mb-4">
+              <!-- Icône Appareil Photo / Miroir -->
+              <img src={iconCamera.src} alt="Miroir" class="w-12 h-12 md:w-16 md:h-16 object-contain" />
+            </div>
+            <h3 class="font-bold text-lg md:text-xl mb-3 font-cal-sans">Miroir Interactif</h3>
+            <p class="text-xs md:text-sm text-gray-800 px-6 font-alexandria font-medium leading-relaxed">
+              Compare tes gestes avec le modèle en temps réel via ta caméra
+            </p>
+          </div>
+
+          <!-- Rond 2: Hors Ligne -->
+          <div class="bg-white text-black p-8 rounded-full w-64 h-64 md:w-[320px] md:h-[320px] flex flex-col items-center justify-center text-center shadow-2xl transform hover:scale-105 transition">
+            <div class="mb-4">
+              <!-- Icône Nuage / Wifi Off -->
+              <img src={iconWifiOff.src} alt="Hors Ligne" class="w-12 h-12 md:w-16 md:h-16 object-contain" />
+            </div>
+            <h3 class="font-bold text-lg md:text-xl mb-3 font-cal-sans">Mode Hors Ligne</h3>
+            <p class="text-xs md:text-sm text-gray-800 px-6 font-alexandria font-medium leading-relaxed">
+              Télécharge des packs de leçons pour apprendre partout facilement
+            </p>
+          </div>
+          
         </div>
       </div>
     </div>
   </section>
 
-  <main class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-12">
-    <section>
-      <ProgressSection
-        image="/images/chemin_utilisateur_accueil.webp"
-        buttonText="Voir l'avancée"
-      />
-    </section>
-
-    <section>
-      <div class="md:gap-6">
-        <a href="/arcade" class="block transition-transform hover:scale-105">
-          <GameModeCard
-            title="Arcade"
-            description="Entraîne-toi sur tes signes favoris !"
-            icon="/src/assets/icones/icon_arcade_accueil.svg" 
-          />
-        </a>
+  <!-- CTA Section Footer -->
+  <section class="max-w-7xl mx-auto px-6 py-16 mb-12">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+      <div class="flex-1 text-center md:text-left">
+        <img src={logo.src} alt="Wenddy Logo" class="h-12 md:h-16 w-auto mb-6 mx-auto md:mx-0" />
+        <h2 class="text-4xl md:text-5xl lg:text-[64px] font-black text-slate-950 font-cal-sans leading-tight">Prêt à maîtriser la LSF ?</h2>
       </div>
-    </section>
-  </main>
-
-  <script>
-    import { pb, getUserProfileStats } from '../../backend/backend.mjs';
-
-    async function initUser() {
-      // pb.authStore est accessible ici car on est dans le navigateur
-      const user = pb.authStore.model;
       
-      if (user) {
-        // 1. Affiche le pseudo
-        const pseudoEl = document.getElementById('user-pseudo');
-        if (pseudoEl) pseudoEl.textContent = user.pseudo || user.username || "Joueur";
-
-        // 2. Récupère les stats et affiche-les
-        try {
-          const stats = await getUserProfileStats(user.id);
-          const seriesEl = document.getElementById('series-value');
-          const xpEl = document.getElementById('xp-value');
+      <div class="flex-1 w-full">
+        <!-- Conteneur du formulaire -->
+        <div class="bg-slate-950 rounded-[28px] px-8 py-10 shadow-2xl transition-all duration-500" id="newsletter-container">
           
-          if (seriesEl) seriesEl.textContent = String(stats.seriesCount || 0);
-          if (xpEl) xpEl.textContent = String(stats.xpTotal || 0);
-        } catch (e) {
-          console.error("Erreur de chargement des stats:", e);
-        }
-      } else {
-        // Optionnel : Rediriger vers login si non connecté
-        // window.location.href = '/login'; 
-      }
-    }
+          <p id="newsletter-text" class="text-white text-base md:text-lg mb-6 font-medium font-alexandria text-center md:text-left">
+            Rejoins la communauté Wenddy et commence ton aventure dès aujourd'hui !
+          </p>
+          
+          <!-- Le Formulaire -->
+          <form id="newsletter-form" class="flex flex-col sm:flex-row gap-4">
+            <input 
+              type="email" 
+              id="newsletter-email"
+              required
+              placeholder="Ton email" 
+              class="flex-1 rounded-full border-none bg-white px-6 py-4 text-slate-950 placeholder:text-slate-500 focus:outline-none focus:ring-4 focus:ring-[#FF6200] font-alexandria" 
+            />
+            <Button type="submit" class="bg-[#FF6200] hover:bg-orange-600 text-white rounded-full px-8 py-4 font-bold transition transform hover:scale-105 shadow-md border-none whitespace-nowrap">
+              Commencer
+            </Button>
+          </form>
 
-    document.addEventListener('DOMContentLoaded', initUser);
-  </script>
+          <!-- Le Message de succès (Caché par défaut) -->
+          <div id="newsletter-success" class="hidden text-center md:text-left">
+            <div class="text-[#FF6200] text-4xl mb-2">✅</div>
+            <h3 class="text-xl font-bold text-white font-cal-sans">Inscription validée !</h3>
+            <p class="text-white/80 font-alexandria mt-2">Merci de nous avoir rejoints. Prépare-toi à découvrir la LSF différemment !</p>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
 </Layout>
+<script>
+  // On attend que la page soit bien chargée
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('newsletter-form');
+    const emailInput = document.getElementById('newsletter-email');
+    const successMsg = document.getElementById('newsletter-success');
+    const textMsg = document.getElementById('newsletter-text');
+
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        // Empêche la page de se rafraîchir
+        e.preventDefault();
+        
+        // Vérifie qu'il y a bien quelque chose dans l'input
+        if (emailInput && (emailInput as HTMLInputElement).value) {
+          // Animation fictive : on cache le formulaire et on affiche le succès
+          form.style.display = 'none';
+          if (textMsg) textMsg.style.display = 'none';
+          
+          if (successMsg) {
+            successMsg.classList.remove('hidden');
+            // Optionnel : petite animation d'apparition
+            successMsg.classList.add('animate-fade-in'); 
+          }
+        }
+      });
+    }
+  });
+</script>

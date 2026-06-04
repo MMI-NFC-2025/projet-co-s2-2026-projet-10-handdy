@@ -1,0 +1,42 @@
+---
+export interface Props {
+  title: string;
+  image: string;
+  description: string;
+  videoUrl: string;
+}
+
+const { title, image, description, videoUrl } = Astro.props;
+---
+
+<div 
+  class="sign-card group relative overflow-hidden rounded-3xl bg-white shadow-sm border border-gray-100 flex flex-col h-full" 
+  data-video-url={videoUrl} 
+  data-sign-title={title}
+>
+  
+  <div class="relative aspect-video bg-gray-100">
+    <img src={image} alt={title} class="w-full h-full object-cover" />
+    
+    <button class="video-overlay-btn absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-all opacity-0 group-hover:opacity-100">
+      <svg class="w-12 h-12 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="p-5 flex-grow flex flex-col justify-between">
+    <div>
+      <h3 class="text-xl font-bold text-gray-900 capitalize font-cal-sans">{title}</h3>
+      <p class="text-sm text-gray-500 mt-1 font-alexandria line-clamp-1">{description}</p>
+    </div>
+    
+    <div class="mt-4 flex justify-end items-center border-t border-gray-100 pt-4">
+      <a href={videoUrl} target="_blank" download={`${title}.mp4`} class="p-2 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-black transition-colors" title="Télécharger la vidéo">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+---
+
+<Layout title="Mon Parcours - Wenddy">
+  <div class="min-h-screen bg-[#E5E7EB] flex flex-col font-sans overflow-x-hidden">
+    
+    <header class="bg-white py-6 shadow-sm z-20 text-center relative px-4">
+      <a href="/accueil" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-black hover:text-[#FF6200] transition-colors" title="Quitter">
+        <svg class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </a>
+      <h1 class="text-2xl md:text-3xl font-black text-slate-950 font-cal-sans">Mon Parcours</h1>
+      <p class="text-[#FF6200] font-bold mt-1 text-sm md:text-base">Niveau 1 - Débutant</p>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center justify-center w-full py-8 px-4">
+      
+      <div class="relative w-full max-w-[360px] rounded-3xl shadow-xl overflow-hidden border-4 border-white" style="background-color: #87B44E;">
+        
+        <!-- Calque de remplissage masqué par la forme du chemin -->
+        <div
+          id="xp-fill"
+          class="absolute inset-0 z-20 pointer-events-none"
+          style="
+            background-color: #FF6200;
+            mask-image: url('/images/frame.png');
+            -webkit-mask-image: url('/images/frame.png');
+            mask-size: contain;
+            -webkit-mask-size: contain;
+            mask-repeat: no-repeat;
+            -webkit-mask-repeat: no-repeat;
+            mask-position: center bottom;
+            -webkit-mask-position: center bottom;
+            height: 0%;
+            bottom: 0;
+            top: auto;
+            transition: height 1000ms ease-out;
+          "
+        ></div>
+
+        <!-- Image du chemin par dessus -->
+        <img
+          src="/images/frame.png"
+          alt="Chemin de progression XP"
+          class="w-full h-auto relative z-10 object-contain block"
+          onerror="this.style.display='none'"
+        />
+      </div>
+
+    </main>
+
+    <footer class="w-full py-4 text-center text-gray-400 text-xs bg-white border-t border-gray-200 z-20">
+      Projet Wenddy - MMI Montbéliard | ID: o4g3yq8bkgg4bxz
+    </footer>
+  </div>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const fill = document.getElementById('xp-fill');
+    
+    const jeuxRealises = parseInt(localStorage.getItem('wenddy_games_completed') || '1');
+    const totalJeux = 5;
+    
+    if (fill) {
+      setTimeout(() => {
+        const percentage = Math.min((jeuxRealises / totalJeux) * 100, 100);
+        fill.style.height = `${percentage}%`;
+      }, 300);
+    }
+  });
+</script>

@@ -1,29 +1,255 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import VraiFauxGameClient from '../../components/VraiFauxGameClient.astro';
-import { gamesVraiFauxAll, getFileUrl } from '../../../backend/backend.mjs';
-
-// On force le type à 'any[]' pour éviter les erreurs de compilation de l'éditeur
+import { gamesVraiFauxAll, getFileUrl, addScore, getCurrentUser, gameTypesAll } from '../../../backend/backend.mjs';
 let questions: any[] = [];
 
 try {
   const rawData = await gamesVraiFauxAll();
   
-  questions = rawData.map((q: any) => ({
-    id: q.id,
-    // On utilise getFileUrl de ton backend pour récupérer l'URL correcte de la vidéo
-    video: getFileUrl(q, q.video), 
-    word: q.nom || 'Mot',
-    correct_answer: q.reponse === true,
-    question_text: 'Le signe présenté correspond-il au mot proposé ?'
-  }));
+  questions = rawData.map((q: any) => {
+    const signeLie = q.expand?.relation;
+    
+    // La vidéo est dans le signe lié
+    const videoUrl = signeLie 
+      ? getFileUrl(signeLie, signeLie.video) 
+      : null;
+
+    return {
+      id: q.id,
+      video: videoUrl,
+      word: q.select || 'Mot',          // champ "select" = le mot proposé
+      correct_answer: q.bool === true,   // champ "bool" = vrai/faux
+      question_text: q.questions || 'Le signe présenté correspond-il au mot proposé ?'
+    };
+  });
+
 } catch (e) {
   console.error("Erreur chargement questions:", e);
 }
+
+const allGameTypes = await gameTypesAll();
+const vraiFauxType = allGameTypes.find((g: any) => g.nom.toLowerCase().includes('vrai'));
+const gameTypeId = vraiFauxType?.id || '';
 ---
 
-<Layout>
-  <main class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <VraiFauxGameClient questions={questions} />
-  </main>
+<Layout title="Mode Vrai ou Faux - Wenddy" showHeader={false} showFooter={false}>
+  <div class="min-h-screen bg-[#E5E7EB] flex flex-col font-sans overflow-x-hidden">
+    
+    <main class="flex-grow flex flex-col justify-between pb-12">
+      
+    <!-- Barre de progression harmonisée -->
+      <div class="bg-white rounded-b-3xl py-6 px-4 shadow-sm relative z-10 mb-8 md:mb-12">
+        <div class="max-w-5xl mx-auto relative flex flex-col items-center">
+          <a href="/arcade" class="absolute left-0 top-0 text-black hover:text-[#FF6200] transition-colors" title="Quitter le jeu">
+            <svg class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </a>
+          
+          <p id="compteur-question" class="text-sm md:text-lg font-bold mb-3 text-gray-700 font-cal-sans">Question 1/5</p>
+          
+          <!-- Jauge harmonisée avec Memory et Vrai/Faux -->
+          <div class="w-full max-w-md md:max-w-xl h-4 md:h-5 bg-gray-200 rounded-full relative">
+            <div id="barre-progression" class="h-full bg-[#FF6200] rounded-full transition-all duration-300" style="width: 20%;">
+              <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center">
+                <img src="/src/assets/icones/mascotte.svg" alt="Mascotte Wenddy" class="w-full h-full drop-shadow-md object-contain" onerror="this.style.display='none'"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Zone de Jeu Principale -->
+      <!-- Zone de Jeu Principale -->
+      <!-- Zone de Jeu Principale -->
+      <!-- Zone de Jeu Principale -->
+<!-- Zone de Jeu Principale -->
+ 
+      <section class="flex-grow flex flex-col items-center justify-center px-4 max-w-sm mx-auto w-full py-2">
+        
+       <!-- Titre sur 2 lignes, plus court et impactant -->
+        <h1 class="text-xl md:text-4xl font-black text-slate-950 mb-6 text-center font-cal-sans leading-tight">
+          Ce signe correspond-il <br /> au mot proposé ?
+        </h1>
+
+        <!-- Conteneur Vidéo -->
+     <div id="media-card" class="w-full max-w-[280px] aspect-[4/5] bg-gray-200 rounded-3xl border-4 border-transparent shadow-sm relative overflow-hidden flex items-center justify-center mb-5 cursor-pointer">
+        
+        <div id="video-container" class="w-full h-full pointer-events-none"></div>
+        
+      </div>
+
+        <!-- Mot proposé (espacement réduit) -->
+        <div id="word-box" class="w-full max-w-[280px] bg-white rounded-2xl py-4 px-6 shadow-sm text-center mb-6">
+          <span id="proposed-word" class="text-2xl font-bold text-slate-900 font-cal-sans">Chargement...</span>
+        </div>
+
+        <!-- Boutons Vrai / Faux (rapprochés du mot) -->
+        <div class="flex w-full max-w-[280px] gap-4">
+          <button id="btn-vrai" class="flex-1 bg-slate-900 text-white font-bold text-xl py-4 rounded-2xl shadow-md transition-all font-cal-sans outline-none">
+            Vrai
+          </button>
+          <button id="btn-faux" class="flex-1 bg-slate-900 text-white font-bold text-xl py-4 rounded-2xl shadow-md transition-all font-cal-sans outline-none">
+            Faux
+          </button>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
 </Layout>
+
+<style is:global>
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-8px); }
+    80% { transform: translateX(8px); }
+  }
+  
+  .animate-shake { 
+    animation: shake 0.4s ease-in-out; 
+  }
+</style>
+
+<script define:vars={{ questions, gameTypeId }}>
+
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    const gameData = questions.map(q => ({
+      id: q.id,
+      videoUrl: q.video,
+      proposedWord: q.word,
+      isTrue: q.correct_answer
+    }));
+
+    let currentIndex = 0;
+    let correctAnswers = 0;
+    const totalQuestions = gameData.length;
+    let canClick = true;
+    
+
+    const proposedWordText = document.getElementById('proposed-word');
+    const videoContainer = document.getElementById('video-container');
+    const btnVrai = document.getElementById('btn-vrai');
+    const btnFaux = document.getElementById('btn-faux');
+    const compteur = document.getElementById('compteur-question');
+    const barre = document.getElementById('barre-progression');
+
+    function loadQuestion() {
+      canClick = true;
+      const currentData = gameData[currentIndex];
+
+      if (proposedWordText) proposedWordText.innerText = currentData.proposedWord;
+
+      const progressPercent = Math.max(5, (currentIndex / totalQuestions) * 100);
+      if (compteur) compteur.innerText = `Question ${currentIndex + 1}/${totalQuestions}`;
+      if (barre) barre.style.width = `${progressPercent}%`;
+
+      if (videoContainer) {
+        if (currentData.videoUrl) {
+          videoContainer.innerHTML = `
+            <video 
+              src="${currentData.videoUrl}" 
+              class="w-full h-full object-cover" 
+              muted loop playsinline autoplay
+            ></video>`;
+        } else {
+          videoContainer.innerHTML = '';
+        }
+      }
+    }
+
+    async function finDePartie() {
+  const pointsGagnes = correctAnswers * 10;
+  try {
+    // PocketBase stocke sous "pocketbase_auth" ou parfois avec le nom de la collection
+    const pbKey = Object.keys(localStorage).find(k => k.startsWith('pocketbase_'));
+    const token = pbKey ? localStorage.getItem(pbKey) : null;
+    
+    if (token) {
+      const authData = JSON.parse(token);
+      const userId = authData?.model?.id;
+      const authToken = authData?.token;
+      
+      if (userId && authToken) {
+        const res = await fetch('https://wenddy.bambou-franceschini.fr/api/collections/scores/records', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            user: userId,
+            game_type: gameTypeId,
+            points: pointsGagnes,
+            duration: 0
+          })
+        });
+        
+        if (!res.ok) {
+          const err = await res.json();
+          console.error("Erreur PocketBase:", err);
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Erreur sauvegarde score:", e);
+  }
+  window.location.href = `/progres?points=${pointsGagnes}`;
+}
+
+    function handleAnswer(userAnswer, clickedBtnId) {
+      if (!canClick) return;
+      canClick = false;
+
+      const currentData = gameData[currentIndex];
+      const isCorrect = userAnswer === currentData.isTrue;
+      const clickedBtn = document.getElementById(clickedBtnId);
+
+      if (isCorrect) {
+        correctAnswers++;
+        const vid = videoContainer?.querySelector('video');
+        if (vid) vid.play();
+
+        if (clickedBtn) {
+          clickedBtn.classList.replace('bg-slate-900', 'bg-green-500');
+          clickedBtn.classList.add('ring-4', 'ring-green-200');
+        }
+
+        const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+        if (barre) barre.style.width = `${progressPercent}%`;
+
+        setTimeout(async () => {
+          if (clickedBtn) {
+            clickedBtn.classList.replace('bg-green-500', 'bg-slate-900');
+            clickedBtn.classList.remove('ring-4', 'ring-green-200');
+          }
+          if (currentIndex < totalQuestions - 1) {
+            currentIndex++;
+            loadQuestion();
+          } else {
+            await finDePartie();
+          }
+        }, 1500);
+
+      } else {
+        if (clickedBtn) {
+          clickedBtn.classList.replace('bg-slate-900', 'bg-red-500');
+          clickedBtn.classList.add('animate-shake', 'ring-4', 'ring-red-200');
+
+          setTimeout(() => {
+            clickedBtn.classList.remove('animate-shake', 'ring-4', 'ring-red-200');
+            clickedBtn.classList.replace('bg-red-500', 'bg-slate-900');
+            canClick = true;
+          }, 600);
+        }
+      }
+    }
+
+    if (btnVrai) btnVrai.addEventListener('click', () => handleAnswer(true, 'btn-vrai'));
+    if (btnFaux) btnFaux.addEventListener('click', () => handleAnswer(false, 'btn-faux'));
+
+    loadQuestion();
+  });
+</script>

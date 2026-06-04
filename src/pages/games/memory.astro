@@ -1,0 +1,285 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { gamesMemoryAll, getFileUrl, addScore, gameTypesAll } from '../../../backend/backend.mjs';
+
+let levels: any[] = [];
+let gameTypeId = '';
+
+const rawData = await gamesMemoryAll();
+console.log("Nombre de niveaux:", rawData.length);
+console.log("expand relation:", JSON.stringify(rawData[0]?.expand?.relation, null, 2));
+console.log("isArray:", Array.isArray(rawData[0]?.expand?.relation));
+
+
+try {
+  levels = rawData.map((level: any) => {
+  const relationData = level.expand?.relation;
+  const relArray = Array.isArray(relationData) 
+    ? relationData 
+    : relationData ? [relationData] : [];
+  
+  return {
+    id: level.id,
+    nom: level.nom_niveau,
+    pairs: relArray.map((dessin: any) => ({
+      id: dessin.id,
+      text: dessin.nom,
+      imageUrl: getFileUrl(dessin, dessin.images)
+    }))
+  };
+}); 
+
+  const allGameTypes = await gameTypesAll();
+  const memoryType = allGameTypes.find((g: any) => g.nom.toLowerCase().includes('memory'));
+  gameTypeId = memoryType?.id || '';
+
+} catch (e) {
+  console.error("Erreur chargement Memory:", e);
+}
+---
+
+<Layout title="Mode Memory - Wenddy" showHeader={false} showFooter={false}>
+  <div class="min-h-screen bg-[#E5E7EB] flex flex-col font-sans overflow-x-hidden">
+
+    <main class="flex-grow flex flex-col justify-between pb-12">
+      
+      <div class="bg-white rounded-b-3xl py-6 px-4 shadow-sm relative z-10 mb-8 md:mb-12">
+        <div class="max-w-5xl mx-auto relative flex flex-col items-center">
+          <a href="/arcade" class="absolute left-0 top-0 text-black hover:text-[#FF6200] transition-colors" title="Quitter le jeu">
+            <svg class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </a>
+          <p id="compteur-question" class="text-sm md:text-lg font-bold mb-3 text-gray-700 font-cal-sans">Question 1/5</p>
+          <div class="w-full max-w-md md:max-w-xl h-4 md:h-5 bg-gray-200 rounded-full relative">
+            <div id="barre-progression" class="h-full bg-[#FF6200] rounded-full transition-all duration-300" style="width: 20%;">
+              <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center">
+                <img src="/src/assets/icones/mascotte.svg" alt="Mascotte Wenddy" class="w-full h-full drop-shadow-md object-contain" onerror="this.style.display='none'"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="flex-grow flex flex-col items-center px-4 max-w-2xl mx-auto w-full py-2">
+        <h1 class="text-4xl font-black text-slate-950 mb-10 text-center font-cal-sans">Memory</h1>
+        <div id="memory-grid" class="grid grid-cols-3 gap-4 w-full mt-6"></div>
+        <div id="validation-container" class="fixed right-6 bottom-8 md:right-12 md:bottom-12 opacity-0 transition-opacity duration-500 pointer-events-none z-50">
+          <button id="btn-suivant" class="w-16 h-16 md:w-20 md:h-20 bg-[#FF6200] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer">
+            <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style is:global>
+  .perspective { perspective: 1200px; }
+  .transform-style-3d { transform-style: preserve-3d; }
+  .flip-front, .flip-back {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    transform: translateZ(1px);
+  }
+  .flip-back { transform: rotateY(180deg) translateZ(1px); }
+  .flipped .flip-inner { transform: rotateY(180deg); }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  .animate-shake { animation: shake 0.4s ease-in-out; }
+</style>
+
+<script define:vars={{ levels, gameTypeId }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const allLevels = levels.map(level => level.pairs);
+
+    let currentLevelIndex = 0;
+    let correctAnswers = 0;
+    const totalLevels = allLevels.length;
+
+    const memoryGrid = document.getElementById('memory-grid');
+    const validationContainer = document.getElementById('validation-container');
+    const btnSuivant = document.getElementById('btn-suivant');
+    const compteur = document.getElementById('compteur-question');
+    const barre = document.getElementById('barre-progression');
+
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let canFlip = true;
+
+    function loadLevel() {
+      if (memoryGrid) memoryGrid.innerHTML = '';
+      if (validationContainer) {
+        validationContainer.classList.add('opacity-0', 'pointer-events-none');
+        validationContainer.classList.remove('opacity-100');
+      }
+
+      matchedPairs = 0;
+      flippedCards = [];
+      canFlip = true;
+
+      const progressPercent = Math.max(5, (currentLevelIndex / totalLevels) * 100);
+      if (compteur) compteur.innerText = `Question ${currentLevelIndex + 1}/${totalLevels}`;
+      if (barre) barre.style.width = `${progressPercent}%`;
+
+      const currentLevelData = allLevels[currentLevelIndex];
+
+      if (!currentLevelData || currentLevelData.length === 0) {
+        if (memoryGrid) memoryGrid.innerHTML = '<p class="col-span-3 text-center text-slate-500">Aucune carte trouvée pour ce niveau.</p>';
+        return;
+      }
+
+      let cardsArray = [];
+
+      currentLevelData.forEach(pair => {
+        cardsArray.push({ pairId: pair.id, type: 'text', content: pair.text });
+        // ✅ imageUrl au lieu de videoUrl
+        cardsArray.push({ pairId: pair.id, type: 'images', content: pair.imageUrl });
+      });
+
+      // Mélange
+      for (let i = cardsArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cardsArray[i], cardsArray[j]] = [cardsArray[j], cardsArray[i]];
+      }
+
+      if (memoryGrid) {
+        cardsArray.forEach((card) => {
+          const btn = document.createElement('button');
+          btn.className = "card-element perspective w-full aspect-[3/4] md:aspect-[4/5] relative cursor-pointer outline-none";
+          btn.dataset.pairId = card.pairId;
+
+          // ✅ image au lieu de video
+          const faceContent = card.type === 'text'
+            ? `<span class="font-bold text-lg md:text-3xl text-slate-900 text-center">${card.content}</span>`
+            : card.content
+              ? `<img src="${card.content}" class="w-full h-full object-contain rounded-3xl" alt="signe" />`
+              : `<div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">Pas d'image</div>`;
+
+          btn.innerHTML = `
+            <div class="flip-inner w-full h-full relative transition-transform duration-500 transform-style-3d">
+              <div class="flip-front absolute inset-0 bg-white rounded-3xl flex items-center justify-center shadow-sm border-2 border-gray-100 hover:bg-gray-50 transition-colors p-4 md:p-8">
+                <img src="/src/assets/icones/mascotte.svg" alt="Dos de carte" class="w-16 h-16 md:w-28 md:h-28 object-contain opacity-90" />
+              </div>
+              <div class="flip-back absolute inset-0 bg-white rounded-3xl flex items-center justify-center shadow-sm border-2 border-transparent p-4 md:p-6 overflow-hidden">
+                ${faceContent}
+              </div>
+            </div>
+          `;
+
+          btn.addEventListener('click', () => handleCardClick(btn));
+          memoryGrid.appendChild(btn);
+        });
+      }
+    }
+
+    function handleCardClick(card) {
+      if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+      card.classList.add('flipped');
+      flippedCards.push(card);
+      if (flippedCards.length === 2) {
+        canFlip = false;
+        checkForMatch();
+      }
+    }
+
+    function checkForMatch() {
+      const card1 = flippedCards[0];
+      const card2 = flippedCards[1];
+      const isMatch = card1.dataset.pairId === card2.dataset.pairId;
+
+      if (isMatch) {
+        setTimeout(() => {
+          card1.classList.add('matched');
+          card2.classList.add('matched');
+          card1.querySelector('.flip-back')?.classList.replace('border-transparent', 'border-green-500');
+          card2.querySelector('.flip-back')?.classList.replace('border-transparent', 'border-green-500');
+          matchedPairs++;
+          flippedCards = [];
+          canFlip = true;
+          if (matchedPairs === allLevels[currentLevelIndex].length) levelWon();
+        }, 400);
+      } else {
+        setTimeout(() => {
+          card1.classList.add('animate-shake');
+          card2.classList.add('animate-shake');
+          card1.querySelector('.flip-back')?.classList.replace('border-transparent', 'border-red-500');
+          card2.querySelector('.flip-back')?.classList.replace('border-transparent', 'border-red-500');
+          setTimeout(() => {
+            card1.classList.remove('animate-shake', 'flipped');
+            card2.classList.remove('animate-shake', 'flipped');
+            card1.querySelector('.flip-back')?.classList.replace('border-red-500', 'border-transparent');
+            card2.querySelector('.flip-back')?.classList.replace('border-red-500', 'border-transparent');
+            flippedCards = [];
+            canFlip = true;
+          }, 600);
+        }, 500);
+      }
+    }
+
+    function levelWon() {
+      correctAnswers++;
+      if (validationContainer) {
+        validationContainer.classList.remove('opacity-0', 'pointer-events-none');
+        validationContainer.classList.add('opacity-100');
+      }
+      const progressPercent = ((currentLevelIndex + 1) / totalLevels) * 100;
+      if (barre) barre.style.width = `${progressPercent}%`;
+    }
+
+    async function finDePartie() {
+      const pointsGagnes = correctAnswers * 10;
+      try {
+        const pbKey = Object.keys(localStorage).find(k => k.startsWith('pocketbase_'));
+        const token = pbKey ? localStorage.getItem(pbKey) : null;
+        if (token) {
+          const authData = JSON.parse(token);
+          const userId = authData?.model?.id;
+          const authToken = authData?.token;
+          if (userId && authToken) {
+            const res = await fetch('https://wenddy.bambou-franceschini.fr/api/collections/scores/records', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+              },
+              body: JSON.stringify({
+                user: userId,
+                game_type: gameTypeId,
+                points: pointsGagnes,
+                duration: 0
+              })
+            });
+            if (!res.ok) console.error("Erreur PocketBase:", await res.json());
+          }
+        }
+      } catch (e) {
+        console.error("Erreur sauvegarde score:", e);
+      }
+      window.location.href = `/progres?points=${pointsGagnes}`;
+    }
+
+    if (btnSuivant) {
+      btnSuivant.addEventListener('click', async () => {
+        if (currentLevelIndex < totalLevels - 1) {
+          currentLevelIndex++;
+          loadLevel();
+        } else {
+          await finDePartie();
+        }
+      });
+    }
+
+    if (totalLevels > 0) {
+      loadLevel();
+    } else {
+      if (memoryGrid) memoryGrid.innerHTML = '<p class="col-span-3 text-center text-slate-500 font-bold">Aucun niveau disponible.</p>';
+    }
+  });
+</script>

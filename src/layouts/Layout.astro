@@ -2,6 +2,18 @@
 import '../style/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  showHeader?: boolean;
+  showFooter?: boolean;
+}
+
+const { 
+  title = "Wenddy – Maîtrise la LSF", 
+  showHeader = true, 
+  showFooter = true 
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -12,26 +24,23 @@ import Footer from '../components/Footer.astro';
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content="Wenddy — Apprends la langue des signes française avec des mini-jeux et défis." />
-    <title>Wenddy – Maîtrise la LSF</title>
+    <title>{title}</title>
   </head>
   <body class="bg-gray-100 min-h-screen text-slate-900">
-  <body>
-    <Header />
+    
+    {showHeader && <Header />}
+    
     <slot />
 
+    {showFooter && <Footer />}
+
     <script>
-      import { initNotifications, planifierRappelQuotidien,} from '../../backend/notifications.js';
-    
-          window.addEventListener('load', () => {
-            initNotifications();
-            planifierRappelQuotidien(14, 0); 
-  });
-    
+      import { initNotifications, planifierRappelQuotidien } from '../../backend/notifications.js';
+
       window.addEventListener('load', () => {
         initNotifications();
+        planifierRappelQuotidien(14, 0); 
       });
-      window.addEventListener('load', initNotifications);
     </script>
-    <Footer />
   </body>
 </html>

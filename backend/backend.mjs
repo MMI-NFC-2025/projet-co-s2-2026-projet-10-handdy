@@ -121,7 +121,9 @@ export async function updateLesson(id, data) {
 }
 
 export async function gamesCardsAll() {
-  return await pb.collection('jeux_cards').getFullList({ expand: 'relation' });
+  return await pb.collection('jeux_cards').getFullList({ 
+    expand: 'relation,relation2' 
+  });
 }
 
 export async function gameCardsById(id) {
@@ -137,7 +139,10 @@ export async function updateGameCards(id, data) {
 }
 
 export async function gamesMemoryAll() {
-  return await pb.collection('jeux_memory').getFullList({ sort: 'nom_niveau', expand: 'relation' });
+  return await pb.collection('jeux_memory').getFullList({ 
+    sort: 'nom_niveau', 
+    expand: 'relation' // plus besoin du double expand
+  });
 }
 
 export async function gameMemoryById(id) {
@@ -152,9 +157,6 @@ export async function updateGameMemory(id, data) {
   return await pb.collection('jeux_memory').update(id, data);
 }
 
-export async function gamesVraiFauxAll() {
-  return await pb.collection('jeux_vrai_faux').getFullList({ expand: 'relation' });
-}
 
 export async function gameVraiFauxById(id) {
   return await pb.collection('jeux_vrai_faux').getOne(id, { expand: 'relation' });
@@ -168,6 +170,11 @@ export async function updateGameVraiFaux(id, data) {
   return await pb.collection('jeux_vrai_faux').update(id, data);
 }
 
+export async function gamesVraiFauxAll() {
+  return await pb.collection('jeux_vrai_faux').getFullList({ 
+    expand: 'relation'  // ← indispensable pour avoir la vidéo
+  });
+}
 export async function scoresAll() {
   return await pb.collection('scores').getFullList({ sort: '-created', expand: 'user,game_type' });
 }
@@ -372,6 +379,10 @@ export async function isFollowing(targetUserId) {
   }
 }
 
+export function getCurrentUser() {
+  return pb.authStore.model;
+}
+
 export function planifierRappelQuotidien(heure, minute) {
   setInterval(() => {
     const maintenant = new Date();
@@ -406,3 +417,4 @@ export function planifierRappelQuotidien(heure, minute) {
               }
             });
           }
+  
