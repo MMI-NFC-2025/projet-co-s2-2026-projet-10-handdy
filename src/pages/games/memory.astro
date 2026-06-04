@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { gamesMemoryAll, getFileUrl, addScore, gameTypesAll } from '../../../backend/backend.mjs';
+import { gamesMemoryAll, getFileUrl, addScore, gameTypesAll, ajouterSession } from '../../../backend/backend.mjs';
 
 let levels: any[] = [];
 let gameTypeId = '';
@@ -72,7 +72,7 @@ try {
       </section>
     </main>
   </div>
-</Layout>
+
 
 <style is:global>
   .perspective { perspective: 1200px; }
@@ -95,10 +95,27 @@ try {
   .animate-shake { animation: shake 0.4s ease-in-out; }
 </style>
 
+<!-- Passage des données Astro vers le module -->
 <script define:vars={{ levels, gameTypeId }}>
-  document.addEventListener('DOMContentLoaded', () => {
-    const allLevels = levels.map(level => level.pairs);
+  window.__memoryLevels = levels;
+  window.__memoryGameTypeId = gameTypeId;
+</script>
 
+<!-- Logique du jeu en ES module avec imports -->
+<script>
+
+  declare global {
+  interface Window {
+    __memoryLevels: { id: string; nom: string; pairs: { id: string; text: string; imageUrl: string }[] }[];
+    __memoryGameTypeId: string;
+  }
+}
+  import { pb, addScore, enregistrerProgression } from '../../../backend/backend.mjs';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const allLevels = (window.__memoryLevels || []).map((level: { pairs: { id: string; text: string; imageUrl: string }[] }) => level.pairs);
+    const gameTypeId = window.__memoryGameTypeId || '';
+ 
     let currentLevelIndex = 0;
     let correctAnswers = 0;
     const totalLevels = allLevels.length;
@@ -109,7 +126,7 @@ try {
     const compteur = document.getElementById('compteur-question');
     const barre = document.getElementById('barre-progression');
 
-    let flippedCards = [];
+    let flippedCards: HTMLButtonElement[] = [];
     let matchedPairs = 0;
     let canFlip = true;
 
@@ -135,15 +152,12 @@ try {
         return;
       }
 
-      let cardsArray = [];
-
-      currentLevelData.forEach(pair => {
+      let cardsArray: { pairId: string; type: string; content: string }[] = [];
+      currentLevelData.forEach((pair: { id: string; text: string; imageUrl: string }) => {
         cardsArray.push({ pairId: pair.id, type: 'text', content: pair.text });
-        // ✅ imageUrl au lieu de videoUrl
         cardsArray.push({ pairId: pair.id, type: 'images', content: pair.imageUrl });
       });
 
-      // Mélange
       for (let i = cardsArray.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [cardsArray[i], cardsArray[j]] = [cardsArray[j], cardsArray[i]];
@@ -152,13 +166,13 @@ try {
       if (memoryGrid) {
         cardsArray.forEach((card) => {
           const btn = document.createElement('button');
-          btn.className = "card-element perspective w-full aspect-[3/4] md:aspect-[4/5] relative cursor-pointer outline-none";
+          btn.className = 'card-element perspective w-full aspect-[3/4] md:aspect-[4/5] relative cursor-pointer outline-none';
           btn.dataset.pairId = card.pairId;
 
-          // ✅ image au lieu de video
-          const faceContent = card.type === 'text'
-            ? `<span class="font-bold text-lg md:text-3xl text-slate-900 text-center">${card.content}</span>`
-            : card.content
+          const faceContent =
+            card.type === 'text'
+              ? `<span class="font-bold text-lg md:text-3xl text-slate-900 text-center">${card.content}</span>`
+              : card.content
               ? `<img src="${card.content}" class="w-full h-full object-contain rounded-3xl" alt="signe" />`
               : `<div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">Pas d'image</div>`;
 
@@ -179,7 +193,8 @@ try {
       }
     }
 
-    function handleCardClick(card) {
+    
+    function handleCardClick(card: HTMLButtonElement) {
       if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched')) return;
       card.classList.add('flipped');
       flippedCards.push(card);
@@ -235,33 +250,32 @@ try {
 
     async function finDePartie() {
       const pointsGagnes = correctAnswers * 10;
-      try {
-        const pbKey = Object.keys(localStorage).find(k => k.startsWith('pocketbase_'));
-        const token = pbKey ? localStorage.getItem(pbKey) : null;
-        if (token) {
-          const authData = JSON.parse(token);
-          const userId = authData?.model?.id;
-          const authToken = authData?.token;
-          if (userId && authToken) {
-            const res = await fetch('https://wenddy.bambou-franceschini.fr/api/collections/scores/records', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-              },
-              body: JSON.stringify({
-                user: userId,
-                game_type: gameTypeId,
-                points: pointsGagnes,
-                duration: 0
-              })
-            });
-            if (!res.ok) console.error("Erreur PocketBase:", await res.json());
-          }
+      const user = pb.authStore.model;
+
+      if (user && pointsGagnes > 0) {
+        try {
+          // Crée la session dans user_games (pour stats et séries)
+          await pb.collection('user_games').create({
+            user: user.id,
+            xp_gagne: pointsGagnes,
+            date_session: new Date().toISOString(),
+          });
+
+          // Met à jour le score global et le streak
+          await enregistrerProgression(user.id, pointsGagnes);
+
+          // Enregistre le score de la partie
+          await addScore({
+            user: user.id,
+            game_type: gameTypeId,
+            points: pointsGagnes,
+            duration: 0,
+          });
+        } catch (e) {
+          console.error('Erreur sauvegarde score:', e);
         }
-      } catch (e) {
-        console.error("Erreur sauvegarde score:", e);
       }
+
       window.location.href = `/progres?points=${pointsGagnes}`;
     }
 
@@ -283,3 +297,4 @@ try {
     }
   });
 </script>
+</Layout>

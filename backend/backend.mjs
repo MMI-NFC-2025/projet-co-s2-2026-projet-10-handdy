@@ -191,6 +191,32 @@ export async function addScore(data) {
   return await pb.collection('scores').create(data);
 }
 
+// Mise à jour du score après une bonne réponse
+export async function updateScore(userId, pointsGagnes) {
+  // 1. Récupérer le score actuel
+  const record = await pb.collection('score').getFirstListItem(`user="${userId}"`);
+  
+  // 2. Calculer le nouveau streak (logique simple)
+  const hier = new Date();
+  hier.setDate(hier.getDate() - 1);
+  
+  const derniereDate = new Date(record.last_played_at);
+  let nouveauStreak = record.streak;
+
+  if (derniereDate.toDateString() === hier.toDateString()) {
+    nouveauStreak += 1; // Joué hier, on continue la série
+  } else if (derniereDate.toDateString() !== new Date().toDateString()) {
+    nouveauStreak = 1; // Reprise après une pause
+  }
+
+  // 3. Update dans PocketBase
+  return await pb.collection('score').update(record.id, {
+    xp: record.xp + pointsGagnes,
+    streak: nouveauStreak,
+    last_played_at: new Date().toISOString()
+  });
+}
+
 export async function supportMessagesAll() {
   return await pb.collection('support_messages').getFullList({ sort: '-created', expand: 'utilisateurs' });
 }
@@ -418,3 +444,50 @@ export function planifierRappelQuotidien(heure, minute) {
             });
           }
   
+  export async function enregistrerProgression(userId, xpGagnes) {
+  // 1. Récupérer ou créer l'enregistrement de score pour l'utilisateur
+  let score;
+  try {
+    score = await pb.collection('score').getFirstListItem(`user="${userId}"`);
+  } catch (e) {
+    score = await pb.collection('score').create({ user: userId, xp: 0, streak: 0, last_played_at: null });
+  }
+
+  const maintenant = new Date();
+  const derniereDate = score.last_played_at ? new Date(score.last_played_at) : null;
+  
+  let nouveauStreak = score.streak;
+  
+  // Logique du streak
+  if (derniereDate) {
+    const diffJours = Math.floor((maintenant - derniereDate) / (1000 * 60 * 60 * 24));
+    
+    if (diffJours === 1) {
+      nouveauStreak += 1; // Le joueur a joué hier, on incrémente
+    } else if (diffJours > 1) {
+      nouveauStreak = 1; // Le joueur a sauté un jour, on remet à 1
+    }
+    // Si diffJours === 0, on ne fait rien (il a déjà joué aujourd'hui)
+  } else {
+    nouveauStreak = 1; // Première fois qu'il joue
+  }
+
+  // 2. Mise à jour dans PocketBase
+  return await pb.collection('score').update(score.id, {
+    xp: score.xp + xpGagnes,
+    streak: nouveauStreak,
+    last_played_at: maintenant.toISOString()
+  });
+}
+
+
+export async function ajouterSession(userId, xpGagnes) {
+  // Crée une session dans user_games (pour les stats/séries)
+  await pb.collection('user_games').create({
+    user: userId,
+    xp_gagne: xpGagnes,
+    date_session: new Date().toISOString(),
+  });
+  // Met à jour le score global et le streak
+  return await enregistrerProgression(userId, xpGagnes);
+}

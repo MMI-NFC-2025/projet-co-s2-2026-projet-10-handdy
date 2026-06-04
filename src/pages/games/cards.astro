@@ -36,7 +36,7 @@ try {
 }
 ---
 
-<Layout title="Mode Cards - Wenddy" showHeader={false} showFooter={false}>
+<Layout title="Mode Cards - Wenddy"showHeader={false} showFooter={false}>
   <div class="min-h-screen bg-[#E5E7EB] flex flex-col font-sans overflow-x-hidden">
     
     <main class="flex-grow flex flex-col justify-between pb-12">
@@ -66,128 +66,153 @@ try {
       </section>
     </main>
   </div>
-</Layout>
 
-<style is:global>
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-8px); }
-    40% { transform: translateX(8px); }
-    60% { transform: translateX(-8px); }
-    80% { transform: translateX(8px); }
-  }
-  .animate-shake { animation: shake 0.4s ease-in-out; }
-</style>
+  <style is:global>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-8px); }
+      80% { transform: translateX(8px); }
+    }
+    .animate-shake { animation: shake 0.4s ease-in-out; }
+  </style>
 
-<script define:vars={{ questions, gameTypeId }}>
-  document.addEventListener('DOMContentLoaded', () => {
-    let currentIndex = 0;
-    let correctAnswers = 0;
-    const totalQuestions = questions.length;
-    let questionResolu = false;
+  <script define:vars={{ questions, gameTypeId }}>
+    window.__cardsQuestions = questions;
+    window.__cardsGameTypeId = gameTypeId;
+  </script>
 
-    const motCible = document.getElementById('mot-cible');
-    const cardsGrid = document.getElementById('cards-grid');
-    const compteur = document.getElementById('compteur-question');
-    const barre = document.getElementById('barre-progression');
+  <script>
+    import { pb, addScore, enregistrerProgression } from '../../../backend/backend.mjs';
 
-    function loadQuestion() {
-      if (!questions[currentIndex]) return;
-      const currentData = questions[currentIndex];
-      questionResolu = false;
+    type CardOption = {
+      id: string;
+      videoUrl: string | null;
+      correct: boolean;
+    };
 
-      if (motCible) motCible.innerText = currentData.mot;
+    type CardQuestion = {
+      id: string;
+      mot: string;
+      options: CardOption[];
+    };
 
-      const progressPercent = Math.max(5, (currentIndex / totalQuestions) * 100);
-      if (compteur) compteur.innerText = `Question ${currentIndex + 1}/${totalQuestions}`;
-      if (barre) barre.style.width = `${progressPercent}%`;
-
-      if (cardsGrid) {
-        cardsGrid.innerHTML = '';
-        currentData.options.forEach((option) => {
-          const btn = document.createElement('button');
-          btn.className = "card-option relative aspect-square bg-gray-200 rounded-3xl border-4 border-transparent shadow-sm overflow-hidden transition-all hover:shadow-md transform hover:-translate-y-1";
-          btn.dataset.correct = option.correct ? "true" : "false";
-
-          btn.innerHTML = option.videoUrl
-            ? `<video src="${option.videoUrl}" class="w-full h-full object-cover" muted loop playsinline autoplay></video>`
-            : `<div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">Pas de vidéo</div>`;
-
-          btn.addEventListener('click', () => handleCardClick(btn, option.correct));
-          cardsGrid.appendChild(btn);
-        });
+    declare global {
+      interface Window {
+        __cardsQuestions: CardQuestion[];
+        __cardsGameTypeId: string;
       }
     }
 
-    async function finDePartie() {
-      const pointsGagnes = correctAnswers * 10;
-      try {
-        const pbKey = Object.keys(localStorage).find(k => k.startsWith('pocketbase_'));
-        const token = pbKey ? localStorage.getItem(pbKey) : null;
-        if (token) {
-          const authData = JSON.parse(token);
-          const userId = authData?.model?.id;
-          const authToken = authData?.token;
-          if (userId && authToken) {
-            await fetch('https://wenddy.bambou-franceschini.fr/api/collections/scores/records', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-              },
-              body: JSON.stringify({
-                user: userId,
-                game_type: gameTypeId,
-                points: pointsGagnes,
-                duration: 0
-              })
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Erreur sauvegarde score:", e);
-      }
-      window.location.href = `/progres?points=${pointsGagnes}`;
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const questions: CardQuestion[] = window.__cardsQuestions || [];
+      const gameTypeId: string = window.__cardsGameTypeId || '';
 
-    function handleCardClick(btn, isCorrect) {
-      if (questionResolu) return;
+      let currentIndex = 0;
+      let sessionXP = 0;
+      const totalQuestions = questions.length;
+      let questionResolu = false;
 
-      if (isCorrect) {
-        questionResolu = true;
-        correctAnswers++;
-        btn.classList.remove('border-transparent');
-        btn.classList.add('border-green-500', 'bg-green-50', 'ring-4', 'ring-green-200');
+      const motCible = document.getElementById('mot-cible');
+      const cardsGrid = document.getElementById('cards-grid');
+      const compteur = document.getElementById('compteur-question');
+      const barre = document.getElementById('barre-progression');
 
-        const vid = btn.querySelector('video');
-        if (vid) vid.play();
+      function loadQuestion() {
+        if (!questions[currentIndex]) return;
+        const currentData = questions[currentIndex];
+        questionResolu = false;
 
-        const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+        if (motCible) motCible.innerText = currentData.mot;
+
+        const progressPercent = Math.max(5, (currentIndex / totalQuestions) * 100);
+        if (compteur) compteur.innerText = `Question ${currentIndex + 1}/${totalQuestions}`;
         if (barre) barre.style.width = `${progressPercent}%`;
 
-        setTimeout(async () => {
-          if (currentIndex < totalQuestions - 1) {
-            currentIndex++;
-            loadQuestion();
-          } else {
-            await finDePartie();
-          }
-        }, 1500);
+        if (cardsGrid) {
+          cardsGrid.innerHTML = '';
+          currentData.options.forEach((option: CardOption) => {
+            const btn = document.createElement('button');
+            btn.className = "card-option relative aspect-square bg-gray-200 rounded-3xl border-4 border-transparent shadow-sm overflow-hidden transition-all hover:shadow-md transform hover:-translate-y-1";
+            btn.dataset.correct = option.correct ? "true" : "false";
 
-      } else {
-        btn.classList.remove('border-transparent');
-        btn.classList.add('border-red-500', 'animate-shake');
-        setTimeout(() => {
-          btn.classList.remove('animate-shake', 'border-red-500');
-          btn.classList.add('border-transparent');
-        }, 400);
+            btn.innerHTML = option.videoUrl
+              ? `<video src="${option.videoUrl}" class="w-full h-full object-cover" muted loop playsinline autoplay></video>`
+              : `<div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">Pas de vidéo</div>`;
+
+            btn.addEventListener('click', () => handleCardClick(btn, option.correct));
+            cardsGrid.appendChild(btn);
+          });
+        }
       }
-    }
 
-    if (totalQuestions > 0) {
-      loadQuestion();
-    } else {
-      if (cardsGrid) cardsGrid.innerHTML = '<p class="col-span-2 text-center text-slate-500">Aucune question disponible.</p>';
-    }
-  });
-</script>
+      async function finDePartie() {
+        const user = pb.authStore.model;
+
+        if (user && sessionXP > 0) {
+          try {
+            await pb.collection('user_games').create({
+              user: user.id,
+              xp_gagne: sessionXP,
+              date_session: new Date().toISOString(),
+            });
+
+            await enregistrerProgression(user.id, sessionXP);
+
+            await addScore({
+              user: user.id,
+              game_type: gameTypeId,
+              points: sessionXP,
+              duration: 0,
+            });
+          } catch (e) {
+            console.error('Erreur sauvegarde score:', e);
+          }
+        }
+
+        window.location.href = `/progres?points=${sessionXP}`;
+      }
+
+      function handleCardClick(btn: HTMLButtonElement, isCorrect: boolean) {
+        if (questionResolu) return;
+
+        if (isCorrect) {
+          questionResolu = true;
+          sessionXP += 10;
+          btn.classList.remove('border-transparent');
+          btn.classList.add('border-green-500', 'bg-green-50', 'ring-4', 'ring-green-200');
+
+          const vid = btn.querySelector('video');
+          if (vid) vid.play();
+
+          const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+          if (barre) barre.style.width = `${progressPercent}%`;
+
+          setTimeout(async () => {
+            if (currentIndex < totalQuestions - 1) {
+              currentIndex++;
+              loadQuestion();
+            } else {
+              await finDePartie();
+            }
+          }, 1500);
+
+        } else {
+          btn.classList.remove('border-transparent');
+          btn.classList.add('border-red-500', 'animate-shake');
+          setTimeout(() => {
+            btn.classList.remove('animate-shake', 'border-red-500');
+            btn.classList.add('border-transparent');
+          }, 400);
+        }
+      }
+
+      if (totalQuestions > 0) {
+        loadQuestion();
+      } else {
+        if (cardsGrid) cardsGrid.innerHTML = '<p class="col-span-2 text-center text-slate-500">Aucune question disponible.</p>';
+      }
+    });
+  </script>
+</Layout>
