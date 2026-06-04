@@ -181,7 +181,7 @@ import Button from '../components/Button.astro';
     });
 
     if (isAuthenticated() || localStorage.getItem('pb_auth')) {
-      window.location.href = '/profil';
+      window.location.href = '/accueil';
     } else {
       setMode('login');
     }
