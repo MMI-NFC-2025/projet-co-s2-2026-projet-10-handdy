@@ -4,13 +4,13 @@
 Éléménts à renseigner pour la soutenance :
 
 - [ ] Nom du projet : Wenddy
-- [ ] URL de la landing page :
-- [ ] URL de l'application finale :
-- [ ] URL de connexion au back office :
-- [ ] Identifiant de connexion au backoffice :
-- [ ] Mot de passe de connexion au backoffice :
-- [ ] URL de la maquette FIGMA :
-- [ ] Description du projet :
+- [ ] URL de la landing page : https://wenddyapp.bambou-franceschini.fr/
+- [ ] URL de l'application finale : https://wenddyapp.bambou-franceschini.fr/login
+- [ ] URL de connexion au back office :  https://wenddy.bambou-franceschini.fr/_/ 
+- [ ] Identifiant de connexion au backoffice : izyathiriet@gmail.com
+- [ ] Mot de passe de connexion au backoffice : Flammes06?
+- [ ] URL de la maquette FIGMA : https://www.figma.com/design/kiBp0iHPSk8bbNcpRBherz/maquette-projet-co?node-id=24-3&t=CWZmlu0YHNVJuSAH-1
+- [ ] Description du projet :   Wenddy est une plateforme ludo-pédagogique innovante dédiée à l'apprentissage inclusif de la Langue des Signes Française (LSF), conçue pour transformer l'acquisition du vocabulaire en une expérience immersive et motivante. L'application se structure autour d'une progression intuitive sous forme de parcours thématique, où l'utilisateur évolue par paliers (vie quotidienne, émotions, voyage, etc.) en validant des étapes clés pour préserver ses "vies" et entretenir sa "streak". Le cœur de l'expérience repose sur une grande variété de mini-jeux, allant du quiz de mémoire et de la reconnaissance de signes au mode histoire scénarisé, permettant de pratiquer la LSF de manière ludique, seul ou en multijoueur
 
 ## 🚀 Équipe
 
