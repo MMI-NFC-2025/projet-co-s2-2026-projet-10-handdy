@@ -3,7 +3,7 @@
 
 Éléménts à renseigner pour la soutenance :
 
-- [ ] Nom du projet : Wendy
+- [ ] Nom du projet : Wenddy
 - [ ] URL de la landing page :
 - [ ] URL de l'application finale :
 - [ ] URL de connexion au back office :
